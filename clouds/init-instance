@@ -6,7 +6,7 @@
 
 RETVAL=0
 BR=/home/br
-CL=$BR/gits/netops/clouds
+CL=$BR/gits/clouds/clouds
 TMPDIR=/tmp/br
 
 # See how we were called.

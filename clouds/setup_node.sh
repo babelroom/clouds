@@ -19,7 +19,7 @@ make
 sudo make install
 
 # BR src (via gen)
-cd $HOME/gits/netops/clouds || exit -1
+cd $HOME/gits/clouds/clouds || exit -1
 ./setup_gen.sh || exit -1
 
 exit 0

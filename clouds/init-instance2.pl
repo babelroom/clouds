@@ -45,7 +45,7 @@ foreach my $key (@md_keys) {
     write_kv($key,$val);
 }
 my $ud = `curl -fs http://169.254.169.254/latest/user-data`;
-#my $ud = `cat /home/br/gits/netops/clouds/user_data_example`;
+#my $ud = `cat /home/br/gits/clouds/clouds/user_data_example`;
 write_kv('user-data',$ud);
 foreach my $line (split /\n/, $data{'user-data'}) {
     chomp($line);

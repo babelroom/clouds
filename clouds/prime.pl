@@ -10,7 +10,7 @@ $R = undef;
 $D = 0;
 
 # ---
-$PDIR = '/home/br/gits/netops/clouds/primers';
+$PDIR = '/home/br/gits/clouds/clouds/primers';
 push @INC, $PDIR;
 
 # ---

@@ -5,7 +5,7 @@ echo 'Perl...'
 ./setup_buildtools.sh || exit -1
 
 SAVE=$PWD
-cd $HOME/gits/netops/clouds
+cd $HOME/gits/clouds/clouds
 
 perl ../br_scripts/check_for_modules.pl 2>/dev/null && echo 'Already installed!' && exit 0;
 
