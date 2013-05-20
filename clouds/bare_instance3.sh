@@ -17,15 +17,8 @@ EOT
 echo "Get BR sources .."
 mkdir gits
 cd gits
-git clone http://github.com/babelroom/clouds.git
+git clone git://github.com/babelroom/clouds.git
 cd ./clouds
-chmod 0600 certs/br.key
-
-# ssh_config
-install -m 0600 ./ssh_config $HOME/.ssh/config
-
-# allow r access to br's directories
-chmod 0755 $HOME/.
 
 # get basics right
 ./setup_base.sh || exit -1

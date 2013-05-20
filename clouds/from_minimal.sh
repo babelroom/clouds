@@ -1,6 +1,9 @@
 #!/bin/sh
 
-# 
+# ---
+# Raise a CentOS6.3 bare install to the point where it can run BR setups
+# ---
+
 cat <<'EOT' >/etc/yum.repos.d/from_minimal.repo
 [from_minimal]
 name=CentOS-6.3 - Base
