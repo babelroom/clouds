@@ -14,5 +14,5 @@ EOT
 yum --disablerepo=\* --enablerepo=from_minimal install -y sudo perl wget make
 rm -f /etc/yum.repos.d/from_minimal.repo
 
-wget http://sourceforge.net/projects/babelroom/files/git-1.7.1.bin/download -O /usr/bin/git && chmod +x /usr/bin/git && mkdir /tmp/gits.tmp && cd /tmp/gits.tmp && git clone http://github.com/babelroom/clouds && cd ./clouds/clouds && ./bare_instance2.sh
+wget http://sourceforge.net/projects/babelroom/files/git-1.7.1.bin/download -O /usr/bin/git && chmod +x /usr/bin/git && mkdir /tmp/gits.tmp && cd /tmp/gits.tmp && git clone git://github.com/babelroom/clouds.git && cd ./clouds/clouds && ./bare_instance2.sh
 
