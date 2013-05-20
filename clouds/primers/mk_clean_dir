@@ -1,0 +1,8 @@
+my $d = $R->{dir};
+die if length($d)<2;    # crude safety
+if (-d $R->{dir}) {
+    `rm -rf $d/*`;
+} else {
+    `mkdir -m 755 -p $d`;
+}
+1

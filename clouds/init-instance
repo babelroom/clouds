@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+# chkconfig: 12345 11 89
+# /etc/rc.d/init.d/init-instance
+#
+
+RETVAL=0
+BR=/home/br
+CL=$BR/gits/netops/clouds
+TMPDIR=/tmp/br
+
+# See how we were called.
+case "$1" in
+  start)
+        (test -d $TMPDIR && rm -rf $TMPDIR)
+        mkdir -p -m 0777 $TMPDIR
+        (test -d $BR/.old_ikeys && rm -rf $BR/.old_ikeys) 2>$TMPDIR/init.err
+        (test -d $BR/ikeys && mv $BR/ikeys $BR/.old_ikeys) 2>>$TMPDIR/init.err
+        $CL/add_virtual_interfaces.sh 2>>$TMPDIR/init.err
+        runuser -l br -c $CL/init-instance2.pl 2>>$TMPDIR/init.err
+        test -f $BR/ikeys/autoprime && $CL/prime.pl 2>>$TMPDIR/init.err
+        ;;
+  stop|status|restart|reload|force-reload|condrestart|try-restart)
+        ;;
+  *)
+        echo "Usage: init-instance {start|stop|status|restart|reload|force-reload|condrestart|try-restart}"
+        exit 2
+esac
+exit ${RETVAL}
+

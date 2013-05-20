@@ -1,0 +1,49 @@
+# red5
+# chkconfig: 2345 95 55
+# description: red5  server startup script
+
+# Source function library.
+if [ -f /etc/init.d/functions ]; then
+    . /etc/init.d/functions
+elif [ -f /etc/rc.d/init.d/functions ]; then
+    . /etc/rc.d/init.d/functions
+else
+    echo "Could not find functions file, your system may be broken"
+    exit 1
+fi
+
+# Source networking configuration.
+if [ -f "/etc/sysconfig/network" ] ; then
+    . /etc/sysconfig/network
+fi
+
+RED5_DIR="/home/br/gits/red5/red5-1.0.0"
+
+# Check that networking is up.
+[ ${NETWORKING} = "no" ] && exit 0
+
+# See how we were called.
+case "$1" in
+    start)
+        # Start daemons.
+        echo -n "Starting red5: "
+        cd ${RED5_DIR}; sh red5.sh 2 >/dev/null &
+        echo_success
+        echo
+        touch /var/lock/subsys/red5
+        ;;
+    stop)
+        # Stop daemons.
+        echo -n "Shutting down red5: "
+        cd ${RED5_DIR}; sh red5-shutdown.sh 2 >/dev/null
+        echo_success
+        echo
+        rm -f /var/lock/subsys/red5
+        ;;
+    *)
+        echo "Usage: red5 {start|stop}"
+        exit 1
+esac
+
+exit 0
+

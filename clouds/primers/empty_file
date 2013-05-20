@@ -1,0 +1,3 @@
+open F, ">$R->{file}" or die;
+close F;
+1

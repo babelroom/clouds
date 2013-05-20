@@ -1,0 +1,52 @@
+
+perl cpan, Hmmmm. 
+
+modules on older systems:
+
+total 180
+drwxr-xr-x  6 root root 4096 Jan 28  2011 Test-Simple-0.96-fnCK69
+drwxr-xr-x  5 root root 4096 Jan 28  2011 URI-1.58-bWUswh
+drwxr-xr-x 10 root root 4096 Jan 28  2011 Compress-Raw-Zlib-2.033-UpH15c
+drwxr-xr-x  9 root root 4096 Jan 28  2011 Compress-Raw-Bzip2-2.033-qM6yxO
+drwxr-xr-x  8 root root 4096 Jan 28  2011 IO-Compress-2.033-oT12y1
+drwxr-xr-x  4 root root 4096 Jan 28  2011 HTML-Tagset-3.20-IyiU04
+drwxr-xr-x  6 root root 4096 Jan 28  2011 libwww-perl-5.837-dwN3h4
+drwxr-xr-x  7 root root 4096 Jan 28  2011 HTML-Parser-3.68-G7GIhl
+drwxr-xr-x  7 root root 4096 Jan 28  2011 Crypt-SSLeay-0.58-fgLpy1
+drwxr-xr-x  6 root root 4096 Jan 28  2011 REST-Client-171-usIPky
+drwxr-xr-x  5 root root 4096 Jan 28  2011 Text-Template-1.45-iCzrcV
+drwxr-xr-x  5 root root 4096 Jan 28  2011 Return-Value-1.666001-a9YI56
+drwxr-xr-x  5 root root 4096 Jan 28  2011 Email-Date-Format-1.002-tc98Sr
+drwxr-xr-x  5 root root 4096 Jan 28  2011 Email-Simple-2.100-PfbmHL
+drwxr-xr-x  6 root root 4096 Jan 28  2011 Email-Address-1.892-UC_Z7A
+drwxr-xr-x  7 root root 4096 Jan 28  2011 Email-Send-2.198-pnklmD
+drwxr-xr-x  4 root root 4096 Feb  5  2011 String-Random-0.22-2p6lqW
+drwxr-xr-x  4 root root 4096 Feb  5  2011 String-Random-0.22-GCNzdC
+drwxr-xr-x  7 root root 4096 Feb  5  2011 version-0.88-zW3wvJ
+drwxr-xr-x  7 root root 4096 Feb  5  2011 Module-Metadata-1.000004-qmIQNg
+drwxr-xr-x  6 root root 4096 Feb  5  2011 Perl-OSType-1.002-4ccy5G
+drwxr-xr-x  6 root root 4096 Feb  5  2011 ExtUtils-CBuilder-0.280202-wo0AYv
+drwxr-xr-x  6 root root 4096 Feb  5  2011 CPAN-Meta-YAML-0.003-ZDJRdQ
+drwxr-xr-x  9 root root 4096 Feb  5  2011 Module-Build-0.3624-Eky1iS
+drwxr-xr-x  6 root root 4096 Feb  5  2011 String-Random-0.22-nEEt7T
+drwxr-xr-x  2 root root 4096 Mar  2  2011 TIMA-pXjN4o
+drwxr-xr-x  6 root root 4096 Mar  2  2011 XML-NamespaceSupport-1.11-4Z5CeM
+drwxr-xr-x  7 root root 4096 Mar  2  2011 XML-SAX-0.96-XR5OKV
+drwxr-xr-x  5 root root 4096 Mar  2  2011 XML-SAX-Expat-0.40-ClSS3h
+drwxr-xr-x  5 root root 4096 Mar  2  2011 XML-Simple-2.18-tAXH2T
+drwxr-xr-x  6 root root 4096 Mar  2  2011 Class-Accessor-0.34-wviZFL
+drwxr-xr-x  5 root root 4096 Mar  2  2011 Digest-SHA1-2.13-Du1t_d
+drwxr-xr-x  5 root root 4096 Mar  2  2011 Digest-HMAC-1.02-fmbT77
+drwxr-xr-x  4 root root 4096 Mar  2  2011 Digest-MD5-File-0.07-4c6FAK
+drwxr-xr-x  5 root root 4096 Mar  2  2011 LWP-UserAgent-Determined-1.05-wol51P
+drwxr-xr-x  5 root root 4096 Mar  2  2011 Amazon-S3-0.45-MPKc_k
+drwxr-xr-x  2 root root 4096 May 17  2011 LBROCARD-XYWiL6
+drwxr-xr-x  6 root root 4096 May 17  2011 Authen-SASL-2.15-02YiX6
+drwxr-xr-x  7 root root 4096 May 17  2011 Net-SSLeay-1.36-aqfDCt
+drwxr-xr-x  9 root root 4096 May 17  2011 IO-Socket-SSL-1.43-mizkzZ
+drwxr-xr-x  5 root root 4096 May 17  2011 Net-SMTP-SSL-1.01-mE6gJJ
+drwxr-xr-x  5 root root 4096 May 17  2011 Email-Send-Gmail-0.33-DEPc1R
+drwxr-xr-x 45 root root 4096 May 17  2011 .
+drwxr-xr-x  5 root root 4096 May 17  2011 Devel-Modlist-0.801-HFoK_v
+drwxr-xr-x  5 root root 4096 Jan 13 14:38 ..
+

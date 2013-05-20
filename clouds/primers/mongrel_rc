@@ -1,0 +1,80 @@
+my ($file, $port, $label, $path, $rails_env) = ($R->{file}, $R->{port}, $R->{label}, $R->{path}, $R->{rails_env});
+open F, ">$file" or die;
+print F <<__EOT__
+# -- automatically created by BR primer MODIFICATIONS MAY BE LOST
+#
+# chkconfig: 345 86 14
+# description: $label
+#
+# processname: $label 
+# config: ?
+# pidfile: /var/run/$label.pid
+
+# !DISCLOSURE! this script is seriously 1/2 baked
+
+# source function library
+. /etc/rc.d/init.d/functions
+
+RETVAL=0
+prog=$label
+
+# Some functions to make the below more readable
+SRC_DIR=$path
+PID_FILE=/var/run/$label.pid
+
+runlevel=\$(set -- \$(runlevel); eval "echo \\\$\$#" )
+
+start()
+{
+    echo -n \$"Starting \$prog: "
+#    \$SRC_DIR/\$NETOPS \$OPTIONS & && success || failure .. what is this?
+    cd \$SRC_DIR && rm -f log/*.pid
+    cd \$SRC_DIR && /bin/su br -c '/usr/bin/mongrel_rails start -d -e $rails_env -p $port -a 127.0.0.1'
+    RETVAL=\$?
+    [ "\$RETVAL" = 0 ] && echo \$! >\$PID_FILE && touch /var/lock/subsys/$label
+    echo
+}
+
+stop()
+{
+    echo -n \$"Stopping \$prog: "
+    PID2KILL=`ps aux | grep mongrel | grep $port | awk '{print \$2;}'`
+    kill \$PID2KILL
+    RETVAL=\$?
+    [ "\$RETVAL" = 0 ] && rm -f /var/lock/subsys/my
+    echo
+}
+
+case "\$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    reload)
+        echo "Not implemented";
+        RETVAL=1
+        ;;
+    condrestart)
+        echo "Not implemented";
+        RETVAL=1
+        ;;
+    status)
+        echo "Not implemented";
+        RETVAL=1
+        ;;
+    *)
+        echo \$"Usage: \$0 {start|stop|restart|reload|condrestart|status}"
+        RETVAL=1
+esac 
+exit \$RETVAL
+__EOT__
+;
+close F;
+chmod(0755, $file);
+1

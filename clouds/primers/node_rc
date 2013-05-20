@@ -1,0 +1,68 @@
+my ($file, $label, $path) = ($R->{file}, $R->{label}, $R->{path});
+open F, ">$file" or die;
+print F <<__EOT__
+#!/bin/sh
+ 
+#
+# chkconfig: 35 90 10
+# description: Node.js
+#
+ 
+. /etc/rc.d/init.d/functions
+ 
+USER="root"
+ 
+DAEMON="/usr/local/bin/node"
+ROOT_DIR="$path"
+ 
+SERVER="\$ROOT_DIR/$label.js"
+PARAMS="-c $R->{config_file}"
+LOG_FILE="/var/log/br/$label.js.log"
+ 
+LOCK_FILE="/var/lock/subsys/node-$label"
+ 
+do_start()
+{
+        if [ ! -f "\$LOCK_FILE" ] ; then
+                echo -n \$"Starting \$SERVER: "
+                runuser -l "\$USER" -c "\$DAEMON \$SERVER \$PARAMS >> \$LOG_FILE &" && echo_success || echo_failure
+                RETVAL=\$?
+                echo
+                [ \$RETVAL -eq 0 ] && touch \$LOCK_FILE
+        else
+                echo "\$SERVER is locked."
+                RETVAL=1
+        fi
+}
+do_stop()
+{
+        echo -n \$"Stopping \$SERVER: "
+        pid=`ps -aefw | grep "\$DAEMON \$SERVER" | grep -v " grep " | awk '{print \$2}'`
+        kill -9 \$pid > /dev/null 2>&1 && echo_success || echo_failure
+        RETVAL=\$?
+        echo
+        [ \$RETVAL -eq 0 ] && rm -f \$LOCK_FILE
+}
+ 
+case "\$1" in
+        start)
+                do_start
+                ;;
+        stop)
+                do_stop
+                ;;
+        restart)
+                do_stop
+                do_start
+                ;;
+        *)
+                echo "Usage: \$0 {start|stop|restart}"
+                RETVAL=1
+esac
+ 
+exit \$RETVAL
+__EOT__
+;
+close F;
+chmod(0755, $file);
+1

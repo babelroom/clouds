@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+# chkconfig: 12345 89 11
+# /etc/rc.d/init.d/start-instance
+#
+
+RETVAL=0
+BR=/home/br
+ST=$BR/ikeys/startup
+CM=$1
+
+# See how we were called.
+case "$CM" in
+  start|stop|status|restart|reload|force-reload|condrestart|try-restart)
+        if [[ -f $ST ]]
+        then
+            while read line || [ "$line" ]; do
+                for word in $line
+                do
+                    service $word $CM 2>>/tmp/br/start-instance.err
+                done
+            done < $ST
+        fi
+        ;;
+  *)
+        echo "Usage: start-instance {start|stop|status|restart|reload|force-reload|condrestart|try-restart}"
+        exit 2
+esac
+exit ${RETVAL}
+
