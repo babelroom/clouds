@@ -2,7 +2,7 @@
 
 echo 'Red5...'
 
-test -d red5 && echo "Red5 already exists" && exit 0
+test -d ~/gits/red5 && echo "Red5 already exists" && exit 0
 
 REQUIRED_PACKAGES="\
     java-1.6.0-openjdk-1.6.0.0-1.45.1.11.1.el6      \
