@@ -44,5 +44,6 @@ Suggested:
    *** READY FOR SETUPS ***
 
 EOT
-bash
+#bash
+su - br # run profile etc.
 
