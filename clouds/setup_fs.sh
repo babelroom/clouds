@@ -40,12 +40,12 @@ git clone -b v1.2.stable git://git.freeswitch.org/freeswitch.git
 
 cd freeswitch
 git checkout 38e3f5fe1655336f9fc807e62f877ed8f932b8a0   # get back to source as of 08/08/2011 (TMP TODO)
-cp -a ../cs_src_overlay/* .
+cp -a ../br_src_overlay/* .
 ./bootstrap.sh
 ./configure --without-pgsql
 make
 sudo make install
-sudo cp -a ../cs_overlay/* /usr/local/freeswitch
+sudo cp -a ../br_overlay/* /usr/local/freeswitch
 sudo rm /usr/local/freeswitch/README
 #sudo install -o root -m 755 build/freeswitch.init.redhat /etc/init.d/freeswitch # --- in the future
 sudo install -o root -m 755 ../freeswitch.rc /etc/init.d/freeswitch
@@ -62,7 +62,7 @@ cd ..
 rm -rf sounds
 
 echo "Conference recordings base setup..."
-sudo mkdir -p /cs_media/conf_recordings
+sudo mkdir -p /br_media/conf_recordings
 cat <<'EOT' >/tmp/br/xfercron
 # .---------------- minute (0 - 59)
 # |   .------------- hour (0 - 23)

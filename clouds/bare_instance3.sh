@@ -41,6 +41,5 @@ Suggested:
    *** READY FOR SETUPS ***
 
 EOT
-ls setup*.sh 
 bash
 

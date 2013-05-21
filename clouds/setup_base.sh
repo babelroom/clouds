@@ -59,13 +59,13 @@ REQUIRED_PACKAGES="\
     perl-Compress-Zlib-2.020-127.el6            \
     kernel-2.6.32-279.1.1.el6                   \
     kernel-firmware-2.6.32-279.1.1.el6          \
-    ntp-4.2.4p8-2.el6                           \
+    ntp-4.2.4p8-2.el6.centos                    \
     "
 sudo yum install -y $REQUIRED_PACKAGES || exit -1
 
 # just say no
-sudo /sbin/chkconfig postfix off
-sudo /sbin/chkconfig cups off
+sudo /sbin/chkconfig postfix && sudo /sbin/chkconfig postfix off
+sudo /sbin/chkconfig cups && sudo /sbin/chkconfig cups off
 
 # but say yes
 sudo /sbin/chkconfig ntpd on # auto startup of ntp
