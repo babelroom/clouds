@@ -1,4 +1,6 @@
 
+/* work to write nodejs version of estream */
+
 var http = require('http');
 var fs = require('fs');
 

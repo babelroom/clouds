@@ -1,0 +1,191 @@
+
+--
+-- setup / reset databases
+--
+
+use `my`;
+
+DELETE FROM `accounts`;
+LOCK TABLES `accounts` WRITE;
+/*!40000 ALTER TABLE `accounts` DISABLE KEYS */;
+INSERT INTO `accounts` VALUES (1,'Primary Account','0.00','0.00','0.00',100,240,NULL,NULL,NULL,NULL,NULL,NULL,NOW(),NOW(),NULL,'free',NULL,NULL,NULL,NULL,NULL,NULL);
+/*!40000 ALTER TABLE `accounts` ENABLE KEYS */;
+INSERT INTO `accounts` VALUES (2,'Dr\'s Primary Account','0.00','0.00','0.00',100,240,NULL,NULL,NULL,NULL,NULL,NULL,NOW(),NOW(),2,'free',NULL,NULL,NULL,NULL,NULL,NULL);
+INSERT INTO `accounts` VALUES (3,'Default\'s Primary Account','0.00','0.00','0.00',100,240,NULL,NULL,NULL,NULL,NULL,NULL,NOW(),NOW(),3,'free',NULL,NULL,NULL,NULL,NULL,NULL);
+ALTER TABLE `accounts` AUTO_INCREMENT=4;
+UNLOCK TABLES;
+
+-- depreciate
+DELETE FROM `billing_records`; ALTER TABLE `billing_records` AUTO_INCREMENT=1;
+
+DELETE FROM `callees`; ALTER TABLE `callees` AUTO_INCREMENT=1;
+DELETE FROM `colmodels`; ALTER TABLE `colmodels` AUTO_INCREMENT=1;
+
+DELETE FROM `conferences`;
+LOCK TABLES `conferences` WRITE;
+/*!40000 ALTER TABLE `conferences` DISABLE KEYS */;
+INSERT INTO `conferences` VALUES (1,'Master Conference Template',NULL,NULL,NOW(),NOW(),NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,NULL);
+INSERT INTO `conferences` VALUES (2,'Demo',NULL,NULL,NOW(),NOW(),2,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'s','demo',NULL,'Demo Conference',NULL);
+/*!40000 ALTER TABLE `conferences` ENABLE KEYS */;
+ALTER TABLE `conferences` AUTO_INCREMENT=3;
+UNLOCK TABLES;
+
+-- depreciate
+DELETE FROM `countries`; ALTER TABLE `countries` AUTO_INCREMENT=1;
+
+DELETE FROM `email_requests`; ALTER TABLE `email_requests` AUTO_INCREMENT=1;
+DELETE FROM `emails`; ALTER TABLE `emails` AUTO_INCREMENT=1;
+
+DELETE FROM `invitations`; ALTER TABLE `invitations` AUTO_INCREMENT=1;
+INSERT INTO `invitations` VALUES (1,'888888','Host',NOW(),NOW(),2,2,'(415) 449 8899',NULL);
+
+DELETE FROM `media_files`; ALTER TABLE `media_files` AUTO_INCREMENT=1;
+DELETE FROM `phones`; ALTER TABLE `phones` AUTO_INCREMENT=1;
+
+-- skip pin -- done externally based on initial prime or reset
+-- DELETE FROM `pins`; ALTER TABLE `pins` AUTO_INCREMENT=1;
+
+DELETE FROM `schema_migrations`;
+LOCK TABLES `schema_migrations` WRITE;
+/*!40000 ALTER TABLE `schema_migrations` DISABLE KEYS */;
+INSERT INTO `schema_migrations` VALUES ('20110109211852');
+INSERT INTO `schema_migrations` VALUES ('20110110001948');
+INSERT INTO `schema_migrations` VALUES ('20110110060515');
+INSERT INTO `schema_migrations` VALUES ('20110110220725');
+INSERT INTO `schema_migrations` VALUES ('20110110221100');
+INSERT INTO `schema_migrations` VALUES ('20110111023010');
+INSERT INTO `schema_migrations` VALUES ('20110111023720');
+INSERT INTO `schema_migrations` VALUES ('20110111024301');
+INSERT INTO `schema_migrations` VALUES ('20110111025241');
+INSERT INTO `schema_migrations` VALUES ('20110111060107');
+INSERT INTO `schema_migrations` VALUES ('20110111064207');
+INSERT INTO `schema_migrations` VALUES ('20110112065302');
+INSERT INTO `schema_migrations` VALUES ('20110112205325');
+INSERT INTO `schema_migrations` VALUES ('20110112205615');
+INSERT INTO `schema_migrations` VALUES ('20110112210227');
+INSERT INTO `schema_migrations` VALUES ('20110112210411');
+INSERT INTO `schema_migrations` VALUES ('20110113005942');
+INSERT INTO `schema_migrations` VALUES ('20110113011431');
+INSERT INTO `schema_migrations` VALUES ('20110113011448');
+INSERT INTO `schema_migrations` VALUES ('20110113011612');
+INSERT INTO `schema_migrations` VALUES ('20110113011633');
+INSERT INTO `schema_migrations` VALUES ('20110113011808');
+INSERT INTO `schema_migrations` VALUES ('20110113011902');
+INSERT INTO `schema_migrations` VALUES ('20110113011939');
+INSERT INTO `schema_migrations` VALUES ('20110113012021');
+INSERT INTO `schema_migrations` VALUES ('20110113074102');
+INSERT INTO `schema_migrations` VALUES ('20110113074459');
+INSERT INTO `schema_migrations` VALUES ('20110113075346');
+INSERT INTO `schema_migrations` VALUES ('20110113075408');
+INSERT INTO `schema_migrations` VALUES ('20110113075501');
+INSERT INTO `schema_migrations` VALUES ('20110113075533');
+INSERT INTO `schema_migrations` VALUES ('20110113075711');
+INSERT INTO `schema_migrations` VALUES ('20110113082051');
+INSERT INTO `schema_migrations` VALUES ('20110113082147');
+INSERT INTO `schema_migrations` VALUES ('20110113204704');
+INSERT INTO `schema_migrations` VALUES ('20110113211434');
+INSERT INTO `schema_migrations` VALUES ('20110114021834');
+INSERT INTO `schema_migrations` VALUES ('20110114022003');
+INSERT INTO `schema_migrations` VALUES ('20110114062227');
+INSERT INTO `schema_migrations` VALUES ('20110114210333');
+INSERT INTO `schema_migrations` VALUES ('20110114220755');
+INSERT INTO `schema_migrations` VALUES ('20110114221045');
+INSERT INTO `schema_migrations` VALUES ('20110114224145');
+INSERT INTO `schema_migrations` VALUES ('20110114224654');
+INSERT INTO `schema_migrations` VALUES ('20110115001638');
+INSERT INTO `schema_migrations` VALUES ('20110115002336');
+INSERT INTO `schema_migrations` VALUES ('20110115002429');
+INSERT INTO `schema_migrations` VALUES ('20110116060232');
+INSERT INTO `schema_migrations` VALUES ('20110116064654');
+INSERT INTO `schema_migrations` VALUES ('20110116220555');
+INSERT INTO `schema_migrations` VALUES ('20110117035944');
+INSERT INTO `schema_migrations` VALUES ('20110117051228');
+INSERT INTO `schema_migrations` VALUES ('20110117051339');
+INSERT INTO `schema_migrations` VALUES ('20110119182723');
+INSERT INTO `schema_migrations` VALUES ('20110119190453');
+INSERT INTO `schema_migrations` VALUES ('20110119190552');
+INSERT INTO `schema_migrations` VALUES ('20110120013302');
+INSERT INTO `schema_migrations` VALUES ('20110120022941');
+INSERT INTO `schema_migrations` VALUES ('20110120215712');
+INSERT INTO `schema_migrations` VALUES ('20110128052211');
+INSERT INTO `schema_migrations` VALUES ('20110203205558');
+INSERT INTO `schema_migrations` VALUES ('20110204000655');
+INSERT INTO `schema_migrations` VALUES ('20110204024921');
+INSERT INTO `schema_migrations` VALUES ('20110216023913');
+INSERT INTO `schema_migrations` VALUES ('20110217005805');
+INSERT INTO `schema_migrations` VALUES ('20110217043405');
+INSERT INTO `schema_migrations` VALUES ('20110217235152');
+INSERT INTO `schema_migrations` VALUES ('20110217235233');
+INSERT INTO `schema_migrations` VALUES ('20110304064734');
+INSERT INTO `schema_migrations` VALUES ('20110401165808');
+INSERT INTO `schema_migrations` VALUES ('20110404205134');
+INSERT INTO `schema_migrations` VALUES ('20110404210303');
+INSERT INTO `schema_migrations` VALUES ('20110405215600');
+INSERT INTO `schema_migrations` VALUES ('20110406061001');
+INSERT INTO `schema_migrations` VALUES ('20110406061155');
+INSERT INTO `schema_migrations` VALUES ('20110406174913');
+INSERT INTO `schema_migrations` VALUES ('20110406195233');
+INSERT INTO `schema_migrations` VALUES ('20110407053826');
+INSERT INTO `schema_migrations` VALUES ('20110407143351');
+INSERT INTO `schema_migrations` VALUES ('20110425023159');
+INSERT INTO `schema_migrations` VALUES ('20110425050219');
+INSERT INTO `schema_migrations` VALUES ('20110513043218');
+INSERT INTO `schema_migrations` VALUES ('20110513063719');
+INSERT INTO `schema_migrations` VALUES ('20110513064435');
+INSERT INTO `schema_migrations` VALUES ('20110513065951');
+INSERT INTO `schema_migrations` VALUES ('20110601052911');
+INSERT INTO `schema_migrations` VALUES ('20110601170015');
+INSERT INTO `schema_migrations` VALUES ('20110601200501');
+INSERT INTO `schema_migrations` VALUES ('20110602000146');
+INSERT INTO `schema_migrations` VALUES ('20110603023127');
+INSERT INTO `schema_migrations` VALUES ('20110603232228');
+INSERT INTO `schema_migrations` VALUES ('20110603233210');
+INSERT INTO `schema_migrations` VALUES ('20110604062708');
+INSERT INTO `schema_migrations` VALUES ('20110604062727');
+INSERT INTO `schema_migrations` VALUES ('20110605233932');
+INSERT INTO `schema_migrations` VALUES ('20110605235122');
+INSERT INTO `schema_migrations` VALUES ('20110606002306');
+INSERT INTO `schema_migrations` VALUES ('20110617141908');
+INSERT INTO `schema_migrations` VALUES ('20110621052421');
+INSERT INTO `schema_migrations` VALUES ('20110902015843');
+INSERT INTO `schema_migrations` VALUES ('20110907211806');
+INSERT INTO `schema_migrations` VALUES ('20110922173908');
+INSERT INTO `schema_migrations` VALUES ('20110922175224');
+INSERT INTO `schema_migrations` VALUES ('20111028055441');
+INSERT INTO `schema_migrations` VALUES ('20111028061925');
+INSERT INTO `schema_migrations` VALUES ('20111028062028');
+INSERT INTO `schema_migrations` VALUES ('20120901044105');
+INSERT INTO `schema_migrations` VALUES ('20120901045014');
+/*
+need to keep the migration level consisten with full_dump
+INSERT INTO `schema_migrations` VALUES ('20130112064351');
+INSERT INTO `schema_migrations` VALUES ('20130112065242');
+INSERT INTO `schema_migrations` VALUES ('20130112065847');
+INSERT INTO `schema_migrations` VALUES ('20130112065955');
+INSERT INTO `schema_migrations` VALUES ('20130112071916');
+INSERT INTO `schema_migrations` VALUES ('20130116070341');
+INSERT INTO `schema_migrations` VALUES ('20130116073336');
+*/
+/*!40000 ALTER TABLE `schema_migrations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+DELETE FROM `skins`;
+ALTER TABLE `skins` AUTO_INCREMENT=1;
+LOCK TABLES `skins` WRITE;
+INSERT INTO `skins` VALUES (1,NULL,NOW(),NOW(),'Classic (default)',0,'/v1/c/img/classic_preview.png');
+ALTER TABLE `skins` AUTO_INCREMENT=2;
+UNLOCK TABLES;
+
+-- DELETE FROM ``; ALTER TABLE `` AUTO_INCREMENT=1;
+-- DELETE FROM ``; ALTER TABLE `` AUTO_INCREMENT=1;
+-- DELETE FROM ``; ALTER TABLE `` AUTO_INCREMENT=1;
+
+DELETE FROM `users`;
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` VALUES (2,'6f8d2a4dd125f747e717b651e1dafa5a46ac2ece','8ef1712c9e05d6427924f012f018b6d16c09e539',NULL,NULL,'Dr','demo@babelroom.com',0,NOW(),NOW(),'active',NULL,'Demo','Pacific Time (US & Canada)',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+INSERT INTO `users` VALUES (3,'6f8d2a4dd125f747e717b651e1dafa5a46ac2ece','8ef1712c9e05d6427924f012f018b6d16c09e539',NULL,NULL,'Default','john@babelroom.com',0,NOW(),NOW(),'active',NULL,'Install','Pacific Time (US & Canada)',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+ALTER TABLE `users` AUTO_INCREMENT=4;
+UNLOCK TABLES;
+

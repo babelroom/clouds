@@ -1,5 +1,6 @@
 
-/* depreciate */
+/* work to write nodejs version of estream */
+
 /*
 ** This is merely an example...
 */

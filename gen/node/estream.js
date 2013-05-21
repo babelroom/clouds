@@ -1,5 +1,5 @@
 
-/* depreciate */
+/* work to write nodejs version of estream */
 
 var net = require('net');
 

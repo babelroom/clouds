@@ -1,0 +1,16 @@
+
+# instructions here might be a little dated - JR 5/2013
+
+
+all files in this directory and all subdirectories are considered programs if they have execute permission set
+
+sync this directory with the database using ./init.pl -u 
+
+the environment configuration for all scripts is manually set in init.pl and then inherited into all scripts.
+
+use:
+$ perl ./check_for_modules.pl 
+
+To verify all required perl modules have been installed correctly
+
+

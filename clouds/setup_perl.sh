@@ -9,6 +9,11 @@ cd $HOME/gits/clouds/clouds
 
 perl ../br_scripts/check_for_modules.pl 2>/dev/null && echo 'Already installed!' && exit 0;
 
+# a method which restricts the repo used so we only get the base (correct) version rather than all the jazz with the explicit packages and version numbers
+#REQUIRED_PACKAGES="\
+#    perl-CPAN                                  \
+#    "
+#sudo yum install --disablerepo=\* --enablerepo=C6.3-base -y $REQUIRED_PACKAGES || exit -1
 REQUIRED_PACKAGES="\
     perl-CPAN-1.9402-127.el6                    \
     perl-Digest-SHA-5.47-127.el6                \
@@ -23,11 +28,6 @@ REQUIRED_PACKAGES="\
     perl-devel-5.10.1-127.el6                   \
     "
 sudo yum install -y $REQUIRED_PACKAGES || exit -1
-# a method which restricts the repo used so we only get the base (correct) version rather than all the jazz with the explicit packages and version numbers
-#REQUIRED_PACKAGES="\
-#    perl-CPAN                                  \
-#    "
-#sudo yum install --disablerepo=\* --enablerepo=C6.3-base -y $REQUIRED_PACKAGES || exit -1
 
 mkdir -p ~/.cpan/CPAN
 cp ./MyConfig.pm ~/.cpan/CPAN/ || exit -1
