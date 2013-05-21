@@ -63,7 +63,10 @@ LBROCARD/Email-Send-Gmail-0.33
 
 for item in ${PERL_MODULES[*]}
 do
-    PERL_MM_USE_DEFAULT=1 cpan -i ${item}.tar.gz 
+#    PERL_MM_USE_DEFAULT=1 cpan -i ${item}.tar.gz 
+# Add the force option to install even if it couldn't get all the bits to run tests
+# this mechanism (cpan from inet) is a problem. Have to rethink.
+    PERL_MM_USE_DEFAULT=1 cpan -fi ${item}.tar.gz 
 done
 
 # determine if it all worked out ...
