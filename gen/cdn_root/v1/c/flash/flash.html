@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head> 
+
+        <!-- TODO tmp. -->
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta http-equiv="Expires" content="-1">
+        <meta http-equiv="cache-control" content="no-store">
+
+<!--<script language="javascript" type="text/javascript" src="/v1/c/jquery/js/jquery-1.4.4.min.js"></script>-->
+<script language="javascript" type="text/javascript" src="/v1/c/jquery/js/jquery-1.9.1.js"></script>
+<script language="javascript" type="text/javascript" src="swfobject.js"></script>
+
+<!--<script type="text/javascript" src="/v1/c/jquery/js/jquery-ui-1.8.9.custom.min.js"></script>-->
+<script type="text/javascript" src="/v1/c/jquery/js/jquery-ui-1.10.1.custom.min.js"></script> 
+
+<link rel="stylesheet" type="text/css" media="screen" href="/v1/c/css/jquery-ui-1.10.1.custom.min.css" /> 
+
+<style>
+<!--
+.dtmftable {
+    width: 100%;
+}
+.dtmfrow {
+    text-align: center;
+}
+.dtmfcell {
+    width: 33%;
+}
+.dtmfkey {
+    width: 100%;
+}
+.f6wn { /* not so sure this works... */
+    font-size: 0.6em;
+    font-weight: normal;
+}
+-->
+</style>
+
+<script type="text/javascript"> 
+
+    var conf_name = "Unused";
+    var current_uuid = null;
+
+    function qparam(name) {
+        var match = RegExp('[?&]' + name + '=([^&]*)')
+                    .exec(window.location.search);
+        return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+    }
+
+    $(document).ready(function() {
+
+        $('.dtmfkey').button({disabled:true}).css('text-align', 'left').click(function(evt){
+            do_dtmf($(this).text());
+            });
+        $('#hangup').button(/*{icons:{primary:'ui-icon-closethick'}}*/).click(function(){
+            $("#flash")[0].hangup(current_uuid);
+            }).css('display','none');
+        $('#connect').button(/*{icons:{primary:'ui-icon-transferthick-e-w'}}*/).click(function(){
+            do_makeCall();
+            });
+
+        var flashvars = { 
+            rtmp_url: qparam('url')
+            }
+        var params  = {
+            allowScriptAccess: 'always'
+            }
+        var attributes = {
+            }
+
+        swfobject.embedSWF("freeswitch.swf", "flash", "240", "160", "9.0.0", "expressInstall.swf", flashvars, params, attributes, function(e){
+            });;
+        
+/*
+        if (swfobject.ua.ie) {
+        $("#flash").css("top", "-500px"); 
+        $("#flash").css("left", "-500px");              
+        } else {
+        $("#flash").css("visibility", "hidden");                
+        }
+*/
+        //var flash = $("#flash");
+        
+    });
+
+    function do_dtmf(key) {
+        var flash = jQuery("#flash");
+        flash[0].sendDTMF(key,1000);
+    }
+
+    function do_open() {
+//console.log('X');
+        var flash = jQuery("#flash");
+        flash[0].showPrivacy();
+    }
+
+    function makeCall(number, account, options) {
+//console.log(options);
+        account = undefined;
+//console.log(number,account,options);
+        $("#flash")[0].makeCall(number, account, options);
+//        $('#connected').css('display', 'block');
+    }
+
+    function do_makeCall() {
+//console.log('Z');
+//console.debug('-');
+        makeCall(conf_name, conf_name, {cid: 'Flash Stream', 'CS-pin': qparam('pin')});
+//        makeCall(conf_name, conf_name, {cid: 'Flash Stream', 'CS-pin': '593448'});
+    }
+
+    function checkMic() {
+//console.debug('K');
+    try {
+//console.debug('K');
+        if ($("#flash")[0].isMuted()) {
+        $("#no_mic").show();
+        $("#input_source").hide();
+//console.debug('-');
+        return false;
+        } else {
+        $("#no_mic").hide();
+        $("#input_source").show();
+//console.debug('-');
+        return true;
+        }
+    } catch(err) {
+//console.debug('-');
+        return false;
+    }
+    }
+
+
+
+    function onEvent(data) {
+//console.log('event');
+//console.log(data);
+    }
+
+    function onDisplayUpdate(uuid, name, number) {
+//console.log('0');
+}
+    function onCallState(uuid, state) {
+//console.log('1');
+}
+    function onIncomingCall(uuid, name, number, account, evt) {
+//console.log('2');
+}
+    function onDisconnected() {
+//console.log('3');
+}
+
+    function onMakeCall(uuid, number, account) {
+//console.log('M');
+        current_uuid = uuid;
+        $('#hangup').css('display', 'block');
+        $('#connect').css('display', 'none');
+        $('.dtmfkey').button('enable');
+        }
+
+    function onHangup(uuid, cause) {
+//console.log('H');
+        $('#hangup').css('display', 'none');
+        $('#connect').css('display', 'block');
+        $('.dtmfkey').button('disable');
+        //$('#hangup').css('display', 'none');
+        }
+
+    function onDebug(message) {
+//console.log(message);
+}
+
+    function onAttach(uuid) {
+//console.log('7');
+}
+
+
+
+    function onConnected(sessionid) {
+        $("#sessionid").text(sessionid);
+        $(".call", "#call_container").remove();
+    //      $(".account", "#account_container").remove();
+        $("#status").text("Connected");
+//console.debug('-');
+//    if (!checkMic()) { $("#security").dialog('open'); }
+    //setTimeout(function(){do_makeCall();},1000);
+//        do_makeCall(); -- don't connect on open
+        }
+
+
+
+    function onLogin(status, user, domain) {
+//console.log('9');
+}
+    function onLogout(user,domain) {
+//console.log('A');
+}
+
+
+
+    function onInit() {
+//console.debug('-');
+    var mics = eval($("#flash")[0].micList());
+    var sources = $("#input_source");
+    var current_mic = $("#flash")[0].getMic();
+    sources.children().remove();
+    
+    $("#status").text("Connecting...");
+ 
+    for (i = 0; i < mics.length; i++) {
+        var a = (i == current_mic) ? "selected" : "";
+        sources.append("<option value='"+ i + "' " + a + " >" + mics[i] + "</option");
+    }
+
+//console.debug('-');
+    }
+
+
+
+    function onReady() {
+//console.log('D');
+}
+
+
+        
+</script> 
+</head> 
+ 
+<body style="font-size: 10px;">
+
+<!--
+      <span id="no_mic">
+    <img src="http://conference.freeswitch.org/conf/warning-icon.png" width="21" height="20" />
+    <button onClick="showSecurity();">Microphone not allowed</button>
+      </span>
+
+      <select id="input_source" onChange="$('#flash')[0].setMic($(this).val())" >
+      </select>
+-->
+
+    <!--<div style="float: left;">--><table width="100%" cellspacing="5"><tr><td>
+
+    <div id="connected" style="height: 100%;">
+        <!--<span>Connected</span><br />-->
+        <span><button id="connect" style="width: 100%; height: 100%;">Connect</button></span>
+        <span><button id="hangup" style="width: 100%; display: none;">Hangup</button></span>
+    </div>
+
+</td><td>
+
+    <center>
+        <div id="flash">
+            <h1>Alternative content</h1>
+            <p><a href="//www.adobe.com/go/getflashplayer"><img src="//www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="Get Adobe Flash player" /></a></p>
+        </div>
+    </center>
+
+    <!--</div>
+    <div style="float: right; height: 100px;">-->
+
+</td><td>
+
+    <div id="controls" class="button" style="display: none;">
+       <table class="dtmftable" cols=3 border=0 cellpadding="0" cellspacing="0">
+            <tr class="dtmfrow">
+                <td class="dtmfcell"><button class="dtmfkey">1<span class="f6wn">&nbsp;&nbsp;&nbsp;&nbsp;</span></button></td>
+                <td class="dtmfcell"><button class="dtmfkey">2<span class="f6wn">&nbsp;ABC</span></button></td>
+                <td class="dtmfcell"><button class="dtmfkey">3<span class="f6wn">&nbsp;DEF</span></button></td>
+            </tr>
+            <tr class="dtmfrow">
+                <td class="dtmfcell"><button class="dtmfkey">4<span class="f6wn">&nbsp;GHI</span></button></td>
+                <td class="dtmfcell"><button class="dtmfkey">5<span class="f6wn">&nbsp;JKL</span></button></td>
+                <td class="dtmfcell"><button class="dtmfkey">6<span class="f6wn">&nbsp;MNO</span></button></td>
+            </tr>
+            <tr class="dtmfrow">
+                <td class="dtmfcell"><button class="dtmfkey">7<span class="f6wn">&nbsp;PQRS</span></button></td>
+                <td class="dtmfcell"><button class="dtmfkey">8<span class="f6wn">&nbsp;TUV</span></button></td>
+                <td class="dtmfcell"><button class="dtmfkey">9<span class="f6wn">&nbsp;WXYZ</span></button></td>
+            </tr>
+            <tr class="dtmfrow">
+                <td class="dtmfcell"><button class="dtmfkey">*</button></td>
+                <td class="dtmfcell"><button class="dtmfkey">0 +</button></td>
+                <td class="dtmfcell"><button class="dtmfkey">#</button></td>
+            </tr>
+        </table>
+    </div>
+
+    <!--</div>-->
+</td></tr></table>
+
+</body> 
+</html> 
+

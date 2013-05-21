@@ -1,0 +1,79 @@
+#  Jeeves software originally copied from 
+#  "Advanced Perl Programming" by Sriram Srinivasan,
+#  O'Reilly & Associates 1997.
+#  ISBN: 1-56592-220-4
+#
+# see: http://oreilly.com/pub/a/oreilly/ask_tim/2001/codepolicy.html
+#  
+#  Modified by John Roy
+#  
+
+package Ast;
+use strict;
+
+sub new {
+	my ($pkg, $name) = @_;
+	bless {'ast_node_name' => $name }, $pkg;
+}
+
+#-------------------------------------------------------------------------
+sub add_prop {
+	my ($node, $prop_name, $prop_value) = @_;
+	$node->{$prop_name} = $prop_value;
+}
+
+#-------------------------------------------------------------------------
+sub add_prop_list {
+	my ($node, $prop_name, $node_ref) = @_;
+	if (! exists $node->{$prop_name}) {
+		$node->{$prop_name} = [];
+	}
+	push (@{$node->{$prop_name}}, $node_ref);
+}
+
+#-------------------------------------------------------------------------
+sub get_prop {
+	my ($node, $list_name, $prop_name, $prop_value) = @_;
+	foreach (@{$node->{$list_name}}) {
+		if ( $_->{$prop_name} eq $prop_value ) {
+			return $_;
+			};
+		};
+}
+
+my @saved_values_stack;
+my @current_values_stack;
+#-------------------------------------------------------------------------
+sub visit {
+	no strict 'refs';
+	my $node = shift;
+	package main;
+	my ($var, $val, $old_val, %saved_values, %current_values);
+	while (($var, $val) = each %{$node}) {
+		if (defined($old_val = $$var)) {
+			$saved_values{$var} = $old_val;
+		}
+		$$var = $val;
+		$current_values{$var} = $val;
+	}
+	push (@saved_values_stack, \%saved_values);
+	push (@current_values_stack, \%current_values);
+}
+
+#-------------------------------------------------------------------------
+sub bye {
+	my $rh_saved_values = pop(@saved_values_stack);
+	my $rh_current_values = pop(@current_values_stack);
+	no strict 'refs';
+	package main;
+	my ($var,$val);
+	while (($var,$val) = each %$rh_current_values) {
+		$$var = undef;
+	}
+	while (($var,$val) = each %$rh_saved_values) {
+		$$var = $val;
+	}
+}
+
+1;
+

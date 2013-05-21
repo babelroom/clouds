@@ -37,7 +37,9 @@ Done!, now it's up to you.
 Suggested:
 
 [br@host]$ setup_all.sh
----
+
+   *** READY FOR SETUPS ***
+
 EOT
 ls setup*.sh 
 bash

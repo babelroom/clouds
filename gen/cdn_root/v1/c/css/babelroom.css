@@ -1,0 +1,14 @@
+
+/* 
+  (re)style after reset
+*/
+p {
+    margin: 1em 0px 0px 1em;
+}
+input, textarea, keygen, select, button, isindex, datagrid, label {
+    margin: 2px 1px 2px 2px;
+}
+
+/* other */
+.br-easter { visibility: hidden; }
+

@@ -1,0 +1,2 @@
+@openfile $dest
+$src

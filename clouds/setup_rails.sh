@@ -1,6 +1,9 @@
 #!/bin/sh
 
 echo 'Rails...'
+
+# not just yet
+exit 0;
  
 #which rails >/dev/null && echo 'Already installed!' && exit 0;
 
@@ -91,15 +94,15 @@ sudo gem install will_paginate -v 2.3.15 --no-rdoc --no-ri --ignore-dependencies
 sudo gem install xml-simple -v 1.0.15 --no-rdoc --no-ri --ignore-dependencies || exit -1
 
 # create DB(s)
-cd $HOME/gits/gen/rails/my
+cd $HOME/gits/clouds/gen/rails/my
 ./install.sh 2>>/tmp/br/my.err
 cd public
 make    # make gen.min.js
-cd $HOME/gits/gen/rails/netops
+cd $HOME/gits/clouds/gen/rails/netops
 ./install.sh 2>>/tmp/br/netops.err
 
-ln -s /home/br/gits/gen/rails/my/log /var/log/br/rails_my
-ln -s /home/br/gits/gen/rails/netops/log /var/log/br/rails_netops
+ln -s /home/br/gits/clouds/gen/rails/my/log /var/log/br/rails_my
+ln -s /home/br/gits/clouds/gen/rails/netops/log /var/log/br/rails_netops
 
 exit 0
 

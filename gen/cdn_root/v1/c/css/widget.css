@@ -1,0 +1,152 @@
+
+.tooltip {
+    display:none;
+    background:transparent url(//cdn.babelroom.com/v1/c/img/fp/black_arrow.png);
+    font-size:12px;
+    height:70px;
+    width:160px;
+    padding:25px;
+    color:#fff;
+}
+
+/* the overlayed element */
+.cs_overlay {
+
+    /* must be initially hidden */
+    display:none;
+
+    /* place overlay on top of other elements */
+    z-index:10000;
+
+
+    /* styling */
+    background-color:#fff;
+
+    padding: 16px;
+
+/*
+    min-height:200px;
+    -webkit-box-shadow: 0 0 18px #333;
+    -moz-box-shadow: 0 0 18px #333;
+    box-shadow: 0 0 18px #333;
+*/
+    -webkit-border-radius: 13px;
+    -moz-border-radius: 13px;
+    border-radius: 13px;
+
+    font-size: 14px;
+}
+
+/* close button positioned on upper right corner */
+.cs_overlay .close {
+    background-image:url(//cdn.babelroom.com/v1/c/img/fp/close.png);
+    position:absolute;
+    right:-15px;
+    top:-15px;
+    cursor:pointer;
+    height:35px;
+    width:35px;
+}
+
+/*
+    root element for the scrollable.
+    when scrolling occurs this element stays still.
+*/
+.scrollable {
+
+    /* required settings */
+    position:relative;
+    overflow:hidden;
+    width: 420px;
+    height: 150px;
+
+    /* custom decorations */
+    border:1px solid #ccc;
+    background:url(//cdn.babelroom.com/v1/c/img/fp/h300.png) repeat-x;
+}
+
+/*
+    root element for scrollable items. Must be absolutely positioned
+    and it should have a extremely large width to accommodate scrollable items.
+    it's enough that you set width and height for the root element and
+    not for this element.
+*/
+.scrollable .items {
+    /* this cannot be too large */
+    width:20000em;
+    position:absolute;
+    clear:both;
+}
+
+/*
+    a single item. must be floated in horizontal scrolling.
+    typically, this element is the one that *you* will style
+    the most.
+*/
+.items div {
+    float:left;
+    width:420px;
+}
+
+/* single scrollable item */
+.scrollable img {
+    float:left;
+    margin:20px 5px 20px 21px;
+    background-color:#fff;
+    padding:2px;
+    border:1px solid #ccc;
+    width:100px;
+    height:100px;
+    
+    -moz-border-radius:4px;
+    -webkit-border-radius:4px;
+}
+
+/* active item */
+.scrollable .active {
+    border:2px solid #000;
+    position:relative;
+    cursor:default;
+}
+
+/* --- */
+/*
+.ui-jqgrid .jqgrow {font-size:14px; border-color: #fff; background-color:transparent;}
+.ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight {border: 1px solid #9cb391; background: #9cb391; }
+.cs-participant-active {font-weight: bold !important;}
+.cs-participant-inactive {font-style: italic;}
+.cs-small {font-size: small; font-weight: bold;}
+.ui-accordion .ui-accordion-content {}
+.ui-accordion-content {}
+*/
+.ui-accordion .ui-accordion-content {
+    padding-top: 0.75em;
+    padding-bottom: 0.75em;
+    padding-left: 1.0em;
+    padding-right: 1.0em;
+}
+
+.br-person-box {
+    width: 214px;
+    height: 206px;
+    padding: 0;
+    float: left;
+    margin: 10px 10px 10px 10px;
+    font-size: 11px;
+}
+#avatar_parent i {
+    color: #d7d7d7;
+    line-height: inherit;
+}
+.br-person-box #avatar_parent { width: 214px; height: 160px; line-height: 160px; margin-left: -1px; }
+
+.br-person-big-box {
+    width: 640px;
+    height: 510px;
+    padding: 0;
+    float: left;
+    margin: 10px 10px 10px 10px;
+    font-size: 11px;
+}
+.br-person-big-box #avatar_parent { width: 640px; height: 480px; line-height: 480px; margin-left: -1px; }
+

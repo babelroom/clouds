@@ -1,0 +1,15 @@
+
+note sure all of these are needed, in particular:
+
+-rw-rw-r-- 1 br br  40513 Dec 23 07:59 jquery-timepicker.js
+-rw-rw-r-- 1 br br   2469 Dec 23 07:59 jquery.pstrength-min.1.2.js
+-rw-rw-r-- 1 br br   7634 Dec 23 07:59 jquery.pstrength.1.4.js
+-rw-rw-r-- 1 br br   3001 Dec 23 07:59 jquery.placeholder.js
+-rw-rw-r-- 1 br br   8670 Feb 17 22:42 jquery.tools.overlay.js
+-rw-rw-r-- 1 br br 268381 Feb 24 20:33 jquery-1.9.1.js
+-rw-rw-r-- 1 br br 228147 Feb 24 22:59 jquery-ui-1.10.1.custom.min.js
+drwxrwxr-x 2 br br   4096 Feb 28 06:24 src
+drwxrwxr-x 2 br br   4096 Mar  3 04:24 i18n
+-rw-rw-r-- 1 br br 260500 Mar  3 04:29 jquery.jqGrid.min.js
+-rw-rw-r-- 1 br br   4097 Mar 14 22:00 query.tools.scrollable-1.2.7.min.js
+

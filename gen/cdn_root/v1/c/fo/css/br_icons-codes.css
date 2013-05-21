@@ -1,0 +1,14 @@
+@charset "UTF-8";
+
+ 
+.icon2-erase:before { content: '\232b'; } /* '⌫' */
+.icon2-volume-up:before { content: '\e00b'; } /* '' */
+.icon2-volume-off:before { content: '\e00c'; } /* '' */
+.icon2-webcam:before { content: '\e010'; } /* '' */
+.icon2-check-empty:before { content: '\e0a5'; } /* '' */
+.icon2-check:before { content: '\e0a6'; } /* '' */
+.icon2-equalizer:before { content: '\e795'; } /* '' */
+.icon2-mic-off:before { content: '\f047'; } /* '' */
+.icon2-mic:before { content: '\f048'; } /* '' */
+.icon2-mute:before { content: '🔇'; } /* '\1f507' */
+.icon2-sound:before { content: '🔊'; } /* '\1f50a' */

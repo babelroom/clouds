@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Babelroom</title> 
+ 
+
+<!-- PRODUCTION -->
+<!--
+-->
+<link href="//cdn.babelroom.com/v1/c/css/gen_workspace.css?2013050600" rel="stylesheet" type="text/css" />
+<!--DEVEL dev -->
+<!--
+<link rel="stylesheet" type="text/css" media="screen" href="/v1/c/css/html5-doctor-reset.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="/v1/c/css/babelroom.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="/v1/c/css/jquery-ui-1.10.1.custom.min.css" />
+<link rel="stylesheet" href="/v1/c/css/font-awesome.min.css">
+<link rel="stylesheet" href="/v1/c/css/br_icons.css">
+<link rel="stylesheet" type="text/css" media="screen" href="/v1/c/jquery/css/ui.jqgrid.css" />
+<link href="/v1/c/css/widget.css" rel="stylesheet" type="text/css" /> 
+-->
+
+<style> 
+<!--
+.bg {
+    background-color: #f7f7f7;  /* this color is white, just off by 1 to make it stick out in file */
+    background-image: none;
+    font-size: 10px;
+    overflow-x: hidden;
+    margin: 0;
+    font-family: Tahoma, Geneva, sans-serif;
+}
+.chat_position {position:absolute; left:0px; bottom:0px; margin-left:0px; margin-bottom:0px; }
+.bold-text { font-weight: bold; }
+.secure-green { color: #22aa22; }
+.secure-bright-green { color: #33ff33; }
+label.fieldWithErrors, span.fieldWithErrors {
+    color: red;
+    font-weight: bold;
+}
+input.fieldWithErrors {
+    border-color: red;
+    border-style: solid;
+    outline: none;
+}
+.top-tab {
+    border-bottom: 4px solid #f7f7f7;
+    border-left: none;
+    border-right: none;
+    padding-bottom: 4px;
+    margin-top: 2px;
+    margin-bottom: 0;
+}
+.top-tab.ui-state-disabled {
+    background: #f7f7f7;
+    opacity: 1.0;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+}
+.menubar-button {
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+.br-icon-rp-width {
+    width: 16px;
+}
+.br-z-index-logo { z-index: 50; }
+.br-z-index-toolbar { z-index: 60; }
+.br-z-index-panels { z-index: 70; }
+.br-z-index-tabs { z-index: 80; }
+.br-z-index-menu { z-index: 90; }
+/* jquery overlay uses z-index 100 */
+.br-z-index-slide, .br-z-index-boxes-container { z-index: 400; }
+.br-z-index-ptr { z-index: 500; }
+.ui-menu { width: 114px; }
+/* TMP todo - because current custom jquery-ui theme is broken */
+.ui-state-error {
+    background: #FEF1EC !important;
+    color: #CD0A0A !important;
+}
+a.ui-state-error {
+    color: #CD0A0A !important;
+}
+/* TMP todo - because current custom jquery-ui theme is broken */
+#menu_button { width: 120px; }
+select.br-select {
+    height: 23px;
+    font-size: 11px;
+}
+a:link, a:visited, a:active { text-decoration:none; }
+a:hover { text-decoration:underline; }
+a.br-blue {
+    color: #5174a4;
+    font-weight: bold;
+}
+table.br-dyn { width: 100%; }
+/*tr.br-dyn:nth-child(odd) { background: #f8fafe; }*/
+td.br-dyn:nth-child(even) { text-align: right; }
+fieldset.br-dyn { margin: 10px; }
+i.br-mini-button
+{
+    margin: 0 2px 0 2px;
+    cursor: pointer;
+}
+.dtmftable {
+    width: 100%;
+}
+.dtmfrow {
+    text-align: center;
+}
+.dtmfcell {
+    width: 33%;
+}
+.dtmfkey {
+    width: 95%;
+}
+.f6wn { /* not so sure this works... */
+    font-size: 0.6em;
+    font-weight: normal;
+}
+input.br-phone-display {
+    border: solid 1px #ccc;
+    font-size: 1.5em;
+    font-weight: bold;
+    outline: none;
+}
+-->
+</style> 
+
+</head> 
+<body id="dashboard_body" class="jquery-ui bg"> 
+<div style="min-width: 800px; display: none;">
+
+<!-- right -->
+<div><!-- got to move this elsewhere -->
+    <img style="right: 210px; position: absolute; top: 2px; margin: 4px;" src="/v1/c/img/logo_18.png" alt="" class="br-z-index-logo">
+</div>
+<div id="right_column" class="br-z-index-panels"></div> 
+ 
+<!-- left -->
+<div id="main">
+    <h3 style="height: 2.85em;">
+        <div style="float: right; border: none;" class="ui-state-active">
+            <button id="user_button" class="menubar-button" style="display: none;">User</button>
+            <input type="checkbox" id="right_panels"><label for="right_panels" class="br-z-index-panels"></label>
+        </div>
+        <button id="menu_button" class="menubar-button br-z-index-menu">Menu</button>
+    </h3>
+
+<!-- depreciate this ... -->
+        <!-- now retaining only this as example -->
+        <!--<button name="ui-icon-help" onClick="Zenbox.show(event);">Help...</button>--> 
+ 
+<!-- tabs -->
+<div id="top-tabs" style="position: absolute; top: 1px; left: 128px;"><h3 class="ui-accordion-header ui-helper-reset" style="border: none;">
+    <button id="view_people" title="Switch to Participant Webcam View" class="top-tab">People</button> 
+    <button id="view_slides" title="Switch to Presentation Mode" class="top-tab">Slides</button> 
+</h3></div>
+
+<div>
+        <ul id="menu" class="br-z-index-menu" style="display: none;">
+            <li><a href="#" onClick="return m('a');" title="Manage Audio Connection"><span class="ui-icon ui-icon-transferthick-e-w"></span>Connect...</a></li>
+            <li></li>
+            <!--<li class="host-only-menuitem"><a href="#" onClick="return m('b');"><span class="ui-icon ui-icon-plusthick"></span>Add People...</a></li>-->
+            <li class="host-only-menuitem"><a href="#" onClick="return m('d');"><span class="ui-icon ui-icon-gear"></span>Settings...</a></li>
+            <li class="host-only-menuitem"><a href="#" onClick="return m('e');"><span class="ui-icon ui-icon-refresh"></span>Reset...</a></li>
+            <li></li>
+            <li><a href="#"><span class="ui-icon ui-icon-link"></span>Links</a>
+                <ul>
+                    <li class="non-ephemeral-only-menuitem"><a href="#" onClick="return m('c');"><span class="ui-icon ui-icon-calculator"></span> Account...</a></li>
+                    <li><a href="//babelroom.com/" target="_blank"><span class="ui-icon ui-icon-home"></span> Home...</a></li>
+                </ul>
+            </li>
+            <li></li>
+            <li><a href="#" onClick="return m('f');"><span class="ui-icon ui-icon-extlink"></span>Logout</a></li>
+        </ul>
+</div>
+
+<!-- center -->
+<!--<div id="center_area" style="position: absolute; top: 30px; lft: 200px; rght: 205px; min-width: 1000px;">-->
+<div id="center_area" style="position: absolute; top: 0px; lft: 200px; rght: 205px; width: 100%;"> 
+</div> 
+
+</div><!-- main -->
+
+</div>
+<div style="
+    font-size: 300%;
+    font-weight: bold;
+    color: #5174a4;
+    position: absolute;
+    left: 0;
+    top: 40%;
+    width: 100%;
+    text-align: center;
+"><!--<i class="icon-comments"></i>-->Loading...</div>
+
+
+<!-- PRODUCTION -->
+<!--
+-->
+<script type="text/javascript" src="//cdn.babelroom.com/v1/c/gen.min.js?2013050600"> </script>
+<script type='text/javascript' src="//cdn.babelroom.com/v1/br_api.full.min.js?2013050600"></script>
+
+<!-- DEVEL everything that follows is devel -->
+<!--
+<script type='text/javascript' src='/v1/src/js_fixups.js'></script>
+<script type='text/javascript' src="/v1/c/jquery/js/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="/v1/c/jquery/js/i18n/grid.locale-en.js"></script>
+<script type="text/javascript" src="/v1/c/jquery/js/jquery.jqGrid.min.js"></script>
+<script type="text/javascript" src="/v1/c/jquery/js/query.tools.scrollable-1.2.7.min.js"></script>
+<script type="text/javascript" src="/v1/c/jquery/js/jquery-ui-1.10.1.custom.min.js"></script>
+<script type="text/javascript" src="/v1/c/jquery/js/jquery.placeholder.js"></script> 
+<script type="text/javascript" src="/v1/c/flash/swfobject.js"></script>
+<script type="text/javascript" src="/v1/c/ws_js/br_content.js"></script>
+<script type="text/javascript" src="/v1/c/ws_js/br_participants.js"></script>
+<script type="text/javascript" src="/v1/c/ws_js/br_dashboard.js"></script>
+<script type="text/javascript" src="/v1/c/ws_js/br_commands.js"></script>
+<script type="text/javascript" src="/v1/c/ws_js/br_utils.js"></script>
+<script type="text/javascript" src="/v1/c/ws_js/br_invitees.js"></script>
+<script type="text/javascript" src="/v1/c/ws_js/br_widgets.js"></script>
+<script type="text/javascript" src="/v1/c/ws_js/br_overlays.js"></script>
+<script type="text/javascript" src="/v1/c/ws_js/br_conference.js"></script>
+<script type="text/javascript" src="/v1/c/ws_js/br_dynamic.js"></script>
+<script type="text/javascript" src="/v1/c/ws_js/br_toolbar.js"></script>
+<script type="text/javascript" src="/v1/AUTO/conference_options.js"></script>
+<script type='text/javascript' src='//cdn-dev.babelroom.com/v1/src/br_api.js'></script>
+<script type='text/javascript' src='//cdn-dev.babelroom.com/v1/src/br_api.streaming.js'></script>
+<script type='text/javascript' src='//cdn-dev.babelroom.com/v1/src/socket.io.min.js'></script>
+-->
+
+<script type="text/javascript">
+
+/* --- globals (soon...) --- */
+var a = BR.api.v1;
+a.init({query_string:window.location.search, _dynamic_form_id:'_ie_dynform'});
+BR.room = {
+    countries: null,
+    context: {}
+}
+var menuOn, menuOff;    /* will assign function to this in ready() */
+
+function switch_view(view) {
+    BRWidgets.changeCenterView(view);
+    var $j = jQuery;
+    $j('.top-tab').button('enable').addClass('ui-state-default');
+    $j('#view_'+view).button('disable').removeClass('ui-state-default');
+}
+function m(item) { return BRToolbar.menuAction(item); }
+
+function br_v1_c_loaded() {
+    /* --- soonest possible --- */
+}
+
+function br_v1_c_ready() {
+    /* --- DOM has been loaded --- */
+    var $j = jQuery;
+
+    BRToolbar.door('open');
+
+    var loginTokenOrNull =  BRToolbar.login_token();
+    if (loginTokenOrNull) {
+        BRToolbar.login_by_token(function(msg){
+            return BRToolbar.door('fatal',msg);                 /* at least throw up the error message */
+            });
+        }
+
+//    if (window!=window.top) // in an iframe (so there is an exit/logout link in parent frame) --- depreciate (or revive)
+//        $j('.logout_link').css('display','none');
+ 
+    /* --- center area --- */
+    BRWidgets.centerArea('#center_area');
+
+    /* --- top tab --- */
+    $j('#main > h3').addClass('ui-accordion-header ui-helper-reset ui-state-default ui-state-active');
+    $j('.top-tab').each(function(){
+        var b = $j(this);
+        var id = this.id;
+        var icon_map = {view_people: 'ui-icon-person', view_slides: 'ui-icon-image'};
+        var view_map = {view_people: 'people', view_slides: 'slides'};    // depreciate by using value directly
+        b.button({icons: {primary: icon_map[id]}})
+            .removeClass('ui-corner-all')
+            .addClass('ui-corner-top');
+        b.click(function(){
+            switch_view(view_map[id]);
+            /* $j('.top-tab').addClass('ui-state-default');
+            b.removeClass('ui-state-default'); */
+            });
+        b.children('span:first-child').css({
+            top: 'auto',
+            'margin-top': '2px'
+            });
+        b.addClass('br-z-index-tabs');
+        });
+    switch_view('people');
+
+    /* ---  right panels --- */
+    var pos = {position: 'absolute', wdth: '202px', top: '1px', right: '0px'};
+    var extra_foo = false;
+    if (extra_foo) {
+        $j('#user_button').button().show()
+            .button('option', 'icons', {prmary: 'ui-icon-triangle-1-s', secondry: 'ui-icon-gear'}).button('option','label','Username')
+            .removeClass('ui-corner-all').addClass('menubar-button ui-corner-left').css($j.extend(pos, {right: '202px'}));
+        }
+    var rp = $j('#right_panels').button();
+//    $j('#right_buttons').buttonset().css(pos);
+    var rl = rp.next().addClass('menubar-button')
+        .css($j.extend(pos,{width: '202px', right: '0px'}));    // the label following the input checkbox is actually the parent object to be styled
+    if (extra_foo) rl.removeClass('ui-corner-all').addClass('ui-corner-right');
+    var rp_icons = ' <i class="icon-cogs pull-right br-icon-rp-width" style="text-align: right;"></i>';
+    var rp_icons_hide = ' <i class="icon-resize-small pull-right br-icon-rp-width" style="text-align: right;"></i>';
+    var rc = $j('#right_column');
+    function rp_update() {
+        if (rp.is(':checked')) {
+            rc.show();
+            rp.button('option', 'icons', {primary: 'ui-icon-triangle-1-s', secondry: 'ui-icon-gear'}).button('option','label','Hide Panels'+rp_icons_hide);
+            }
+        else  {
+            rc.hide();
+            rp.button('option', 'icons', {primary: 'ui-icon-triangle-1-e', secondry: 'ui-icon-gear'}).button('option','label','Show Panels'+rp_icons);
+            }
+        rl.find('span.ui-button-text').css('text-align', 'left');
+        }
+    rp.click(rp_update);
+    rc.css($j.extend(pos,{'width': '205px', 'top': '2.8em'}));
+//pos.top = '26px';
+
+    /* --- at this point we need the right column, and the right column (apparently) needs the main div visible --- */ 
+    $j(".bg > div:first").show();
+    BRWidgets.rightMenu('#right_column');
+    rp_update();
+    rc.hide();
+
+    /* --- */
+    $j('#menu_button').button({ icons: {secondary: 'ui-icon-triangle-1-s'}, label: '<i class=""></i> Loading...' });
+
+    /* align some heights TODO tmp. think this is going away ... */
+    var pos = $j('#top-tabs').height();
+//console.log(pos);
+//console.log( $j('#main').height() );
+//    $j('#main > h3').height( $j('#top-tabs').height()-1 );
+    //$j('#main').css('padding-bottom', $j('#top-tabs').height()+'px');
+//console.log(pos);
+//console.log( $j('#main').height() );
+
+    /* --- display (rest of) dashboard --- */
+    $j(".bg > div:first").next().hide();
+    
+    /* --- connect --- */
+    if (!loginTokenOrNull)  /* this logic may seem strange, but it's staged for case of leaving login token on room URL */
+        br_v1_c_connect(loginTokenOrNull);
+}
+
+function br_v1_c_connect(loginTokenOrNull) {
+
+    /* now populate */
+    a.get_countries(function(err, list) {
+        if (err)
+            return BRToolbar.door('fatal');
+        BR.room.countries = list;
+        var uri = BRUtils.conferencePath();
+        if (uri) {
+            a.addStreamCredential(uri, loginTokenOrNull, function(err, data) {
+                if (err)
+                    return BRToolbar.door('fatal');
+                BRToolbar.door('invitation', data);
+                });
+            }
+        else
+            BRToolbar.door('fatal');  /* at least throw up the error message */
+        });
+}
+
+jQuery(document).ready(function(){ br_v1_c_ready(); });
+br_v1_c_loaded();
+</script>
+<form id="_ie_dynform" style="display: none;" action="//api.babelroom.com/v1/_dynform"></form>
+</body> 
+</html> 

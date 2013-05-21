@@ -1,0 +1,12 @@
+
+.icon2-erase { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#x232b;&nbsp;'); }
+.icon2-volume-up { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xe00b;&nbsp;'); }
+.icon2-volume-off { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xe00c;&nbsp;'); }
+.icon2-webcam { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xe010;&nbsp;'); }
+.icon2-check-empty { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xe0a5;&nbsp;'); }
+.icon2-check { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xe0a6;&nbsp;'); }
+.icon2-equalizer { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xe795;&nbsp;'); }
+.icon2-mic-off { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xf047;&nbsp;'); }
+.icon2-mic { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xf048;&nbsp;'); }
+.icon2-mute { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#x1f507;&nbsp;'); }
+.icon2-sound { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#x1f50a;&nbsp;'); }

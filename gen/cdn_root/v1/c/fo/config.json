@@ -1,0 +1,73 @@
+{
+  "name": "br_icons",
+  "css_prefix_text": "icon2-",
+  "css_use_suffix": false,
+  "glyphs": [
+    {
+      "uid": "2f750a9be253e8e451209574336e7020",
+      "css": "mute",
+      "code": 128263,
+      "src": "entypo"
+    },
+    {
+      "uid": "ef51920c7a9bed4d87f53709db115e34",
+      "css": "sound",
+      "code": 128266,
+      "src": "entypo"
+    },
+    {
+      "uid": "e8239f8188c76c925be4bd1bbcc013ac",
+      "css": "erase",
+      "code": 9003,
+      "src": "entypo"
+    },
+    {
+      "uid": "e3699d145bd628d2a35d4a508b616f0c",
+      "css": "equalizer",
+      "code": 59285,
+      "src": "iconic"
+    },
+    {
+      "uid": "858e967d1c67608546add6beebade5b3",
+      "css": "mic",
+      "code": 61512,
+      "src": "mfglabs"
+    },
+    {
+      "uid": "5dc427ad9f0644447ca5292911c378f1",
+      "css": "mic-off",
+      "code": 61511,
+      "src": "mfglabs"
+    },
+    {
+      "uid": "f274acf461473025f0d75518b653ec14",
+      "css": "webcam",
+      "code": 57360,
+      "src": "elusive"
+    },
+    {
+      "uid": "8489d61496923b1159b01d8a0a7b2df0",
+      "css": "volume-off",
+      "code": 57356,
+      "src": "elusive"
+    },
+    {
+      "uid": "012ff5762ccb18c16bdfdd6baf187406",
+      "css": "volume-up",
+      "code": 57355,
+      "src": "elusive"
+    },
+    {
+      "uid": "e2d87e7631c608efe71762a9f4c95e75",
+      "css": "check",
+      "code": 57510,
+      "src": "elusive"
+    },
+    {
+      "uid": "cc8e2a0eff0356811984b84a868524f8",
+      "css": "check-empty",
+      "code": 57509,
+      "src": "elusive"
+    }
+  ]
+}

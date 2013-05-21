@@ -1,0 +1,170 @@
+#!/usr/bin/perl -w
+
+# ---
+use JSON qw( from_json to_json );
+use Data::Dumper;
+use strict;
+use warnings;
+
+# --- L E X I C A L   P R O C E S S I N G
+my $dump_pp = 0;
+my $dump_json = 0;
+my %vars = ();
+my $heredoc = 0;
+
+# ---
+foreach my $arg (@ARGV) {
+    $dump_pp = 1 if $arg eq '-n';
+    $dump_json = 1 if $ arg eq '-j';
+}
+
+# ---
+sub exp_var
+{
+    my $var = shift;
+    return "\$$var" if not defined $vars{$var};
+    return expand($vars{$var});
+}
+sub protect_quote { my $s=shift; $s=~s/"/\\"/g; return $s; } # need to add this in more places ...
+sub recurse_expand
+{
+    my ($a,$b,$c) = @_;
+    return expand($a).$b.expand($c);
+}
+sub expand_vars
+{
+    my $s = shift;
+    # this next line: not so elegent (expansion should implicitly recurse or not, should not need to test)
+    #if (/^(.*)\$(\w+)(.*)$/)        { my ($a,$b,$c)=($1,$2,$3); my $d = exp_var($b); return expand_vars($a).("\$$b" eq $d)?$d:expand($d).expand_vars($c); }
+    #if (/^(.*)\$(\w+)(.*)$/)        { my ($a,$b,$c)=($1,$2,$3); my $d = exp_var($b); return expand_vars($a).("\$$b" eq $d)?$d:expand($d).expand_vars($c); }
+    $s=~s/\$(\w+)/&exp_var($1)/ge;
+    return $s;
+}
+sub expand
+{
+    $_ = shift;
+    return '' if not length;
+    if (/^(.*)'([^'|\\']*)'(.*)$/)  { return recurse_expand($1,"\'$2\'",$3); }
+    if (/^(.*)"([^"|\\"]*)"(.*)$/)  { my ($a,$b,$c)=($1,$2,$3); return recurse_expand($a,"\"".expand_vars($b)."\"",$c); }
+    if (/^(.*)##(.*)$/)             { return recurse_expand($1,"\"$2\"",''); }
+    if (/^(.*)<<__(.*)$/)           { my ($a,$b)=($1,$2); $heredoc = 1; return recurse_expand($a,"\"$b",''); }
+    if (/^(.*)@([\w|\.|\/]+)(.*)$/) { my ($a,$b,$c)=($1,$2,$3); return recurse_expand($a,include_file($b),$c); }
+    if (/^(.*)#([\w|\.]+)(.*)$/)    { return recurse_expand($1,"\"$2\"",$3); }
+    # this next line: not so elegent (expansion should implicitly recurse or not, should not need to test)
+    #if (/^(.*)\$(\w+)(.*)$/)        { my ($a,$b,$c)=($1,$2,$3); my $d = exp_var($b); return recurse_expand($a,("\$$b" eq $d)?$d:expand($d),$c); }
+    if (/^(.*)\$(\w+)(.*)$/)        { my ($a,$b,$c)=($1,$2,$3); return recurse_expand($a,exp_var($b),$c); }
+    return $_;
+}
+sub set_var
+{
+    my ($lhs,$rhs) = @_;
+    $vars{$lhs} = $rhs;
+}
+
+# ---
+sub process_tu
+{
+    my $fh = shift;
+    my $inp = '';
+    foreach(<$fh>) {
+        chomp;
+        if ($heredoc) {
+            if (s/^(.*)__>>(.*)$/$2/) { my $a=$1; if (length($a)) { $inp .= "\\n".protect_quote($a); } $inp .= "\""; $heredoc = 0; }
+            else { $inp .= "\\n".protect_quote($_); next; }
+            }
+        set_var($1,$2) if /^\s*#\$(\w+)\s*=(.*)$/;
+#        next if /^\s*#/;    # skip lines which are entirely commented out
+        s/#[\s|\$].*$//; # skip text after # + (space || $) on line
+#        print "$_\n";
+        $inp .= expand($_);
+    }
+    return $inp;
+}
+
+# ---
+sub include_file
+{
+    my $fn = shift;
+    my $fh = $fn;
+    local *FH;
+    open FH, "<$fn" or die "$@ opening $fn";
+    my $inp = process_tu('FH');
+    close FH;
+    return $inp;
+}
+
+# ---
+$main::input = process_tu('STDIN');
+
+# ---
+if ($dump_pp) {
+    print $main::input;
+    exit 0;
+}
+
+# --- T R E E
+my $tree = from_json($main::input, {allow_barekey => 1, allow_singlequote => 1, relaxed => 1});
+#print "[$main::input]\n";
+#print Dumper($tree);
+
+if ($dump_json) {
+#print STDERR "foo\n";
+    print to_json($tree, {});
+    exit 0;
+}
+
+# --- C O M P O N E N T   P R O C E S S I N G
+
+my $verbose = 0;
+my $template_dir = 'idl_tpl';
+$main::ROOT = {};
+
+push (@INC, 'idl');
+require 'TemplateParser.pm';
+
+# ---
+sub exec_tpl
+{
+    my ($generator, $tree) = @_;
+    my $template_file = "$template_dir/$generator.tpl";
+    my $inter_file = "$template_file.pl";
+    if ( TemplateParser->parse ($template_file, $inter_file) == 0 ) {
+            print STDERR ( "Translated $template_file to $inter_file\n") if $verbose;
+        } else {
+            die "Could not parse template file - exiting\n";
+        }
+    # exec the inter file
+    $main::ROOT = $tree;
+    # >>> found this but haven't used it here ... it works where I used it (in clouds/prime.pl) ... sweet
+    # delete $INC{$inter_file}; --- actually using it now -- but leave this note in in case of problems ....
+    # delete this comment on or after 2/2013?
+    delete $INC{$inter_file};
+    require "$inter_file";
+    run_generator();
+    die "$@\n" if $@;
+}
+
+# ---
+sub generate
+{
+    my $system = shift;
+    my $root = shift;
+    my @l = @{$root};
+    foreach my $k (@l) {
+        #print Dumper($k);
+        #my %h = %$k;
+        #print Dumper(%h);
+        if (defined $k->{generators}) {
+            #foreach my $generator (@{$k->{generators}}) { my $subref = \&{'gen__'.$generator}; &$subref($system, $k); }
+            foreach my $generator (@{$k->{generators}}) {
+                ($k->{system}, $k->{generator}) = ($system, $generator);
+                exec_tpl($generator, $k);
+                }
+            }
+        }
+}
+
+foreach my $system (keys %$tree) {
+    generate($system, $tree->{$system});
+}
+

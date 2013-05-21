@@ -1,0 +1,17 @@
+@openfile rails/$system/models/$generator.rb
+class $camel_generator < ActiveRecord::Base
+
+  hobo_model # Don't put anything above this
+
+  fields do
+@foreach columns
+    $_, $type
+@end
+
+@foreach list
+    $_
+@end
+@foreach list2
+    $_0 $_1
+@end
+
