@@ -1,0 +1,17 @@
+From: "Babelroom" <no-reply@babelroom.com>
+To: "{$full_name}" <{$email}>
+Bcc: "Babelroom monitoring" <john@babelroom.com>
+Subject: Welcome to Babelrom!
+
+{$first_name},
+
+Thank you for registering with Babelroom.
+
+Please click on the link below to activate your Babelroom account:
+
+{$link_url}/{$ouid}/go/{$link_key}
+
+If you did not register with Babelroom please ignore this email.
+
+Thank you
+

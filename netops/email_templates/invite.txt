@@ -1,0 +1,18 @@
+From: "Conference Invitations" <no-reply@babelroom.com>
+To: "{$full_name}" <{$email}>
+Bcc: "Babelroom monitoring" <john@babelroom.com>
+Subject: Your Babelroom Conference Invitation
+
+You have a conference scheduled.
+
+Your conference is called "{$conference_name}" and it starts {$start}.
+
+You can use the following link to access your account:
+
+{$link_url}/{$ouid}/go/{$link_key}
+
+Use your pin {$pin} to access the conference.
+
+Dialin access:
+{$dialin}
+
