@@ -18,12 +18,15 @@ REQUIRED_PACKAGES="\
     perl-IO-Zlib-1.09-127.el6                   \
     perl-Package-Constants-0.02-127.el6         \
     perl-ExtUtils-MakeMaker-6.55-127.el6        \
-    perl-ExtUtils-ParseXS-1:2.2003.0-127.el6    \
+    perl-ExtUtils-ParseXS-2.2003.0-127.el6      \
     perl-Test-Harness-3.17-127.el6              \
-    perl-devel-4:5.10.1-127.el6                 \
+    perl-devel-5.10.1-127.el6                   \
     "
 sudo yum install -y $REQUIRED_PACKAGES || exit -1
-# an method which restricts the repo used so we only get the base (correct) version rather than all the jazz with the explicit packages and version numbers
+# a method which restricts the repo used so we only get the base (correct) version rather than all the jazz with the explicit packages and version numbers
+#REQUIRED_PACKAGES="\
+#    perl-CPAN                                  \
+#    "
 #sudo yum install --disablerepo=\* --enablerepo=C6.3-base -y $REQUIRED_PACKAGES || exit -1
 
 mkdir -p ~/.cpan/CPAN
