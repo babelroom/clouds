@@ -1,0 +1,5 @@
+files which map freeswitch 
+file which map data for freeswitch:
+    - phone: map carrier phone id to pin information, to authorize based on caller-id rather than pin
+    - pin: key value pairs to identify a (possibly anonymous) user based on pin (or phone# if a phone map generated the pin)
+    - conference: key value pairs with data conference specific data (or possibly redirect data if conference in on another server?)

@@ -1,0 +1,27 @@
+
+Building
+========
+Generally build like this:
+$ make
+
+Install as root:
+# make install
+
+The installation comprises core binaries and configuration under
+/usr/local/estream
+
+Log and data files are under
+/var/estream
+
+Notes
+=====
+Make sure you have perl REST::Client.pm installed otherwise you'll get an error like:
+Can't locate REST/Client.pm in @INC (@INC contains: /usr/lib64/perl5/site_perl/5.8.8/x86_64-linux-thread-multi /usr/lib/perl5/site_perl/5.8.8 /usr/lib/perl5/site_perl /usr/lib64/perl5/vendor_perl/5.8.8/x86_64-linux-thread-multi /usr/lib/perl5/vendor_perl/5.8.8 /usr/lib/perl5/vendor_perl /usr/lib64/perl5/5.8.8/x86_64-linux-thread-multi /usr/lib/perl5/5.8.8 .) at ./FS_out.pl line 13.
+BEGIN failed--compilation aborted at ./FS_out.pl line 13.
+
+likely resolve with 
+yum install perl-CPANPLUS
+cpan -i REST::Client
+
+if cpan spins in a loop trying to get geographic information, perhaps run it with a users profile in the environment (i.e su, not su -).
+

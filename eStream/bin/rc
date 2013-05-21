@@ -1,0 +1,82 @@
+#
+# chkconfig: 345 86 14 
+# description: estream
+#
+# processname: estream
+# config: /usr/local/conf/WebServ.conf
+# config: /home/jroy/sys/CommonSite.conf
+# pidfile: /var/run/estream.pid
+    
+# source function library
+. /etc/rc.d/init.d/functions
+
+RETVAL=0
+prog="estream"
+
+# Some functions to make the below more readable
+ESTREAM=/usr/local/estream/bin/estream.sh
+PID_FILE=/var/run/estream.pid
+LOG=/var/log/br/estream_1.log
+LOG2=/var/log/br/estream_2.log
+
+runlevel=$(set -- $(runlevel); eval "echo \$$#" )
+    
+start()
+{
+    echo -n $"Starting $prog: "
+    $ESTREAM $OPTIONS >$LOG 2>$LOG2 && success || failure
+    RETVAL=$?
+    [ "$RETVAL" = 0 ] && touch /var/lock/subsys/estream
+    echo
+}   
+
+stop()
+{
+    echo -n $"Stopping $prog: "
+    pkill estream
+pkill FS_out.pl    # TODO: tmp!!
+pkill cs_restart.sh    # TODO: tmp!!
+pkill FS_in.pl    # TODO: tmp!!
+
+    sleep 5
+pkill -9 estream    # TODO: tmp!!
+
+    if [ -n "`pidfileofproc $ESTREAM`" ] ; then
+        killproc $ESTREAM
+    else
+        failure $"Stopping $prog"
+    fi
+    RETVAL=$?
+    [ "$RETVAL" = 0 ] && rm -f /var/lock/subsys/estream
+    echo
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    reload)
+        echo "Not implemented";
+        RETVAL=1
+        ;;
+    condrestart)
+        echo "Not implemented";
+        RETVAL=1
+        ;;
+    status)
+        echo "Not implemented";
+        RETVAL=1
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|restart|reload|condrestart|status}"
+        RETVAL=1
+esac
+exit $RETVAL
+
