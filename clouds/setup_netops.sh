@@ -7,7 +7,7 @@ test -L /var/log/br/netops && echo 'Already installed!' && exit 0;
 ./setup_perl.sh || exit -1
 
 # removed this ... not sure it's needed ...
-    ORBit2-2.14.17-3.2.el6_3
+#    ORBit2-2.14.17-3.2.el6_3
 
 REQUIRED_PACKAGES="\
     ImageMagick-6.5.4.7-6.el6_2                 \
@@ -22,7 +22,7 @@ REQUIRED_PACKAGES="\
     "
 sudo yum install -y $REQUIRED_PACKAGES || exit -1
 
-ln -s /home/br/gits/netops/log /var/log/br/netops
+ln -s /home/br/gits/clouds/netops/log /var/log/br/netops
 
 cat <<'EOT' >/tmp/br/clean_netops_logs
 # .---------------- minute (0 - 59)

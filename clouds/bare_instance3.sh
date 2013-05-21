@@ -6,7 +6,10 @@ echo ---
 
 cd $HOME
 cat << 'EOT' >>.bash_profile
+
+# --- added by BR clouds/setup
 export HISTSIZE=20000
+export PATH=~/gits/clouds/utils:$PATH
 EOT
 cat << 'EOT' >.exrc
 set tabstop=4

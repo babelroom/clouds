@@ -16,7 +16,6 @@ make clean && make
 sudo sh -c "cd $HOME/gits/clouds/eStream && make install"
 make clean
 sudo /sbin/chkconfig estream off        # make install puts this on by default, disable it as we'll use primers
-sudo install -m 755 $HOME/gits/eStream/bin/rc /etc/init.d/estream
 
 exit 0
 

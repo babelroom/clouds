@@ -7,7 +7,7 @@ echo 'Perl...'
 SAVE=$PWD
 cd $HOME/gits/clouds/clouds
 
-perl ../br_scripts/check_for_modules.pl 2>/dev/null && echo 'Already installed!' && exit 0;
+perl ../netops/br_scripts/check_for_modules.pl 2>/dev/null && echo 'Already installed!' && exit 0;
 
 # a method which restricts the repo used so we only get the base (correct) version rather than all the jazz with the explicit packages and version numbers
 #REQUIRED_PACKAGES="\
@@ -67,7 +67,7 @@ do
 done
 
 # determine if it all worked out ...
-perl ../br_scripts/check_for_modules.pl || exit -1
+perl ../netops/br_scripts/check_for_modules.pl || exit -1
 
 cd $SAVE
 
