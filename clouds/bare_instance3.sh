@@ -34,6 +34,11 @@ sudo service init-instance start
 sudo install -o root -m 755 ./start-instance /etc/init.d
 sudo /sbin/chkconfig --add start-instance
 
+# copy initial files
+cd ../misc
+sudo install -o root -m 644 issue.std /etc/issue
+cp config.default ~/config
+
 cat << EOT 
 ---
 Done!, now it's up to you.
