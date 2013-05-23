@@ -118,16 +118,16 @@ ngx_cdn_cert: {script: "empty_file", file: "/etc/nginx/br_conf.d/cdn.babelroom.c
 ngx_no_cert: {script: "empty_file", file: "/etc/nginx/br_conf.d/no.babelroom.com.cert.inc", cert: "/home/br/gits/netops/clouds/certs/no.crt", key: "/home/br/gits/netops/clouds/certs/no.key", deps: ['ngx_cln']}
 ngx_www_bblr_co_cert: {script: "nginx_cert", file: "/etc/nginx/br_conf.d/www.bblr.co.cert.inc", cert: "/home/br/gits/netops/clouds/certs/bblr_bundle.crt", key: "/home/br/gits/netops/clouds/certs/www.bblr.co.key", deps: ['ngx_cln']}
 ngx_proxy_common_inc: {src: "proxy_common_inc", file: "/etc/nginx/br_conf.d/proxy_common.inc"}
-mongrel_my: {script: "mongrel_rc", file: "/etc/init.d/mongrel_my", path: "/home/br/gits/gen/rails/my", port: 3001, label: "my", rails_env: "production"}
-mongrel_no: {script: "mongrel_rc", file: "/etc/init.d/mongrel_no", path: "/home/br/gits/gen/rails/netops", port: 3002, label: "no", rails_env: "production"}
-ngx_my: {script: "proxy_conf", label: "my", root: "/home/br/gits/gen/rails/my/public", iface: "eth0:1", port: 3001, deps: ['ngx_my_cert','ngx_proxy_common_inc','mongrel_my']}
-ngx_no: {script: "proxy_conf", label: "no", root: "/home/br/gits/gen/rails/netops/public", auth_file: "no_htpasswd", iface: "eth0:1", port: 3002, deps: ['ngx_no_cert','ngx_proxy_common_inc','mongrel_no']}
+mongrel_my: {script: "mongrel_rc", file: "/etc/init.d/mongrel_my", path: "/home/br/gits/clouds/gen/rails/my", port: 3001, label: "my", rails_env: "production"}
+mongrel_no: {script: "mongrel_rc", file: "/etc/init.d/mongrel_no", path: "/home/br/gits/clouds/gen/rails/netops", port: 3002, label: "no", rails_env: "production"}
+ngx_my: {script: "proxy_conf", label: "my", root: "/home/br/gits/clouds/gen/rails/my/public", iface: "eth0:1", port: 3001, deps: ['ngx_my_cert','ngx_proxy_common_inc','mongrel_my']}
+ngx_no: {script: "proxy_conf", label: "no", root: "/home/br/gits/clouds/gen/rails/netops/public", auth_file: "no_htpasswd", iface: "eth0:1", port: 3002, deps: ['ngx_no_cert','ngx_proxy_common_inc','mongrel_no']}
 ngx_myapi: {script: "myapi_conf", iface: "eth0:1", port: 3001, deps: ['ngx_proxy_common_inc','mongrel_my']}
 ngx_bblr_co: {script: "bblr_co_conf", iface: "eth0:1", deps: ['ngx_www_bblr_co_cert']}
 ngx_cdn: {script: "cdn_conf", iface: "eth0:1", deps: ['ngx_cdn_cert']}
 prime_nginx: {script: "nginx_conf", deps: ['ngx_wd_cert','ngx_my','ngx_no','ngx_cdn','ngx_bblr_co','ngx_myapi']}
 node_config_app: {script: "config_js", iface: "eth0", file: "/tmp/br/app_config.js"}
-prime_node_app: {script: "node_rc", file: "/etc/init.d/node_app", path: "/home/br/gits/gen/node", config_file: "/tmp/br/app_config.js", label: "app", deps: ['node_config_app']}
+prime_node_app: {script: "node_rc", file: "/etc/init.d/node_app", path: "/home/br/gits/clouds/gen/node", config_file: "/tmp/br/app_config.js", label: "app", deps: ['node_config_app']}
 prime_netops: {src: "netops_rc", file: "/etc/init.d/netops", mode: "0755"}
 prime_red5: {src: "red5_rc", file: "/etc/init.d/red5", mode: "0755"}
 prime_mysqld: {script: "my_cnf", server_id: 37}
@@ -144,7 +144,7 @@ __EOT__
     # netops last
     add(rooms,node_app,<<__EOT__
 node_config_app: {script: "config_js", iface: "eth0", secret: "$misc{secret}", key: "$privatekeys{api}", cert: "$certificates{api}", cookie_key: "brv1", domain: "", file: "/tmp/br/app_config.js"}
-prime_node_app: {script: "node_rc", file: "/etc/init.d/node_app", path: "/home/br/gits/gen/node", config_file: "/tmp/br/app_config.js", label: "app", deps: ['node_config_app']}
+prime_node_app: {script: "node_rc", file: "/etc/init.d/node_app", path: "/home/br/gits/clouds/gen/node", config_file: "/tmp/br/app_config.js", label: "app", deps: ['node_config_app']}
 __EOT__
 );
     add(red5, red5, 'prime_red5: {src: "red5_rc", file: "/etc/init.d/red5", mode: "0755"}');
