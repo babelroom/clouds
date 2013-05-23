@@ -1,0 +1,47 @@
+open F, ">$R->{file}" or die;
+my $iface = $M{$R->{iface}};
+print F <<__EOT__
+/* --- */
+var config = {
+    groups: [{
+        apps: ['api','live'],
+        servers: [{
+                protocol: 'https',
+                bindaddr: '$iface',
+                bindport: 443,
+                options: {key: '$R->{key}', cert: '$R->{cert}'},
+            },{
+                protocol: 'http',
+                bindaddr: '$iface',
+                bindport: 80,
+            }],
+        estream: {
+            hostname: '127.0.0.1',
+            port: 8888,
+            },
+        api: {
+            hostname: '$iface',
+            port: 80,
+            },
+        session_manager: {
+            key: '$R->{cookie_key}',
+            domain: '$R->{domain}',
+            // secure: true, -- soon
+            },
+        mysql: {
+            poolsize: 20,
+            host: '127.0.0.1',
+            user: 'root',
+            database: 'my',
+            password: '',
+            },
+        secret: '$R->{secret}',
+        }
+        ]
+}
+
+module.exports = config;
+__EOT__
+;
+close F;
+1
