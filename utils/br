@@ -196,11 +196,12 @@ __EOT__
             }
         $value .= defined($services{$key}{value}) ? $services{$key}{value}() : '';
         $status = 'NOT installed' if not defined $status;
-        format =
-@<<<<<<<<< @<<<<<<<<<<<<<<<<<< @>>> @<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        format SC =
+@<<<<<<<<< @<<<<<<<<<<<<<<<<<< @<<< @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 $key $status $oo $value
 .
-#123456789.123456789.223456789.323456789.4234567890123456789.523456789.623456789.723456789
+#123456789.123456789.223456789.323456789.423456789.523456789.623456789.723456789.823456789
+        $~ = "SC";
         write;
         }
 }
@@ -213,18 +214,19 @@ sub list_flags()
 }
 sub list_keycerts()
 {
-    sub outl { my($k,$v)=@_; format=
-@<<<<<<<<<<<<<<<<<<< @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    sub outl { my($k,$v)=@_; format KC =
+@<<<<<<<<< @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 $k $v
 .
-#123456789.123456789.223456789.323456789.4234567890123456789.523456789.623456789.723456789
+#123456789.123456789.223456789.323456789.423456789.523456789.623456789.723456789.823456789
+        $~ = "KC";
         write;}
     outl('Service','Private Key');
     outl('-------','-----------');
-    foreach my $key(keys %privatekeys) { outl($k,$privatekeys{$k}); }
+    foreach my $k (keys %privatekeys) { outl($k,$privatekeys{$k}); }
     outl('Service','Certificate');
     outl('-------','-----------');
-    foreach my $key(keys %certificates) { outl($k,$certificates{$k}); }
+    foreach my $k (keys %certificates) { outl($k,$certificates{$k}); }
 }
 sub list_all()
 {
