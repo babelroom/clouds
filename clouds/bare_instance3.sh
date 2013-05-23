@@ -50,5 +50,5 @@ Suggested:
 
 EOT
 #bash
-su - br # run profile etc.
+#su - br # run profile etc.
 
