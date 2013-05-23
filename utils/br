@@ -7,8 +7,8 @@ use Data::Dumper;   # for devel
 # ---
 $config_file = "/home/br/config";
 $prefx = "_br_";
-$dummy_key = "/home/br/gits/clouds/misc/dummy_privatekey.pem";
-$dummy_cert = "/home/br/gits/clouds/misc/dummy_certificate.pem";
+$dummy_key = "/home/br/gits/clouds/clouds/misc/dummy_privatekey.pem";
+$dummy_cert = "/home/br/gits/clouds/clouds/misc/dummy_certificate.pem";
 
 # ---
 %hostnames = ('rooms' => 'http://please.ignore.test');
@@ -112,11 +112,11 @@ sub write_config
     my $dummy =<<__EOT__
 autoprime:
 ngx_cln:     {script: "mk_clean_dir", dir: "/etc/nginx/br_conf.d"}
-ngx_wd_cert: {script: "nginx_cert", file: "/etc/nginx/br_conf.d/babelroom.com.cert.inc", cert: "/home/br/gits/netops/clouds/certs/wd_bundle.crt", key: "/home/br/gits/netops/clouds/certs/wd.key", deps: ['ngx_cln']}
-ngx_my_cert: {script: "empty_file", file: "/etc/nginx/br_conf.d/my.babelroom.com.cert.inc", cert: "/home/br/gits/netops/clouds/certs/my.crt", key: "/home/br/gits/netops/clouds/certs/my.key", deps: ['ngx_cln']}
-ngx_cdn_cert: {script: "empty_file", file: "/etc/nginx/br_conf.d/cdn.babelroom.com.cert.inc", cert: "/home/br/gits/netops/clouds/certs/cdn.crt", key: "/home/br/gits/netops/clouds/certs/cdn.key", deps: ['ngx_cln']}
-ngx_no_cert: {script: "empty_file", file: "/etc/nginx/br_conf.d/no.babelroom.com.cert.inc", cert: "/home/br/gits/netops/clouds/certs/no.crt", key: "/home/br/gits/netops/clouds/certs/no.key", deps: ['ngx_cln']}
-ngx_www_bblr_co_cert: {script: "nginx_cert", file: "/etc/nginx/br_conf.d/www.bblr.co.cert.inc", cert: "/home/br/gits/netops/clouds/certs/bblr_bundle.crt", key: "/home/br/gits/netops/clouds/certs/www.bblr.co.key", deps: ['ngx_cln']}
+ngx_wd_cert: {script: "nginx_cert", file: "/etc/nginx/br_conf.d/babelroom.com.cert.inc", cert: "/home/br/gits/clouds/netops/certs/wd_bundle.crt", key: "/home/br/gits/clouds/netops/certs/wd.key", deps: ['ngx_cln']}
+ngx_my_cert: {script: "empty_file", file: "/etc/nginx/br_conf.d/my.babelroom.com.cert.inc", cert: "/home/br/gits/clouds/netops/certs/my.crt", key: "/home/br/gits/clouds/netops/certs/my.key", deps: ['ngx_cln']}
+ngx_cdn_cert: {script: "empty_file", file: "/etc/nginx/br_conf.d/cdn.babelroom.com.cert.inc", cert: "/home/br/gits/clouds/netops/certs/cdn.crt", key: "/home/br/gits/clouds/netops/certs/cdn.key", deps: ['ngx_cln']}
+ngx_no_cert: {script: "empty_file", file: "/etc/nginx/br_conf.d/no.babelroom.com.cert.inc", cert: "/home/br/gits/clouds/netops/certs/no.crt", key: "/home/br/gits/clouds/netops/certs/no.key", deps: ['ngx_cln']}
+ngx_www_bblr_co_cert: {script: "nginx_cert", file: "/etc/nginx/br_conf.d/www.bblr.co.cert.inc", cert: "/home/br/gits/clouds/netops/certs/bblr_bundle.crt", key: "/home/br/gits/clouds/netops/certs/www.bblr.co.key", deps: ['ngx_cln']}
 ngx_proxy_common_inc: {src: "proxy_common_inc", file: "/etc/nginx/br_conf.d/proxy_common.inc"}
 mongrel_my: {script: "mongrel_rc", file: "/etc/init.d/mongrel_my", path: "/home/br/gits/clouds/gen/rails/my", port: 3001, label: "my", rails_env: "production"}
 mongrel_no: {script: "mongrel_rc", file: "/etc/init.d/mongrel_no", path: "/home/br/gits/clouds/gen/rails/netops", port: 3002, label: "no", rails_env: "production"}
