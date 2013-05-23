@@ -143,7 +143,7 @@ __EOT__
     add(mysqld, mysqld, 'prime_mysqld: {script: "my_cnf", server_id: 37}');
     # netops last
     add(rooms,node_app,<<__EOT__
-node_config_app: {script: "config_js", iface: "eth0", secret: $misc{secret}, key: "$privatekeys{api}", cert: "$certificates{api}", cookie_key: "brv1", domain: "", file: "/tmp/br/app_config.js"}
+node_config_app: {script: "config_js", iface: "eth0", secret: "$misc{secret}", key: "$privatekeys{api}", cert: "$certificates{api}", cookie_key: "brv1", domain: "", file: "/tmp/br/app_config.js"}
 prime_node_app: {script: "node_rc", file: "/etc/init.d/node_app", path: "/home/br/gits/gen/node", config_file: "/tmp/br/app_config.js", label: "app", deps: ['node_config_app']}
 __EOT__
 );
