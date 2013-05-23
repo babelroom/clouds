@@ -37,7 +37,7 @@ $dummy_cert = "/home/br/gits/clouds/misc/dummy_certificate.pem";
     live => $dummy_key,
     api => $dummy_key,
 );
-%certificates = ();
+%certificates = (
     live => $dummy_cert,
     api => $dummy_cert,
 );
@@ -203,6 +203,7 @@ $key $status $oo $value
         }
 }
 sub list_flags()
+{
     sub wflag { my $fn=shift; print "$fn: " . ($onoff{$fn} ? 'on' : 'off') . "\n"; }
     print "---\n";
     wflag(autoprime);
