@@ -2,7 +2,7 @@
 
 use Getopt::Long;
 use Data::Dumper;   # for devel
-use String::Random;
+#use String::Random;
 
 # ---
 $config_file = "/home/br/config";
@@ -97,8 +97,9 @@ sub read_config
         }
     if ($no_content) {
         print "Warning: could not read configuration file '$config_file', using defaults\n";
-        my $pat = new String::Random or die;
-        $misc{secret} = $pat->randregex("[a-zA-Z0-9]{128}");
+#        my $pat = new String::Random or die;
+#        $misc{secret} = $pat->randregex("[a-zA-Z0-9]{128}");
+        $misc{secret} = join "", map { unpack "H*", chr(rand(256)) } 1..64;
         return 0;
         }
     return 1;
