@@ -2,6 +2,7 @@
 
 echo 'node...'
 
+# not sure this check is valid, node is also installed just so uglify is available
 which node 2>/dev/null && echo 'Already installed!' && exit 0;
 
 ./setup_buildtools.sh || exit -1

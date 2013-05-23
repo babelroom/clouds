@@ -1,4 +1,234 @@
 #!/usr/bin/perl
 
-print "Aloha world!\n";
+use Getopt::Long;
+use Data::Dumper;   # for devel
+
+# ---
+$config_file = "/home/br/config";
+$prefx = "_br_";
+
+# ---
+%hostnames = ('rooms' => 'http://please.ignore.test');
+@on = ();
+@off = ();
+%commands = ();
+#%flags = (autoprime=>1, startup=>1);
+
+# ---
+%services = (
+    rooms => {installed=>sub{`which node`;}, running=>sub{_ps_grep('-c /tmp/br/app_config.js');}, value=>sub{$hostnames{rooms}}, required=>1},
+    accounts => {installed=>sub{`which node` && -d '/home/br/gits/clouds/gen/rails/my';}, running=>sub{_ps_grep('mongrel_my');}, value=>sub{$hostnames{accounts}}},
+    freeswitch => {installed=>sub{-x '/usr/local/freeswitch/bin/freeswitch';}, running=>sub{_ps_grep('-m /usr/local/freeswitch -db');}},
+    red5 => {installed=>sub{-d '/home/br/gits/red5';}, running=>sub{_ps_grep('-Dred5.root=/home/br/gits/red5/');}},
+    mysqld => {installed=>sub{-d '/var/log/br/mysql';}, running=>sub{_ps_grep('/usr/libexec/mysqld');}, required=>1},
+    netops => {installed=>sub{1;}, running=>sub{_ps_grep('/bin/su br -c ./init.pl');}, required=>1},
+);
+%onoff = (autoprime=>1, startup=>1,    'rooms'=>1, 'freeswitch'=>1, 'red5'=>0, 'accounts'=>0, 'netops'=>1, 'mysqld'=>1);  # defaults
+
+$result = GetOptions (
+    "hostname=s" => \%hostnames,
+    "on=s" => \@on,
+    "off=s" => \@off,
+    "online" => \$commands{online},
+    "offline" => \$commands{offline},
+    "check" => \$commands{check},
+    "status" => \$commands{status},
+    "help" => \$commands{help},
+    "write" => \$commands{write},
+    
+#                        "length=i" => \$length,     # numeric
+#                        "file=s"   => \$data,       # string
+#                        "verbose"  => \$verbose     # flag
+) or help(1);   # doesn't seem to fire if bad options ...
+
+# ---
+$ps_output = undef;
+sub _ps_grep
+{
+    my $pattern = shift;
+#    $pattern =~ s/\-/\\-/g;
+    $ps_output = `ps axw` if not defined $ps_output;
+#    my $cmd = "ps xw | grep '$pattern'";
+##print $cmd;
+#    `$cmd`;
+#    $pattern = quotemeta($pattern);
+#print $ps_output;
+#print $pattern;
+#exit 0;
+#$ps_out = 'foobar';
+#    return ($ps_output =~ /$pattern/m);
+    $ps_output =~ /\Q$pattern\E/m;
+}
+
+# ---
+sub read_config
+{
+    my $no_content = 1;
+    if (-f $config_file && open(IF, "<$config_file")) {
+        foreach(<IF>) {
+            $no_content = 0;
+            next if not /^\s*#\Q$prefx\E([^\-]+)\-([^:]*):(.*)$/;
+            my ($var,$key,$val) = ($1,$2,$3);
+            $$var{$key} = $val;
+#print "$var $key $val\n";
+            }
+        close(IF);
+        }
+    if ($no_content) {
+        print "Warning: could not read configuration file '$config_file', using defaults\n";
+        return 0;
+        }
+    return 1;
+}
+
+# ---
+sub write_config
+{
+    my $fh = shift;
+    my $dummy =<<__EOT__
+autoprime:
+ngx_cln:     {script: "mk_clean_dir", dir: "/etc/nginx/br_conf.d"}
+ngx_wd_cert: {script: "nginx_cert", file: "/etc/nginx/br_conf.d/babelroom.com.cert.inc", cert: "/home/br/gits/netops/clouds/certs/wd_bundle.crt", key: "/home/br/gits/netops/clouds/certs/wd.key", deps: ['ngx_cln']}
+ngx_my_cert: {script: "empty_file", file: "/etc/nginx/br_conf.d/my.babelroom.com.cert.inc", cert: "/home/br/gits/netops/clouds/certs/my.crt", key: "/home/br/gits/netops/clouds/certs/my.key", deps: ['ngx_cln']}
+ngx_cdn_cert: {script: "empty_file", file: "/etc/nginx/br_conf.d/cdn.babelroom.com.cert.inc", cert: "/home/br/gits/netops/clouds/certs/cdn.crt", key: "/home/br/gits/netops/clouds/certs/cdn.key", deps: ['ngx_cln']}
+ngx_no_cert: {script: "empty_file", file: "/etc/nginx/br_conf.d/no.babelroom.com.cert.inc", cert: "/home/br/gits/netops/clouds/certs/no.crt", key: "/home/br/gits/netops/clouds/certs/no.key", deps: ['ngx_cln']}
+ngx_www_bblr_co_cert: {script: "nginx_cert", file: "/etc/nginx/br_conf.d/www.bblr.co.cert.inc", cert: "/home/br/gits/netops/clouds/certs/bblr_bundle.crt", key: "/home/br/gits/netops/clouds/certs/www.bblr.co.key", deps: ['ngx_cln']}
+ngx_proxy_common_inc: {src: "proxy_common_inc", file: "/etc/nginx/br_conf.d/proxy_common.inc"}
+mongrel_my: {script: "mongrel_rc", file: "/etc/init.d/mongrel_my", path: "/home/br/gits/gen/rails/my", port: 3001, label: "my", rails_env: "production"}
+mongrel_no: {script: "mongrel_rc", file: "/etc/init.d/mongrel_no", path: "/home/br/gits/gen/rails/netops", port: 3002, label: "no", rails_env: "production"}
+ngx_my: {script: "proxy_conf", label: "my", root: "/home/br/gits/gen/rails/my/public", iface: "eth0:1", port: 3001, deps: ['ngx_my_cert','ngx_proxy_common_inc','mongrel_my']}
+ngx_no: {script: "proxy_conf", label: "no", root: "/home/br/gits/gen/rails/netops/public", auth_file: "no_htpasswd", iface: "eth0:1", port: 3002, deps: ['ngx_no_cert','ngx_proxy_common_inc','mongrel_no']}
+ngx_myapi: {script: "myapi_conf", iface: "eth0:1", port: 3001, deps: ['ngx_proxy_common_inc','mongrel_my']}
+ngx_bblr_co: {script: "bblr_co_conf", iface: "eth0:1", deps: ['ngx_www_bblr_co_cert']}
+ngx_cdn: {script: "cdn_conf", iface: "eth0:1", deps: ['ngx_cdn_cert']}
+prime_nginx: {script: "nginx_conf", deps: ['ngx_wd_cert','ngx_my','ngx_no','ngx_cdn','ngx_bblr_co','ngx_myapi']}
+node_config_app: {script: "config_js", iface: "eth0", file: "/tmp/br/app_config.js"}
+prime_node_app: {script: "node_rc", file: "/etc/init.d/node_app", path: "/home/br/gits/gen/node", config_file: "/tmp/br/app_config.js", label: "app", deps: ['node_config_app']}
+prime_netops: {src: "netops_rc", file: "/etc/init.d/netops", mode: "0755"}
+prime_red5: {src: "red5_rc", file: "/etc/init.d/red5", mode: "0755"}
+prime_mysqld: {script: "my_cnf", server_id: 37}
+prime_freeswitch: {script: "vars_xml", eip: "54.241.140.39"}
+
+# startup -- in order
+startup:    mysqld freeswitch fail2ban nginx   node_app mongrel_my mongrel_no estream red5   netops
+__EOT__
+;
+    my $startup = '';
+    print $fh "autoprime:\n" if ($onoff{autoprime});
+    sub add($$$) {my ($s,$p,$l)=@_; if ($onoff{$s}) { print $fh "$l\n"; $startup .= "$p "; } }
+    add(mysqld, mysqld, 'prime_mysqld: {script: "my_cnf", server_id: 37}');
+    # netops last
+    add(rooms,node_app,<<__EOT__
+node_config_app: {script: "config_js", iface: "eth0", file: "/tmp/br/app_config.js"}
+prime_node_app: {script: "node_rc", file: "/etc/init.d/node_app", path: "/home/br/gits/gen/node", config_file: "/tmp/br/app_config.js", label: "app", deps: ['node_config_app']}
+__EOT__
+);
+    add(red5, red5, 'prime_red5: {src: "red5_rc", file: "/etc/init.d/red5", mode: "0755"}');
+    add(netops, netops, 'prime_netops: {src: "netops_rc", file: "/etc/init.d/netops", mode: "0755"}');
+    if ($onoff{startup}) {
+        print $fh "# startup -- in order\nstartup: $startup\n";
+        }
+    print $fh "\n";
+    sub outvar {
+        my $vn = shift;
+        my %h = %$vn;
+        foreach my $key (keys %h) {
+            print $fh "#$prefx$vn-$key:$h{$key}\n";
+            }
+        }
+    print $fh "# --- All values from this point are used to preserve configuration for 'br' and not used directing in priming\n";
+    outvar(hostnames);
+    outvar(onoff);
+    print "Configuration written\n";
+}
+
+## ---
+#sub flags()
+#{
+#    my $mod = 0;
+#    foreach my $key (keys %flags) {
+#        }
+#}
+
+# ---
+sub onoff()
+{
+    my $key;
+    my $mod = 0;
+    foreach $key (@on) {
+        $mod = 1 if not $onoff{$key};
+        $onoff{$key} = 1;
+        }
+    foreach $key (@off) {
+        $mod = 1 if $onoff{$key};
+        $onoff{$key} = 0;
+        }
+    return $mod;
+}
+sub online() {}
+sub offline() {}
+sub check() {}
+sub status()
+{
+#<<<<<<<<< @<<<<<<<<<<<<<<<<<< @>>> @<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    print <<__EOT__
+Service    Status              Flag Notes / Configuration 
+-------    ------              ---- ---------------------
+__EOT__
+;
+    foreach my $key(keys %services) {
+        my ($status, $oo, $value);
+        $status = $services{$key}{installed}() ? ($services{$key}{running}() ? 'running' : 'installed') : undef;
+        $oo = (defined ($status) && $onoff{$key}) ? 'on' : 'off';
+        if (defined $services{$key}{required} && $oo ne 'on') {
+            $value = '[ERROR -- required service] ';
+            }
+        $value .= defined($services{$key}{value}) ? $services{$key}{value}() : '';
+        $status = 'NOT installed' if not defined $status;
+        format =
+@<<<<<<<<< @<<<<<<<<<<<<<<<<<< @>>> @<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+$key $status $oo $value
+.
+#123456789.123456789.223456789.323456789.4234567890123456789.523456789.623456789.723456789
+        write;
+        }
+    sub wflag { my $fn=shift; print "$fn: " . ($onoff{$fn} ? 'on' : 'off') . "\n"; }
+    print "---\n";
+    wflag(autoprime);
+    wflag(startup);
+}
+
+# ---
+sub help($) 
+{
+    my $rc = shift;
+# TODO
+    print "There is no help coming\n";
+    exit $rc;
+}
+
+# ---
+sub logic
+{
+    # ---
+    my $mod = shift;
+    if (length(@on) or length(@off)) { $mod = 1 if onoff(); }
+    online() if defined($commands{online});
+    offline() if defined($commands{offline});
+    check() if defined($commands{check});
+    status() if defined($commands{status});
+    help(0) if defined($commands{help});
+    $mod = 1 if defined($commands{write});
+
+    return if (!$mod);
+
+    # --- write out new value
+    open OF, ">$config_file";
+    write_config(OF);
+    close OF;
+}
+
+# ---
+my $read = read_config();
+logic(!$read);
 

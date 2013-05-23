@@ -39,13 +39,24 @@ sub write_kv
     close OF;
 }
 
+# --- determine if we might be on amazon ec2 -- this code is meant to error towards true (false positive rather than false negative)
+`curl -fs http://169.254.169.254/`;
+my $rc = (($? & 0xff00) >> 8);  # rc from curl, 0 on success, else its error code (1 for bad scheme, 255 if no curl)
+my $ec2 = ($rc !=7);            # 7 is the error code we expect on a non-ec2 system. We could also check for ==0 here, but that might snag a different transitory error ??
+
 # ---
-foreach my $key (@md_keys) {
-    $val = `curl -fs http://169.254.169.254/latest/meta-data/$key`;
-    write_kv($key,$val);
+my $ud = '';
+if ($ec2) {
+    foreach my $key (@md_keys) {
+        $val = `curl -fs http://169.254.169.254/latest/meta-data/$key`;
+        write_kv($key,$val);
+    }
+    $ud = `curl -fs http://169.254.169.254/latest/user-data`;
 }
-my $ud = `curl -fs http://169.254.169.254/latest/user-data`;
-#my $ud = `cat /home/br/gits/clouds/clouds/user_data_example`;
+if (length($ud)==0) {
+    # either not amazon or amazon without user-data -- get it from last br config write 
+    $ud = `cat /home/br/config`;
+}
 write_kv('user-data',$ud);
 foreach my $line (split /\n/, $data{'user-data'}) {
     chomp($line);

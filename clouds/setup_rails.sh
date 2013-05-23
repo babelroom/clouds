@@ -5,7 +5,7 @@ echo 'Rails...'
 # not just yet
 exit 0;
  
-#which rails >/dev/null && echo 'Already installed!' && exit 0;
+which rails >/dev/null && echo 'Already installed!' && exit 0;
 
 ./setup_mysql_client.sh  || exit -1
 

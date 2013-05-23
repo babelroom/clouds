@@ -20,17 +20,18 @@ EOT
 }
 
 MAC_ADDR=$(ifconfig eth0 | sed -n 's/.*HWaddr \([a-fA-F0-9:]*\).*/\L\1/p')
+echo "   === Add Virtual Interfaces ===";
 echo "mac: [$MAC_ADDR]";
 IP=$(ifconfig eth0 | sed -n 's/.*inet addr:\([0-9.]*\)*.*/\1/p')
 DEVICE=eth0
 write_ip
 echo "eth0 ip: [$IP]";
+echo "virtual IP's follow... (only expect virtual IP's on amazon ec2 instances)";
 LIP=($(curl -s http://169.254.169.254/latest/meta-data/network/interfaces/macs/$MAC_ADDR/local-ipv4s))
 i=1
 for IP in ${LIP[@]:1}; do
-    echo "Adding IP: [$IP]"
-#    ip addr add dev eth0 $IP/24
     DEVICE=eth0:$i
+    echo "Adding IP: [$IP] for device $DEVICE"
     FILE=/etc/sysconfig/network-scripts/ifcfg-$DEVICE
     cat << EOT > $FILE
 # AUTOMATICALLY GENERATED (BR / netops / clouds)
