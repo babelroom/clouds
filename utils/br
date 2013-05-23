@@ -32,6 +32,7 @@ $dummy_cert = "/home/br/gits/clouds/clouds/misc/dummy_certificate.pem";
     services => list_services,
     flags => list_flags,
     keycerts =>  list_keycerts,
+    all => list_all,
 );
 %privatekeys = (
     live => $dummy_key,
@@ -209,6 +210,27 @@ sub list_flags()
     print "---\n";
     wflag(autoprime);
     wflag(startup);
+}
+sub list_keycerts()
+{
+    sub outl { my($k,$v)=@_; format=
+@<<<<<<<<<<<<<<<<<<< @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+$k $v
+.
+#123456789.123456789.223456789.323456789.4234567890123456789.523456789.623456789.723456789
+        write;}
+    outl('Service','Private Key');
+    outl('-------','-----------');
+    foreach my $key(keys %privatekeys) { outl($k,$privatekeys{$k}); }
+    outl('Service','Certificate');
+    outl('-------','-----------');
+    foreach my $key(keys %certificates) { outl($k,$certificates{$k}); }
+}
+sub list_all()
+{
+    list_services();
+    list_flags();
+    list_keycerts();
 }
 
 # ---
