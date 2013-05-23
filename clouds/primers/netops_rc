@@ -16,7 +16,7 @@ PID_FILE=/var/tmp/netops.pid
 prog="./init.pl"
 
 # Some functions to make the below more readable
-NETOPS_DIR=/home/br/gits/netops
+NETOPS_DIR=/home/br/gits/clouds/netops
 
 # BTW -- this is useful
 #ps -eo pid,pgid,args | grep pl

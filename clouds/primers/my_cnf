@@ -1,0 +1,44 @@
+my $LOGDIR='/var/log/br/mysql';
+my $f = '/etc/my.cnf';
+open F, ">$f" or die;
+print F <<__EOT__
+# BR mysql configuration from primer
+[mysqld]
+bind-address=127.0.0.1
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
+user=mysql
+
+# Disabling symbolic-links is recommended to prevent assorted security risks
+symbolic-links=0
+
+# character set stuff
+character-set-server = utf8
+collation-server = utf8_unicode_ci
+init-connect='SET NAMES utf8'
+skip-character-set-client-handshake
+
+long_query_time=1
+slow_query_log_file=$LOGDIR/log-slow-queries.log
+
+#general_log_file=$LOGDIR/mysql.log
+#general_log=1
+
+server-id=$R->{server_id}
+log-bin=binlog
+binlog-format=ROW
+
+
+[mysqld_safe]
+# note /etc/init.d/mysqld will point to wrong location for error log file -- oh well --> that script is a little too busy anyhow
+log-error=$LOGDIR/error.log
+pid-file=/var/run/mysqld/mysqld.pid
+
+[mysql]
+# strictly speaking this isn't necessary as the 'skip-character-set-client-handshake' above means it gets this stuff from server (I think)
+default-character-set = utf8
+
+__EOT__
+;
+close F;
+1

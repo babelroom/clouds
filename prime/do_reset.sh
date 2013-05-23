@@ -29,11 +29,11 @@ echo 'Stop DB'
 sudo service mysqld stop
 
 echo 'Delete replication marker'
-sudo rm -f /home/br/gits/netops/replicate_db/provisioning*
+sudo rm -f /home/br/gits/clouds/netops/replicate_db/provisioning*
 
 echo 'Delete logfiles'
 sudo rm -f /var/log/br/mysql/*
-sudo rm -f /home/br/gits/netops/log/*
+sudo rm -f /home/br/gits/clouds/netops/log/*
 sudo rm -f /var/log/br/*.*
 sudo rm -f /tmp/br/*
 

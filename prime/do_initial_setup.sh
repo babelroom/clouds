@@ -23,10 +23,8 @@ mysql -uroot netops <./netops_prime.sql
 
 # assume the image may be older than source repository...
 cd /home/br/gits/red5; git pull
-cd /home/br/gits/eStream; git pull
 cd /home/br/gits/FS; git pull
-cd /home/br/gits/netops; git pull
-cd /home/br/gits/gen; git pull
+cd /home/br/gits/clouds; git pull
 
 make clean
 make
