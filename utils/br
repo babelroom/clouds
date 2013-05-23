@@ -2,15 +2,19 @@
 
 use Getopt::Long;
 use Data::Dumper;   # for devel
+use String::Random;
 
 # ---
 $config_file = "/home/br/config";
 $prefx = "_br_";
+$dummy_key = "/home/br/gits/clouds/misc/dummy_privatekey.pem";
+$dummy_cert = "/home/br/gits/clouds/misc/dummy_certificate.pem";
 
 # ---
 %hostnames = ('rooms' => 'http://please.ignore.test');
 @on = ();
 @off = ();
+@list = ();
 %commands = ();
 #%flags = (autoprime=>1, startup=>1);
 
@@ -24,11 +28,28 @@ $prefx = "_br_";
     netops => {installed=>sub{1;}, running=>sub{_ps_grep('/bin/su br -c ./init.pl');}, required=>1},
 );
 %onoff = (autoprime=>1, startup=>1,    'rooms'=>1, 'freeswitch'=>1, 'red5'=>0, 'accounts'=>0, 'netops'=>1, 'mysqld'=>1);  # defaults
+%list_functions = (
+    services => list_services,
+    flags => list_flags,
+    keycerts =>  list_keycerts,
+);
+%privatekeys = (
+    live => $dummy_key,
+    api => $dummy_key,
+);
+%certificates = ();
+    live => $dummy_cert,
+    api => $dummy_cert,
+);
+%misc = ();
 
+
+# ---
 $result = GetOptions (
     "hostname=s" => \%hostnames,
     "on=s" => \@on,
     "off=s" => \@off,
+    "list=s" => \@list,
     "online" => \$commands{online},
     "offline" => \$commands{offline},
     "check" => \$commands{check},
@@ -76,6 +97,8 @@ sub read_config
         }
     if ($no_content) {
         print "Warning: could not read configuration file '$config_file', using defaults\n";
+        my $pat = new String::Random or die;
+        $misc{secret} = $pat->randregex("[a-zA-Z0-9]{128}");
         return 0;
         }
     return 1;
@@ -119,7 +142,7 @@ __EOT__
     add(mysqld, mysqld, 'prime_mysqld: {script: "my_cnf", server_id: 37}');
     # netops last
     add(rooms,node_app,<<__EOT__
-node_config_app: {script: "config_js", iface: "eth0", file: "/tmp/br/app_config.js"}
+node_config_app: {script: "config_js", iface: "eth0", secret: $misc{secret}, key: "$privatekeys{api}", cert: "$certificates{api}", cookie_key: "brv1", domain: "", file: "/tmp/br/app_config.js"}
 prime_node_app: {script: "node_rc", file: "/etc/init.d/node_app", path: "/home/br/gits/gen/node", config_file: "/tmp/br/app_config.js", label: "app", deps: ['node_config_app']}
 __EOT__
 );
@@ -139,6 +162,9 @@ __EOT__
     print $fh "# --- All values from this point are used to preserve configuration for 'br' and not used directing in priming\n";
     outvar(hostnames);
     outvar(onoff);
+    outvar(privatekeys);
+    outvar(certificates);
+    outvar(misc);
     print "Configuration written\n";
 }
 
@@ -151,24 +177,7 @@ __EOT__
 #}
 
 # ---
-sub onoff()
-{
-    my $key;
-    my $mod = 0;
-    foreach $key (@on) {
-        $mod = 1 if not $onoff{$key};
-        $onoff{$key} = 1;
-        }
-    foreach $key (@off) {
-        $mod = 1 if $onoff{$key};
-        $onoff{$key} = 0;
-        }
-    return $mod;
-}
-sub online() {}
-sub offline() {}
-sub check() {}
-sub status()
+sub list_services()
 {
 #<<<<<<<<< @<<<<<<<<<<<<<<<<<< @>>> @<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     print <<__EOT__
@@ -192,10 +201,43 @@ $key $status $oo $value
 #123456789.123456789.223456789.323456789.4234567890123456789.523456789.623456789.723456789
         write;
         }
+}
+sub list_flags()
     sub wflag { my $fn=shift; print "$fn: " . ($onoff{$fn} ? 'on' : 'off') . "\n"; }
     print "---\n";
     wflag(autoprime);
     wflag(startup);
+}
+
+# ---
+sub onoff()
+{
+    my $key;
+    my $mod = 0;
+    foreach $key (@on) {
+        $mod = 1 if not $onoff{$key};
+        $onoff{$key} = 1;
+        }
+    foreach $key (@off) {
+        $mod = 1 if $onoff{$key};
+        $onoff{$key} = 0;
+        }
+    return $mod;
+}
+sub list()
+{
+    foreach $key (@list) {
+        my $fn = $list_functions{$key};
+        &$fn() if $fn;
+        }
+}
+sub online() {}
+sub offline() {}
+sub check() {}
+sub status()
+{
+    list_services();
+    list_flags();
 }
 
 # ---
@@ -213,6 +255,7 @@ sub logic
     # ---
     my $mod = shift;
     if (length(@on) or length(@off)) { $mod = 1 if onoff(); }
+    list();
     online() if defined($commands{online});
     offline() if defined($commands{offline});
     check() if defined($commands{check});
