@@ -2,7 +2,6 @@
 
 echo 'Base System...'
 
-
 # fixup yum repository for older packages
 cat <<'EOT' >/tmp/CentOS-Vault-6-3.repo
 # BR find older packages
