@@ -38,15 +38,15 @@ $ENV{BR_ENVIRONMENT} = 'production';
 
 # ---
 if ($ENV{BR_ENVIRONMENT} eq 'development') {
-    $ENV{BR_INSTALL_DIR} = '/home/jroy/gits/netops';
+    $ENV{BR_INSTALL_DIR} = '/home/jroy/gits/clouds/netops';
     $ENV{BR_DSN} = 'dbi:mysql:netops_development:127.0.0.1:3306';
     }
 elsif ($ENV{BR_ENVIRONMENT} eq 'staging') {
-    $ENV{BR_INSTALL_DIR} = '/home/br/gits/netops';
+    $ENV{BR_INSTALL_DIR} = '/home/br/gits/clouds/netops';
     $ENV{BR_DSN} = 'dbi:mysql:netops_staging:127.0.0.1:3306';	# staging
     }
 elsif ($ENV{BR_ENVIRONMENT} eq 'production') {
-    $ENV{BR_INSTALL_DIR} = '/home/br/gits/netops';
+    $ENV{BR_INSTALL_DIR} = '/home/br/gits/clouds/netops';
     $ENV{BR_DSN} = 'dbi:mysql:netops:127.0.0.1:3306';	# production
     }
 else {
