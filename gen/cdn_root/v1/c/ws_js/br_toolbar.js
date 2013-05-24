@@ -129,7 +129,7 @@ var BRToolbar = {
     menuAction: function(item) {
         var $j = jQuery;
         function make_webcall_url() {
-            var url = '/v1/c/flash/flash.html?url='+encodeURIComponent('rtmp:'+BR.api.v1.get_host('live')+'/phone')+'&pin='+BR.room.context.pin;
+            var url = '/cdn/v1/c/flash/flash.html?url='+encodeURIComponent('rtmp:'+BR.api.v1.get_host('live')+'/phone')+'&pin='+BR.room.context.pin;
             return url;
             }
         $j('#menu').hide();
@@ -346,7 +346,7 @@ if (qs && qs['e']) {
             html += '<div id="d_set_nick_intro"'+hs+'><p>Participants need to be identified in this room. You may enter a nickname or login if you have an account.</p></div>';
             html += '<div id="d_set_nick"'+hs+'><p style="text-align: center;"><label>Enter a Nickname<input id="d_input_nick" spellcheck="false" type="text" size="20" /></label><br>Have an account? <a href="#" class="br-blue br-d-login">Login</a><p></div>';
             html += '<div id="d_set_login"'+hs+'><center><table wdth="100%"><tr><td><label>Email<br><input id="d_input_email" style="margin-left:0;" type="text" size="20" spellcheck="false" /></label></td><td rowspan="2" width="10%"></td><td><label>Password<br><input id="d_input_password" style="margin-left:0;" type="password" size="20" spellcheck="false" /></label></td></tr><tr><td>Just use a <a href="#" id="d_link_nick" class="br-blue">Nickname</a></td><td><a href="'+BR.api.v1.get_host('my')+'/login?reset" class="br-blue" target="_blank">Forgot</a> password?</td></tr></table></center></div>';
-            html += '<div id="d_set_wait"'+hs+'><center>Waiting for host to enter conference...<br><img src="/v1/c/img/bar-spinner.gif"></center></div>';
+            html += '<div id="d_set_wait"'+hs+'><center>Waiting for host to enter conference...<br><img src="/cdn/v1/c/img/bar-spinner.gif"></center></div>';
             html += '<p></p>';
 
             $j('#'+id+'_content').html(html).find('a.br-d-button').button();

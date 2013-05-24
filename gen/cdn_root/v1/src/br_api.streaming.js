@@ -13,7 +13,7 @@
         var _this = this;
         if (typeof(io)==="undefined")
             fn('socket io not present or not initialized');
-        else if (!(this._socket = io.connect(url/*, options */)))
+        else if (!(this._socket = io.connect(url, {resource: 'sio'})))
             fn('socket io error connecting to ['+url+']');
         else {
             this._socket.on('error', function(e){fn(e);});

@@ -35,26 +35,6 @@ function signature(val, secret)
 }
 
 /*
-function decrypt(val, secret, enc)
-{
-    key = secret.slice(16,32);
-    iv = secret.slice(48,64);
-    var cipher = enc ? crypto.createCipheriv('aes-128-cfb',key,iv) : crypto.createDecipheriv('aes-128-cfb',key,iv);
-    var result;
-    result = cipher.update(val, 'hex', 'ascii') + cipher.final('ascii');
-    return result;
-}
-function decrypt(val, secret) { return do_crypt(val, secret, false); }
-function encrypt(val, secret) {
-    var missing = 32-(val.length);
-    if (missing>0) {
-        val += crypto.randomBytes(Math.floor(missing/2)+1).toString(16);
-        }
-    return do_crypt(val, secret, true);
-}
-*/
-
-/*
     so the hack here is to deal with the rails session which has used their hokey Marshal.load()/dump() serialization ....
 4
 8 <-- initial record -- probably version stamp

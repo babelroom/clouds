@@ -4,6 +4,7 @@ var https = require('https');
 var fs = require('fs');
 var Live = require('./live');
 var API = require('./api');
+var Mini = require('./mini');
 
 /*
 ** Read configuration 
@@ -13,8 +14,6 @@ var config_file = './app_example_cfg.js';
 for(var i=0; i<process.argv.length; i++)
     if (process.argv[i]=='-c')
         config_file = process.argv[i+1];    // will throw an exception if no arg
-console.log('reading configuration from ['+config_file+']');
-var config = require(config_file);
 
 /* --- */
 var protocol_factory = {
@@ -29,6 +28,7 @@ for(var i=0; i<config.groups.length; i++) {
     var servers = {};
     var io = new Live(g);
     var api = new API(g);
+    var mini = new Mini(g);
     var express = require('express');
     var app = express();
     app.disable('x-powered-by');
@@ -42,10 +42,25 @@ for(var i=0; i<config.groups.length; i++) {
     for(var j=0; j<g.apps.length; j++)
         switch(g.apps[j]) {
             case 'live':
+                io.addUseHandlers(express, app, g);
+                break;
+            case 'api':
+                api.addUseHandlers(express, app, g);
+                break;
+            case 'mini':
+                mini.addUseHandlers(express, app, g);
+                break;
+            }
+    for(var j=0; j<g.apps.length; j++)
+        switch(g.apps[j]) {
+            case 'live':
                 io.addHandlers(express, app, g);
                 break;
             case 'api':
                 api.addHandlers(express, app, g);
+                break;
+            case 'mini':
+                mini.addHandlers(express, app, g);
                 break;
             }
 }

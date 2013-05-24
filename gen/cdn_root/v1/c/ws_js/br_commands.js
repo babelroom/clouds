@@ -20,7 +20,7 @@ var BRCommands = {
                         Application.totalParticipantCount--;
                         }
                     else {
-                        grid.jqGrid('addRowData',idx,{icon: '<img src="'+BR.room.co..... OLD ... ntext.cdn_host+'/v1/c/img/blank.png" />'});
+                        grid.jqGrid('addRowData',idx,{icon: '<img src="'+BR.room.co..... OLD ... ntext.cdn_host+'/cdn/v1/c/img/blank.png" />'});
                         Application.totalParticipantCount++;
                         }
 */

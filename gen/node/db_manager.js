@@ -96,7 +96,6 @@ DBManager.prototype = {
             if (this._db_pool[idx].br_count>=conn.br_count)
                 break;
         if (idx>1) { /* swap only if both entries are not next to each other */
-//console.log(">swap: "+idx+", "+conn.br_idx);
             idx--;
             var swp2 = this._db_pool[idx];
             this._db_pool[idx] = conn;
@@ -104,8 +103,6 @@ DBManager.prototype = {
             swp2.br_idx = conn.br_idx;
             conn.br_idx = idx;
             }
-//else console.log("<no swap: "+idx+", "+conn.br_idx);
-//        this._dumpPool();
         },
     _moveUp: function(conn) {
         var idx;
@@ -113,7 +110,6 @@ DBManager.prototype = {
             if (this._db_pool[idx].br_count<=conn.br_count)
                 break;
         if (idx<(conn.br_idx-1)) { /* swap only if both entries are not next to each other */
-//console.log("<swap: "+idx+", "+conn.br_idx);
             idx++;
             var swp2 = this._db_pool[idx];
             this._db_pool[idx] = conn;
@@ -121,18 +117,14 @@ DBManager.prototype = {
             swp2.br_idx = conn.br_idx;
             conn.br_idx = idx;
             }
-//else console.log("<no swap: "+idx+", "+conn.br_idx);
-//        this._dumpPool();
         },
     _getConn: function() {
         var conn = this._db_pool[0];
-//console.log('>> ' + conn.br_count);
         conn.br_count++;
         this._moveDown(conn);
         return conn;
         },
     _returnConn: function(conn) {
-//console.log('<< ' + conn.br_count);
         conn.br_count--;
         this._moveUp(conn);
         }

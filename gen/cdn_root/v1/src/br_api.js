@@ -171,7 +171,8 @@
 
     function API() {
         this.options = null;
-        this.config = null;
+//        this.config = null;
+        this.hosts = null;
         this.stream_channel = undefined;
         this.xhr_channel = undefined;
         }
@@ -197,7 +198,7 @@
         }
 
     function _form_call(verb, path, data) { /* an error will be raised if _dynamic_form_id has not been set */
-        // like this: <form id="_ie_dynform" style="display: none;" action="//api-dev.babelroom.com/v1/_dynform"></form>
+        // like this: <form id="_ie_dynform" style="display: none;" action="//api-dev.babelroom.com/api/v1/_dynform"></form>
         // and this: a.init({query_string:window.location.search, _dynamic_form_id:'_ie_dynform'});
         var frm = document.getElementById(this.options._dynamic_form_id);
         while (frm.hasChildNodes()) {   /* not really necessary if requests result in redirect, but cleaner, particularly in cases of error */
@@ -281,7 +282,7 @@
         }
 
     function _get_host(name) {
-        return this.config.hosts[name];
+        return this.hosts[name];
         }
 
     function _addStreamCredential(path, token, fn) {
@@ -314,7 +315,7 @@
             default:
                 return fn('bad args',null);
             }
-        return _call.call(this, 'GET', '/v1/'+model+'/'+id, null, function(e,d){
+        return _call.call(this, 'GET', '/api/v1/'+model+'/'+id, null, function(e,d){
             if (d && d.data) {          /* this is one way of doing this, not sure it is the right way yet */
                 var copy = _orm_shallow_copy(d.data);
                 copy._ = {id: id, model: model, orig: d.data}
@@ -327,7 +328,7 @@
 /* where is this used? -- depreciate
     function _save(model, id, arg, fn) {
 // TODO --- what about when PUT isn't supported???, i.e. POST??? tmp.
-        return _call.call(this, 'PUT', '/v1/'+model+'/'+id, arg, fn);
+        return _call.call(this, 'PUT', '/api/v1/'+model+'/'+id, arg, fn);
         }
 */
     function _update(obj, fn) {
@@ -347,7 +348,7 @@
         if (!found)
             return fn(null,{});
         else
-            return _call.call(this, 'PUT', '/v1/'+obj._.model+'/'+obj._.id, to_save, function(e,d){
+            return _call.call(this, 'PUT', '/api/v1/'+obj._.model+'/'+obj._.id, to_save, function(e,d){
                 if (!e && d) obj._.orig = _orm_shallow_copy(obj);
                 fn(e,d);
                 });
@@ -358,7 +359,8 @@
         /* this next line is practically a work of art .. but unnecessary here
         var subdomain = src_of_this_src.match(/^(?:http:|https:)\/\/([a-z0-9]+(?:-[a-z0-9]+)*)(\.[a-z0-9]+(-[a-z0-9]+)*)/i); */
         var subdomain = src_of_this_src.match(/^(?:http:|https:)\/\/([a-z0-9]+(?:-[a-z0-9]+)*)\.babelroom.com\//i);
-        this.config = (subdomain && subdomain[1].match('dev')) ? config_map.dev : config_map.prod;
+        var _config = (subdomain && subdomain[1].match('dev')) ? config_map.dev : config_map.prod;
+        var hosts = null;
         this.options = {
             /* defaults */
             streamFactory: window.BR.SIO
@@ -376,12 +378,17 @@
                 if (args.hasOwnProperty(key)) {
                     var val = args[key];
                     switch(key) {
-                        case 'env': this.config = config_map[val]; break;
+                        case 'env': _config = config_map[val]; break;
+                        case 'hosts': hosts = val; break;  /* either a hash of alternate hosts, or a string specifying a single host to override them all */
                         default:
                             this.options[key] = val;
                     }
                 }
             }
+        this.hosts = {};
+        for(var i in _config.hosts)
+            if (_config.hosts.hasOwnProperty(i))
+                this.hosts[i] = (hosts!==null) ? (typeof(hosts)==='object'? (typeof(hosts[i])!=="undefined"?hosts[i]:_config.hosts[i]) :hosts) : _config.hosts[i];
         };
 
     /* return static data */
@@ -407,21 +414,21 @@
     /* API calls which may set cookies and redirect */
     API.prototype.login = function(data, options) {
         options = _canonify_cookie_call_options(options);
-        return _cookie_call.call(this, 'POST', '/v1/login', data, options, function(e,d){
+        return _cookie_call.call(this, 'POST', '/api/v1/login', data, options, function(e,d){
             _cookie_call_response(e || !d, e, options);     /* intentional: !e == login failed, else error logging in */
             });
         }
 
     API.prototype.logout = function(options) {
         options = _canonify_cookie_call_options(options);
-        return _cookie_call.call(this, 'DELETE', '/v1/login', null, options, function(e,d){
+        return _cookie_call.call(this, 'DELETE', '/api/v1/login', null, options, function(e,d){
             _cookie_call_response(e, e, options);
             });
         }
 
     API.prototype.addSelf = function(path, data, options) {
         options = _canonify_cookie_call_options(options);
-        return _cookie_call.call(this, 'POST', '/v1/add_self'+path, data, options, function(e,d){
+        return _cookie_call.call(this, 'POST', '/api/v1/add_self'+path, data, options, function(e,d){
             _cookie_call_response(e || !d, e || 'Missing response data', options);  /* should always return something in d on success */
             });
         }
@@ -430,12 +437,12 @@
 
     /* regular API calls */
     API.prototype.currentUser = function(fn) {
-        return _call.call(this, 'GET', '/v1/login', null, function(e,d){fn(e,d?d.user:null);});
+        return _call.call(this, 'GET', '/api/v1/login', null, function(e,d){fn(e,d?d.user:null);});
         }
 
     API.prototype.addParticipant = function(path, data, fn) {
-        //return _call.call(this, 'POST', '/v1/add_participant'+path, data, function(e,d){fn(e,d?d.user:null);});
-        return _call.call(this, 'POST', '/v1/add_participant'+path, data, fn);
+        //return _call.call(this, 'POST', '/api/v1/add_participant'+path, data, function(e,d){fn(e,d?d.user:null);});
+        return _call.call(this, 'POST', '/api/v1/add_participant'+path, data, fn);
         }
 
     API.prototype.users = function(arg,fn) { return _model.call(this, "users", arg, fn); }             /* still figuring this */
@@ -443,7 +450,7 @@
     API.prototype.conferences = function(arg,fn) { return _model.call(this, "conferences", arg, fn); }
 
     API.prototype._aq = function(data, fn) {            /* 2depreciate */
-        return _call.call(this, 'POST', '/v1/_aq', data, fn);
+        return _call.call(this, 'POST', '/api/v1/_aq', data, fn);
         }
 
     /* --- */

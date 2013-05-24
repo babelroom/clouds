@@ -41,7 +41,7 @@ var BRWidgets = {
         BROverlays.generic({
             content: function(id) {
                 //var url = '/ws_js/fileuploader/index.html?url='
-                var url = '/v1/c/ws_js/fileuploader/index.html?url='
+                var url = '/cdn/v1/c/ws_js/fileuploader/index.html?url='
                     + escape(BR.api.v1.get_host('myapi')+'/plugin/0/upload.js')
                     + '&ts=' + new Date().getTime()
                     + '&conference_id=' + BR.room.context.conference_id
@@ -507,7 +507,7 @@ console.log( $j('#tile',sel) );
                     //bgcolor: '#282828'
                     };
                 var attributes = {};
-                swfobject.embedSWF( BR.api.v1.get_host('cdn') + "/v1/c/flash/" + (broadcast ? "brBroadcast.swf" : "brViewer.swf"),
+                swfobject.embedSWF( BR.api.v1.get_host('cdn') + "/cdn/v1/c/flash/" + (broadcast ? "brBroadcast.swf" : "brViewer.swf"),
                     //flash_id, "214", "160", "8.0.0", "expressInstall.swf", flashvars, params, attributes);  /* returns 'undefined' */
                     flash_id, "100%", "100%", "8.0.0", "expressInstall.swf", flashvars, params, attributes);  /* returns 'undefined' */
                 if (broadcast)
@@ -1526,7 +1526,7 @@ can't operate on individual connections as the last one will always overwrite...
                     case 'slideshow_pages':
                         switch(h.value) {
                             case undefined: tmp = '???'; break;
-                            case '-1': tmp = '<img src="/v1/c/img/arrows_spinner.gif" alt="Loading...">'; break;
+                            case '-1': tmp = '<img src="/cdn/v1/c/img/arrows_spinner.gif" alt="Loading...">'; break;
                             case '0': tmp = '<em>None</em>'; break;
                             default: tmp = h.value;
                             };
@@ -1579,7 +1579,7 @@ can't operate on individual connections as the last one will always overwrite...
             function remove(token) { jQuery('#'+id+'_'+token+'_line').remove(); }
             function newLine(token, state, full_number, sec) {
                 modified();
-//                var html = '<div id="'+id+'_'+token+'_line"><span id="'+id+'_'+token+'_spinner"><img src="/v1/c/img/arrows_spinner.gif" alt="" /></span>\
+//                var html = '<div id="'+id+'_'+token+'_line"><span id="'+id+'_'+token+'_spinner"><img src="/cdn/v1/c/img/arrows_spinner.gif" alt="" /></span>\
 //<span id="'+id+'_'+token+'_status"></span><button id="'+id+'_'+token+'_hup">Cancel</button></div><div style="clear:both;"></div>';
                 var html = '<div id="'+id+'_'+token+'_line">\
 <button id="'+id+'_'+token+'_hup" title="Hangup"><i class="icon icon-remove-sign" stle="color: red;"></i></button>\

@@ -17,7 +17,7 @@ var BRUtils = {
             });
 /*
         var result = jQuery.ajax({
-            url: BR.api.v1.get_host('api') + "/v1/aq",
+            url: BR.api.v1.get_host('api') + "/api/v1/aq",
             type: "POST",
 /*            contentType: 'application/json; charset=UTF-8', -- leave it urlencoded *./
             data: { act: action, args: args, auth: BR.room.context.authen },

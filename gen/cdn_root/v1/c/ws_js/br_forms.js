@@ -210,8 +210,8 @@ var BRForms = {
             nd = $('<label id="'+field.id+'_info"></label>').appendTo($(field).parent());
             return nd;
             }
-        var err_html = function(msg) { return '<img src="'+BR.api.v1.get_host('cdn')+'/v1/c/img/x-issue.png" alt="" border="0"> <span class="val_err">'+msg+'</span>'; }
-        var ok_html = function(msg) { return '<img src="'+BR.api.v1.get_host('cdn')+'/v1/c/img/check.png" alt="" border="0">'+msg; }
+        var err_html = function(msg) { return '<img src="'+BR.api.v1.get_host('cdn')+'/cdn/v1/c/img/x-issue.png" alt="" border="0"> <span class="val_err">'+msg+'</span>'; }
+        var ok_html = function(msg) { return '<img src="'+BR.api.v1.get_host('cdn')+'/cdn/v1/c/img/check.png" alt="" border="0">'+msg; }
         var h = $.extend({
             clearInfo: function(field){ foa(field).html(''); $(field).data('cs_invalid',false); },
             errInfo: function(field,msg){ foa(field).html(err_html(msg)).addClass('error'); },

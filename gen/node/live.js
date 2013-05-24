@@ -168,21 +168,13 @@ https://github.com/LearnBoost/socket.io/wiki/Authorizing
 io.configure(function (){
   io.set('authorization', function (handshakeData, callback) {
 */
+        io.set('resource', '/sio');
         /* need this for IE at least */
         io.set('transports', [ 'websocket' , 'flashsocket' , 'htmlfile' , 'xhr-polling' , 'jsonp-polling' ]);
 
-        //io.enable('browser client minification');
         var _this = this, es = this.config.estream, api_host = this.config.api;
         io.sockets.on('connection', function (socket) {
-// interesting ...
         console.log('UA',socket.handshake.headers['user-agent']);
-/*
-            socket.on('message', function(data){    /* attach *./
-                var cid = parseInt(data), admin = get(socket, 'access_'+cid);
-                if (typeof(admin)!=='undefined')
-                    estream_get(es, socket, data, function(){});
-                });
-*/
             socket.on('br_attach', function (data,fn) {
                 var cid = parseInt(data||0), admin = get(socket, 'access_'+cid);
                 if (typeof(admin)!=='undefined')
@@ -200,12 +192,9 @@ io.configure(function (){
                 /* TODO -- marshall the login_tokin to the api call: data.token */
                 var data = {
                     verb: 'GET',
-                    path: '/v1/invitation'+data.path,
+                    path: '/api/v1/invitation'+data.path,
                     };
-//console.log(data);
                 br_api_call(api_host, socket, data, function(e,d){
-//console.log(e,d);
-//fn({data:{sent_data:data,handshake:socket.handshake}});
                     if (e || !d) return fn(null);
                     try { d = JSON.parse(d); }
                     catch(e) {
@@ -213,31 +202,10 @@ io.configure(function (){
                         fn(null);
                         }
                     if (!d.data) return fn(null);
-//console.log(d);
                     set(socket, 'access_'+d.data.conference_estream_id, d.data.is_host);
                     fn(d);
                     });
                 });
-/*
-            socket.on('br_old_put', function (data) {
-                try { data = JSON.parse(data); }
-                catch(e) {
-                    console.log('JSON.parse exception: ['+e+'], ['+data+']');
-                    return ;
-                    }
-                var admin = undefined;
-                if (data && data.queue && /(\d+)$/.exec(data.queue))
-                    admin = get(socket, 'access_'+RegExp.$1);
-                if (typeof(admin)!=='undefined') {
-                    try { estream_put(es, socket, data); }
-                    catch(e) {
-                        console.log('estream exception: ['+e+'], ['+data+']');
-                        }
-                    }
-                else
-                    console.log('(old) put request access denied',data);
-                });
-*/
             socket.on('br_put', function (data) {
                 try { data = JSON.parse(data); }
                 catch(e) {
@@ -248,11 +216,9 @@ io.configure(function (){
                 if (!data || !data.cid || typeof(data.args)==="undefined" || !data.template || !(map=put_templates[data.template]))
                     return console.log('br_put: invalid input',data);
                 var admin = get(socket, 'access_'+data.cid);
-//console.log('access',admin);
                 if (typeof(admin)!=='undefined' && (map.nonpriv || admin===true)) {
                     data.queue = ((map.q==='fs_') ? '/fs/_' : ('/'+map.q+'/'+data.cid));
                     data.data = map.fmt(data);
-//console.log(data);
                     try { estream_put(es, socket, data); }
                     catch(e) {
                         console.log('estream exception: ['+e+'], ['+data+']');
@@ -284,6 +250,7 @@ io.configure(function (){
                 }
         },
 
+    addUseHandlers: function(_, _, _) {;},
     addHandlers: function(_, app, _) {
         this.listen();
 /*        app.use(function(req, res, next){

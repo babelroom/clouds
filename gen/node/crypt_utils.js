@@ -17,21 +17,6 @@ function do_crypt(val, secret, enc)
 
 CryptUtils.prototype = {
     encrypt: function(val) {
-/*
- frankly couldn't get this to work properly in the time available
-        var missing = 32-(val.length);
-console.log(1,val);
-console.log(2,missing);
-        if (missing>0) {
-            //val += crypto.randomBytes(Math.floor(missing/2)+1).toString(16);
-            buf = crypto.randomBytes(Math.floor(missing/2)+1);
-            val += buf.toString('hex');
-            }
-        val = val.substr(0,32);
-console.log(3,val);
-console.log('   01234567890123456789012345678901234567890');
-console.log(4,val);
-*/
         return do_crypt(val, this.secret, true);
     },
     

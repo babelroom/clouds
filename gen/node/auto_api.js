@@ -152,25 +152,11 @@ function db_create(f)
     cols.push('NOW()');
     cols.push('NOW()');
     sql += cols.join(',')+")";
-//console.log(sql);
     f.self.db.query(sql, vals, function(err, rows, fields){
         if (err)
             return he.db_error(f.res, err, sql);
         if (!rows.affectedRows)
             return he.internal_server_error(f.res);
-/* ref:
-console.log(rows);
-{ fieldCount: 0,
-  affectedRows: 1,
-  insertId: 37,
-  serverStatus: 2,
-  warningCount: 0,
-  message: '',
-  changedRows: 0 }
-console.log(fields);
-undefined
-*/
-//        var data = {id: rows.insertId};
         f.res.setHeader('Location', '/' + f.rest.model + '/' + rows.insertId);  // need absolute?
         f.res.statusCode = 201;     /* created */
         f.res.send(JSON.stringify({data: {id: rows.insertId}}));
@@ -255,7 +241,6 @@ var _default_rgx_key = {verb: 1, model: 2, id: 3};
 for(var r in routes)
     for(var idx in routes[r])
         if (routes[r].hasOwnProperty(idx)) {
-//console.log(idx,routes[r][idx]);
             if (idx==="rgx_key" || idx==="permfn" || idx==="dbfn")
                 routes[r][idx] = eval(routes[r][idx]);
             } 
