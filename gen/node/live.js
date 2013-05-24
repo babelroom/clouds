@@ -1,8 +1,4 @@
 
-/*
-NEEEEEEEEEEEEEEEEEEEEEEEEED to error handle and catch exceptions ... getting there ...
-*/
-
 var http = require('http')
     ;
 
@@ -20,7 +16,6 @@ var put_templates = {
     conferenceIdsAction: {q: 'fs', fmt: function(d){return 'M'+d.args[0]+' bgapi conference '+d.cid+' '+d.args[1];}, nonpriv: true},   /*temporarily allowed by non-admins (mute)*/
     gue: {q: 'conference', fmt: function(d){return "Kgue-"+d.args.idx+d.args.attr+d.args.value;}, nonpriv: true},
 
-    /* don't ask TODO tmp */
     dialCmd: {q: 'fs_', fmt: function(d){return d.args;}, nonpriv: true},  /* scary */
 };
 
@@ -33,7 +28,6 @@ var Live = function(config) {
 /* --- */
 function get(socket, name)
 {
-    /* socket.set('estreamRequest',value, functio CB??) = req; tmp TODO -- use this instead? -- whats the deal with the cb? */
     return socket._br_data ? socket._br_data[name] : undefined;
 }
 function set(socket, name, value)
@@ -74,14 +68,12 @@ function estream_get(es, socket, url_suffix, fn)
 /* --- */
 function estream_put(es, socket, data)
 {
-//console.log(data);
     var options = {
         hostname: es.hostname,
         port: es.port,
         path: data.queue,
         method: 'PUT',
         headers: {
-            //'Content-Length': data.data.length,    -- no, will truncate non-ascii chars in utf8 string
             'Content-Length': Buffer.byteLength(data.data), // yes
             'Connection': 'close'
             }
@@ -104,12 +96,10 @@ function estream_put(es, socket, data)
 function br_api_call(api_host, socket, data, fn)
 {
     if (false /* not right ---- data.data && typeof(data.data)!=='string'*/) {
-        /* TMP todo .. more sanity check data from client .. */
         console.log('API proxy request failed sanity check', data);
         return fn(null);
         }
     var requestHeaders = {
-        //'Cookie': data.cookie,
         'Cookie': socket.handshake.headers.cookie,
         }
     var data2Send = '';
