@@ -4,7 +4,7 @@ print F <<__EOT__
 /* --- */
 var config = {
     groups: [{
-        apps: ['live','api','live'],
+        apps: ['api','mini','live'],    /* leave live last as it (socket.io) serves '/' */
         servers: [{
                 protocol: 'https',
                 bindaddr: '$iface',
