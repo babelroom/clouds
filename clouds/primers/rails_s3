@@ -1,0 +1,9 @@
+open F, ">$R->{file}" or die;
+print F <<__EOT__
+access_key_id: <%= ENV['AWS_ACCESS_KEY_ID'] || '$R->{key_id}' %>
+secret_access_key: <%= ENV['AWS_SECRET_ACCESS_KEY'] || '$R->{key}' %>
+__EOT__
+;
+close F;
+1
+
