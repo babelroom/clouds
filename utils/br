@@ -155,6 +155,7 @@ my_rails_environment: {script: "my_rails_environment", host: "", cookie_key: "$m
 mongrel_my: {script: "mongrel_rc", file: "/etc/init.d/mongrel_my", path: "/home/br/gits/clouds/gen/rails/my", port: 3001, label: "my", rails_env: "production"}, deps: ['my_rails_session_store','my_rails_cookie_verification_secret','my_rails_s3','my_rails_environment']}
 __EOT__
 );
+    $start .= "estream ";
     add(red5, red5, 'prime_red5: {src: "red5_rc", file: "/etc/init.d/red5", mode: "0755"}');
     add(netops, netops,<<__EOT__
 netops_db_syscfg: {script: "netops_db_syscfg", file: "/tmp/br/netops_db_syscfg", my_host: "", mode: "0600", s3_key_id: "$misc{s3_key_id}", s3_key: "$misc{s3_key}", gmail_user: "", gmail_password: "", recurly_user: "", recurly_password: ""}

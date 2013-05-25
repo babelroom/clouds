@@ -2,6 +2,8 @@
 
 echo 'MySQL (client) / MySQL devel'
 
+test -x /usr/bin/mysql && echo 'Already installed!' && exit 0;
+
 ./setup_openssl_devel.sh || exit -1
 
 REQUIRED_PACKAGES="\
