@@ -286,6 +286,7 @@ var BRToolbar = {
 <p>Support information is available from the <a href="'+BR.api.v1.get_host('home')+'/faq/" style="font-weight: bold; color: black;">FAQ</a></p>\
 </div>';
                 $j('#'+id+'_error',pdlg).html(c).show();
+                $j('#'+id+'_contents',pdlg).find('i.icon-comments').hide(); /* hide icon if it's still visible (i.e. no content has been added) */
                 }
             else
                 $j('#'+id+'_error',pdlg).html('').hide();
