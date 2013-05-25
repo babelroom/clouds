@@ -39,7 +39,7 @@
 #    state :active
 
 
-    state :inactive, :default => true
+    state :active, :default => true
 
     create :signup, :available_to => "Guest",
            :params => [:name, :last_name, :email_address, :timezone, :company, :password, :password_confirmation],
