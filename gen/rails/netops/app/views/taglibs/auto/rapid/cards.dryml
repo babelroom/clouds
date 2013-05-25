@@ -1,0 +1,141 @@
+<!-- AUTOMATICALLY GENERATED FILE - DO NOT EDIT -->
+
+<def tag="card" for="Call">
+  <card class="call" param="default" merge>
+    <header: param>
+      <h4 param="heading"><name/></h4>
+    </header:>
+  </card>
+</def>
+
+<def tag="card" for="Colmodel">
+  <card class="colmodel" param="default" merge>
+    <header: param>
+      <h4 param="heading"><name/></h4>
+    </header:>
+  </card>
+</def>
+
+<def tag="card" for="Conference">
+  <card class="conference" param="default" merge>
+    <header: param>
+      <h4 param="heading"><name/></h4>
+    </header:>
+  </card>
+</def>
+
+<def tag="card" for="Interconnect">
+  <card class="interconnect" param="default" merge>
+    <header: param>
+      <h4 param="heading"><a><name/></a></h4>
+    </header:>
+  </card>
+</def>
+
+<def tag="card" for="Job">
+  <card class="job" param="default" merge>
+    <header: param>
+      <h4 param="heading"><name/></h4>
+    </header:>
+  </card>
+</def>
+
+<def tag="card" for="JobTrigger">
+  <card class="job-trigger" param="default" merge>
+    <header: param>
+      <h4 param="heading"><a><name/></a></h4>
+    </header:>
+  </card>
+</def>
+
+<def tag="card" for="Log">
+  <card class="log" param="default" merge>
+    <header: param>
+      <h4 param="heading"><name/></h4>
+    </header:>
+  </card>
+</def>
+
+<def tag="card" for="Person">
+  <card class="person" param="default" merge>
+    <header: param>
+      <h4 param="heading"><name/></h4>
+    </header:>
+  </card>
+</def>
+
+<def tag="card" for="Pin">
+  <card class="pin" param="default" merge>
+    <header: param>
+      <h4 param="heading"><name/></h4>
+    </header:>
+  </card>
+</def>
+
+<def tag="card" for="Script">
+  <card class="script" param="default" merge>
+    <header: param>
+      <h4 param="heading"><a><name/></a></h4>
+    </header:>
+  </card>
+</def>
+
+<def tag="card" for="ScriptFormat">
+  <card class="script-format" param="default" merge>
+    <header: param>
+      <h4 param="heading"><name/></h4>
+    </header:>
+  </card>
+</def>
+
+<def tag="card" for="Server">
+  <card class="server" param="default" merge>
+    <header: param>
+      <h4 param="heading"><name/></h4>
+    </header:>
+  </card>
+</def>
+
+<def tag="card" for="ServerService">
+  <card class="server-service" param="default" merge>
+    <header: param>
+      <h4 param="heading"><name/></h4>
+    </header:>
+  </card>
+</def>
+
+<def tag="card" for="Service">
+  <card class="service" param="default" merge>
+    <header: param>
+      <h4 param="heading"><a><name/></a></h4>
+    </header:>
+  </card>
+</def>
+
+<def tag="card" for="ServiceMetric">
+  <card class="service-metric" param="default" merge>
+    <header: param>
+      <h4 param="heading"><a><name/></a></h4>
+    </header:>
+  </card>
+</def>
+
+<def tag="card" for="System">
+  <card class="system" param="default" merge>
+    <header: param>
+      <h4 param="heading"><name/></h4>
+    </header:>
+    <body: param>
+      <view:description param="description"/>
+    </body:>
+  </card>
+</def>
+
+<def tag="card" for="User">
+  <card class="user" param="default" merge>
+    <header: param>
+      <h4 param="heading"><a><name/></a></h4>
+    </header:>
+  </card>
+</def>
+

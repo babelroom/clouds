@@ -1,0 +1,51 @@
+
+html, body { background: white }
+
+.page-header ul {float:left; zoom: 0; overflow: hidden }
+.account-nav { margin-top:0px; background:#222222; float:right }
+ul.account-nav { float:right }
+
+.page-header { color:#222222; background: url(../images/br-25.png) no-repeat #ffffff }
+
+.page-header .navigation.main-nav a {
+  background:#222222
+}
+.page-header .navigation.main-nav li.current a {
+  color: #222222;
+  background:#cccccc;
+  border-top: 0px solid white;
+  border-left: 0px solid white;
+  border-right: 0px solid white;
+}
+
+.page-header { margin-top:0px; margin-bottom:10px; padding: 0px 0px 0px;}
+.page-header h1 {
+    margin: 0; padding:21px 115px 0px;
+    font-family: "Arial Black", Tahoma, Arial, sans-serif; font-size: 11px; letter-spacing: -0.7pt; font-weight: bold;
+}
+.page-header li {float: left; margin-left: 0; list-style: none;}
+
+.page-header .navigation a,
+.page-header .navigation a:hover
+ {border: none; color:white; background: none;}
+.page-header .navigation.main-nav a:hover {background: #888888;}
+.page-header h1 a,
+.page-header h1 a:hover
+ {border: none; color:#222222; background: none;}
+
+.main-nav {padding: 0 0px;}
+.main-nav li {margin-right: 1px;}
+
+.section.content {background-color: transparent;}
+
+.page-header .main-nav a {
+    display: block;
+    padding: 4px 7px 7px;
+    font-size: 11px;
+}
+
+select.dev-user-changer 
+{
+    opacity: 0.5;
+}
+

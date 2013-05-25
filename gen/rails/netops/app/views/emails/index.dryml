@@ -1,0 +1,41 @@
+
+<page title="Emails">
+  <append-scripts:>
+    <jqgrid-includes/>
+  </append-scripts:>
+  <body:/>
+  <content:>
+
+    <% this.member_class = Email %>
+    <cs-jqgrid id="mails"
+        caption="Emails"
+        rownum="15"
+        pager
+        autowidth
+        add 
+        addoptions="closeAfterAdd:true"
+        edit
+        editoptions="closeAfterEdit:true"
+        colnames="'Email','Template','Kv Pairs','Content','Progress','Final Status','Person','System','Updated At'"
+        colmodel="   {name:'email'}\
+                    ,{name:'template'}\
+                    ,{name:'kv_pairs'}\
+                    ,{name:'content',editable:false,edittype:'text',editoptions:{rows:'4',cols:'20'}}\
+                    ,{name:'progress'}\
+                    ,{name:'final_status',editable:true}\
+                    ,{name:'person'}\
+                    ,{name:'system'}\
+                    ,{name:'updated_at'}"
+        forcefit
+        noscroll
+        rowlist="5,10,15"
+        viewrecords
+        delete
+        mymodel="Email"
+        sortname="updated_at"
+        sortorder="desc"
+        refresh/>
+
+  </content:>  
+</page>
+

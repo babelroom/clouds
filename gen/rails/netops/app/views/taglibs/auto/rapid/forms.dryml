@@ -1,0 +1,155 @@
+<!-- AUTOMATICALLY GENERATED FILE - DO NOT EDIT -->
+
+<def tag="form" for="Conference">
+  <form merge param="default">
+    <error-messages param/>
+    <field-list fields="name, configuration, system" param/>
+    <div param="actions">
+      <submit label="#{ht 'conferences.actions.save', :default=>['Save']}" param/><or-cancel param="cancel"/>
+    </div>
+  </form>
+</def>
+
+
+
+<def tag="form" for="Interconnect">
+  <form merge param="default">
+    <error-messages param/>
+    <field-list fields="name, did, config, notes" param/>
+    <div param="actions">
+      <submit label="#{ht 'interconnects.actions.save', :default=>['Save']}" param/><or-cancel param="cancel"/>
+    </div>
+  </form>
+</def>
+
+
+
+<def tag="form" for="JobTrigger">
+  <form merge param="default">
+    <error-messages param/>
+    <field-list fields="name, interval_ms, description" param/>
+    <div param="actions">
+      <submit label="#{ht 'job_triggers.actions.save', :default=>['Save']}" param/><or-cancel param="cancel"/>
+    </div>
+  </form>
+</def>
+
+
+
+<def tag="form" for="Job">
+  <form merge param="default">
+    <error-messages param/>
+    <field-list fields="name, script_name, pid, parameters, started, ended, status, user" param/>
+    <div param="actions">
+      <submit label="#{ht 'jobs.actions.save', :default=>['Save']}" param/><or-cancel param="cancel"/>
+    </div>
+  </form>
+</def>
+
+
+
+<def tag="form" for="Log">
+  <form merge param="default">
+    <error-messages param/>
+    <field-list fields="name, table, id_in_table, content_type, path" param/>
+    <div param="actions">
+      <submit label="#{ht 'logs.actions.save', :default=>['Save']}" param/><or-cancel param="cancel"/>
+    </div>
+  </form>
+</def>
+
+
+
+<def tag="form" for="ScriptFormat">
+  <form merge param="default">
+    <error-messages param/>
+    <field-list fields="name, view, validation, notes" param/>
+    <div param="actions">
+      <submit label="#{ht 'script_formats.actions.save', :default=>['Save']}" param/><or-cancel param="cancel"/>
+    </div>
+  </form>
+</def>
+
+
+
+<def tag="form" for="Script">
+  <form merge param="default">
+    <error-messages param/>
+    <field-list fields="name, version, is_deleted, description, startup, script_format" param/>
+    <div param="actions">
+      <submit label="#{ht 'scripts.actions.save', :default=>['Save']}" param/><or-cancel param="cancel"/>
+    </div>
+  </form>
+</def>
+
+
+
+<def tag="form" for="Server">
+  <form merge param="default">
+    <error-messages param/>
+    <field-list fields="name, ipv4, cluster, group" param/>
+    <div param="actions">
+      <submit label="#{ht 'servers.actions.save', :default=>['Save']}" param/><or-cancel param="cancel"/>
+    </div>
+  </form>
+</def>
+
+
+
+<def tag="form" for="ServiceMetric">
+  <form merge param="default">
+    <error-messages param/>
+    <field-list fields="name, value, service" param/>
+    <div param="actions">
+      <submit label="#{ht 'service_metrics.actions.save', :default=>['Save']}" param/><or-cancel param="cancel"/>
+    </div>
+  </form>
+</def>
+
+
+
+<def tag="form" for="Service">
+  <form merge param="default">
+    <error-messages param/>
+    <field-list fields="name" param/>
+    <div param="actions">
+      <submit label="#{ht 'services.actions.save', :default=>['Save']}" param/><or-cancel param="cancel"/>
+    </div>
+  </form>
+</def>
+
+
+
+<def tag="form" for="User">
+  <form merge param="default">
+    <error-messages param/>
+    <field-list fields="name, email_address, administrator, state" param/>
+    <div param="actions">
+      <submit label="#{ht 'users.actions.save', :default=>['Save']}" param/><or-cancel param="cancel"/>
+    </div>
+  </form>
+</def>
+
+<def tag="signup-form" polymorphic/>
+<def tag="signup-form" for="User">
+  <form lifecycle="signup" merge param="default">
+    <error-messages param/>
+    <field-list fields="name, email_address, password, password_confirmation" param/>
+    <div param="actions">
+      <submit label="#{ht 'users.actions.signup', :default=>['Signup']}" param/><or-cancel param="cancel"/>
+    </div>
+  </form>
+</def>
+
+<def tag="reset-password-form" polymorphic/>
+<def tag="reset-password-form" for="User">
+  <form lifecycle="reset_password" merge param="default">
+    <error-messages param/>
+    <input type="hidden" name="key" value="&this.lifecycle.provided_key" if="&this.lifecycle.provided_key"/>
+    <field-list fields="password, password_confirmation" param/>
+    <div param="actions">
+      <submit label="#{ht 'users.actions.reset_password', :default=>['Reset Password']}" param/><or-cancel param="cancel"/>
+    </div>
+  </form>
+</def>
+

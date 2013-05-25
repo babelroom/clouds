@@ -1,0 +1,109 @@
+
+<page title="People + Conferences + Calls">
+  <append-scripts:>
+    <jqgrid-includes/>
+  </append-scripts:>
+  <body:/>
+  <content:>
+
+<% this.member_class = Person %>
+    <cs-jqgrid id="people"
+        caption="People (1 distinct entry per conference invitee/possible participant, including owner)"
+        rownum="100"
+        colnames="'Id','Name','Dialout','Email','PIN','Dialin','Configuration','Created','Updated','Conference Id','Deleted?','Deployed','FS Server','Origin id','System Id'"
+        colmodel="   {name:'id',index:'id',editable:true}\
+                    ,{name:'name',index:'name',editable:true}\
+                    ,{name:'dialout',index:'dialout',editable:true}\
+                    ,{name:'email',index:'email',editable:true}\
+                    ,{name:'pin',index:'pin',editable:true}\
+                    ,{name:'dialin',index:'dialin',editable:true}\
+                    ,{name:'configuration',index:'configuration',editable:true}\
+                    ,{name:'created_at',index:'created_at',editable:true}\
+                    ,{name:'updated_at',index:'updated_at',editable:true}\
+                    ,{name:'configuration_id',index:'configuration_id',editable:true}\
+                    ,{name:'is_deleted',index:'is_deleted',editable:true}\
+                    ,{name:'deployed_at',index:'deployed_at',editable:true}\
+                    ,{name:'fs_server',index:'fs_server',editable:true}\
+                    ,{name:'origin_id',index:'origin_id',editable:true}\
+                    ,{name:'system_id',index:'system_id',editable:true}"
+        edit
+        editoptions="closeAfterEdit:true"
+        pager
+        autowidth
+        forcefit
+        rowlist="100,1000,5000"
+        viewrecords
+        hiddengrid="true"
+        mymodel="Person"
+        filter="is_deleted IS NULL"
+        refresh/>
+<!--
+        edit
+why?
+        delete
+-->
+
+<br/>
+
+<%
+#        edit
+#        colnames="'Name','System','Configuration(internal)'"
+#        colmodel="   {name:'name',index:'name',editable:true}\
+#                    ,{name:'system.name',index:'system.name',editable:false}\
+#                    ,{name:'configuration',index:'configuration'}"
+#        editoptions="closeAfterEdit:true"
+#        add
+#        addoptions="closeAfterAdd:true"
+%>
+<% this.member_class = Conference %>
+    <cs-jqgrid id="conferences"
+        rownumbers
+        caption="Conferences"
+        rownum="15"
+        pager
+        autowidth
+        forcefit
+        noscroll
+        rowlist="100,500,1000"
+        viewrecords
+        mymodel="Conference"
+        filter="is_deleted IS NULL"
+        refresh/>
+<!--
+    edit
+want it, but too dangerous
+    delete
+-->
+
+<br/>
+
+<% this.member_class = Call %>
+    <cs-jqgrid id="calls"
+        caption="Calls"
+        rownum="15"
+        colnames="'Id','uuid','meta data','conference','person','started','ended','created','updated'"
+        colmodel="   {name:'id',index:'id'}\
+                    ,{name:'uuid',editable:true}\
+                    ,{name:'meta_data',editable:true}\
+                    ,{name:'conference_id',editable:true}\
+                    ,{name:'person_id',editable:true}\
+                    ,{name:'started',editable:true}\
+                    ,{name:'ended',editable:true}\
+                    ,{name:'created_at',editable:true}\
+                    ,{name:'updated_at',editable:true}"
+        pager
+        sortname="id"
+        sortorder="desc"
+        autowidth
+        forcefit
+        noscroll
+        rowlist="100,500,1000"
+        viewrecords
+        edit delete
+        hiddengrid="true"
+        mymodel="Call"
+        refresh/>
+
+  </content:>  
+</page>
+

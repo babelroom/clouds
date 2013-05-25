@@ -1,0 +1,2 @@
+module ScriptFormatsHelper
+end

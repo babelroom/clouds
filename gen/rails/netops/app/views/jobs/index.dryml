@@ -1,0 +1,58 @@
+
+<page title="Jobs">
+  <append-scripts:>
+    <jqgrid-includes/>
+  </append-scripts:>
+  <body:/>
+  <content:>
+
+    <% this.member_class = Job %>
+
+    <cs-jqgrid id="jobs-active"
+        caption="Active Jobs"
+        rownum="15"
+        pager
+        autowidth
+        colnames="'Name','Script Name','Pid','Started','User'"
+        colmodel="   {name:'name',index:'name'}\
+                    ,{name:'script_name',index:'script_name'}\
+                    ,{name:'pid',index:'pid'}\
+                    ,{name:'started',index:'started'}\
+                    ,{name:'user',index:'user'}"
+        forcefit
+        noscroll
+        rowlist="15,30,45"
+        viewrecords
+        mymodel="Job"
+        filter="ended IS NULL"
+        sortname="id"
+        sortorder="desc"
+        refresh/>
+
+    <br />
+    <cs-jqgrid id="jobs-completed"
+        caption="Completed Jobs"
+        rownum="500"
+        pager
+        autowidth
+        colnames="'Name','Script Name','Pid','Started','Ended','User'"
+        colmodel="   {name:'name',index:'name'}\
+                    ,{name:'script_name',index:'script_name'}\
+                    ,{name:'pid',index:'pid'}\
+                    ,{name:'started',index:'started'}\
+                    ,{name:'ended',index:'ended'}\
+                    ,{name:'user',index:'user'}"
+        forcefit
+        rowlist="500,1000,5000"
+        viewrecords
+        delete
+        hiddengrid="true"
+        mymodel="Job"
+        filter="ended IS NOT NULL"
+        sortname="ended"
+        sortorder="desc"
+        refresh/>
+
+  </content:>  
+</page>
+

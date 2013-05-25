@@ -1,0 +1,2 @@
+module JobTriggersHelper
+end

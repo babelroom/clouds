@@ -1,0 +1,33 @@
+
+<page title="Interconnections">
+  <append-scripts:>
+    <jqgrid-includes/>
+  </append-scripts:>
+  <body:/>
+  <content:>
+
+    <% this.member_class = Interconnect %>
+    <cs-jqgrid id="dids"
+        caption="DIDs"
+        rownum="15"
+        edit
+        colnames="'Name (business name)','DID (strict regex format)','Notes (e.g. reminders)','Configuration (NetOps internal flags)'"
+        colmodel="   {name:'name',index:'name',editable:true}\
+                    ,{name:'did',index:'did',editable:true}\
+                    ,{name:'notes',index:'notes',editable:true}\
+                    ,{name:'config',index:'config',editable:true}"
+        editoptions="closeAfterEdit:true"
+        add
+        addoptions="closeAfterAdd:true"
+        autowidth
+        pager
+        forcefit
+        noscroll
+        rowlist="5,10,15"
+        viewrecords
+        delete
+        refresh/>
+
+  </content:>  
+</page>
+

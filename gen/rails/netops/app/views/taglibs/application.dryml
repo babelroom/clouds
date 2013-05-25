@@ -1,0 +1,41 @@
+<include src="rapid" plugin="hobo"/>
+
+<include src="taglibs/cs-jqgrid"/>
+
+<include src="taglibs/auto/rapid/cards"/>
+<include src="taglibs/auto/rapid/pages"/>
+<include src="taglibs/auto/rapid/forms"/>
+
+<set-theme name="clean"/>
+
+<extend tag="page">
+  <old-page merge without-live-search>
+  </old-page>
+</extend>
+
+<def tag="app-name">Network Operations <%= $babelroom_environment %></def>
+
+<def tag="main-nav">
+  <navigation class="main-nav" merge-attrs param="default">
+    <nav-item href="#{base_url}/">Dashboard</nav-item>
+    <nav-item with="&Email"><ht key="emails.nav_item">Mailer</ht></nav-item>
+    <nav-item with="&System"><ht key="systems.nav_item">Systems</ht></nav-item>
+    <nav-item with="&Job"><ht key="jobs.nav_item">Jobs</ht></nav-item>
+    <nav-item with="&Script"><ht key="scripts.nav_item">Launch + Scripts</ht></nav-item>
+    <nav-item with="&Conference"><ht key="scripts.nav_item">People + Conferences + Calls</ht></nav-item>
+    <nav-item with="&Interconnect"><ht key="interconnects.nav_item">Interconnections</ht></nav-item>
+    <nav-item with="&ScriptFormat"><ht key="script_formats.nav_item">Setup</ht></nav-item>
+  </navigation>
+</def>
+
+<def tag="form" for="Job">
+  <form merge param="default">
+    <error-messages param/>
+    <field-list fields="name, script_name, parameters" param/>
+    <div param="actions">
+      <submit label="#{ht 'jobs.actions.save', :default=>['Save']}" param/><or-cancel param="cancel"/>
+    </div>
+  </form>
+</def>
+
+

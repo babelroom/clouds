@@ -1,0 +1,62 @@
+
+<page title="Launch + Scripts">
+  <append-scripts:>
+    <jqgrid-includes/>
+  </append-scripts:>
+  <body:/>
+  <content:>
+
+
+  <form action="/jobs/new">
+  Launch a Script (Create new Job): 
+    <select name="id">
+      <repeat>
+        <option value="<%= this.id.to_s %>"><%= this.name.to_s %> (<%= this.description.to_s %>)</option>
+      </repeat>
+    </select>
+    <input type="submit" value="Continue (specify job parameters) ..." />
+  </form>
+
+  <br />
+
+<!--
+        <collection>
+        </collection>
+          <submit: label="#{ht 'jobs.actions.create', :default=>['Create Job']}"/>
+                    ,{name:'startup', editable:true, edittype:'select',editoptions:{value: 'never:Never;one:One;manual:Manual' }}"
+-->
+
+    <% this.member_class = Script %>
+    <cs-jqgrid id="scripts"
+        caption="Scripts (Programs / Tasks / Reports / Job-Templates)"
+        rownum="15"
+        edit
+        colnames="'Name','Description','Startup'"
+        colmodel="   {name:'name',index:'name'}\
+                    ,{name:'description',editable:true}\
+                    ,{name:'startup', editable:true}"
+        editoptions="closeAfterEdit:true"
+        pager
+        autowidth
+        forcefit
+        noscroll
+        rowlist="5,10,15"
+        viewrecords
+        delete
+        mymodel="Script"
+        filter="is_deleted IS NULL"
+        refresh/>
+
+<!--
+        colnames="'Name','Script Name','Pid','Started','Ended','User'"
+        colmodel="   {name:'name',index:'name'}\
+                    ,{name:'script_name',index:'script_name'}\
+                    ,{name:'pid',index:'pid'}\
+                    ,{name:'started',index:'started'}\
+                    ,{name:'ended',index:'ended'}\
+                    ,{name:'user',index:'user'}"
+-->
+
+  </content:>  
+</page>
+

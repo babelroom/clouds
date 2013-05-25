@@ -1,0 +1,48 @@
+
+<new-page>
+  <append-scripts:>
+    <jqgrid-includes/>
+  </append-scripts:>
+    <body: class="new-page job"/>
+
+    <content:>
+<!--
+        <form>
+          <submit: label="#{ht 'jobs.actions.create', :default=>['Create Job']}"/>
+        </form>
+-->
+
+    <% this.member_class = Script %>
+    <cs-jqgrid id="scripts"
+        caption="Scripts"
+        rownum="15"
+        edit
+        colnames="'Name','Description','Startup'"
+        colmodel="   {name:'name',index:'name'}\
+                    ,{name:'description',editable:true}\
+                    ,{name:'startup', editable:true, edittype:'select',editoptions:{value: 'never:Never;one:One;manual:Manual' }}"
+        editoptions="closeAfterEdit:true"
+        pager
+        autowidth
+        forcefit
+        noscroll
+        rowlist="5,10,15"
+        viewrecords
+        delete
+        mymodel="Script"
+        refresh/>
+
+<!--
+        colnames="'Name','Script Name','Pid','Started','Ended','User'"
+        colmodel="   {name:'name',index:'name'}\
+                    ,{name:'script_name',index:'script_name'}\
+                    ,{name:'pid',index:'pid'}\
+                    ,{name:'started',index:'started'}\
+                    ,{name:'ended',index:'ended'}\
+                    ,{name:'user',index:'user'}"
+-->
+    </content:>
+
+
+</new-page>
+

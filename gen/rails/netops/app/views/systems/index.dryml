@@ -1,0 +1,61 @@
+
+<page title="Systems">
+  <append-scripts:>
+    <jqgrid-includes/>
+  </append-scripts:>
+  <body:/>
+  <content:>
+
+    <% this.member_class = System %>
+    <cs-jqgrid id="systems"
+        caption="Systems & Configuration"
+        rownum="15"
+        pager
+        add 
+        addoptions="closeAfterAdd:true"
+        edit
+        editoptions="closeAfterEdit:true"
+        colnames="'Id','Name','Type','Key','Access (Config/IP/DSN etc.)','Notes'"
+        colmodel="   {name:'id',index:'id',width:50,editable:false}\
+                    ,{name:'name',index:'name',width:100,editable:true}\
+                    ,{name:'system_type',width:100,editable:true,edittype:'text',editoptions:{rows:'4',cols:'20'}}\
+                    ,{name:'config_key',width:100,editable:true}\
+                    ,{name:'access',width:500,editable:true,edittype:'text',editoptions:{rows:'4',cols:'20'}}\
+                    ,{name:'notes',index:'notes',width:1,editable:true}"
+        forcefit
+        noscroll
+        rowlist="5,10,15"
+        viewrecords
+        delete
+        mymodel="System"
+        refresh/>
+<!--
+<% this.member_class = System %>
+    <cs-jqgrid id="systems"
+        edit
+        colnames="'Name','Description','Access (IP/DSN etc.)','Configuration'"
+        colmodel="   {name:'name',editable:true}\
+                    ,{name:'description',editable:true}\
+                    ,{name:'configuration',editable:true}"
+        editoptions="closeAfterEdit:true"
+        add
+        addoptions="closeAfterAdd:true"
+        caption="Systems (Front-end provisioning systems)"
+        rownum="15"
+        pager
+        noscroll
+        autowidth
+        forcefit
+        rowlist="5,10,50,100"
+        viewrecords
+        hiddengrid="true"
+        mymodel="System"
+        refresh/>
+want it, but too dangerous
+        delete
+-->
+
+
+  </content:>  
+</page>
+

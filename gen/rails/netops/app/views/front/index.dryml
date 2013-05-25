@@ -1,0 +1,23 @@
+<page title="Home">
+
+  <body: class="front-page"/>
+
+  <content:>
+    <header class="content-header"></header>
+
+    <section class="content-body">
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <center><img src="/images/br_1.png" /></center>
+    </section>
+  </content:>
+  
+</page>
+

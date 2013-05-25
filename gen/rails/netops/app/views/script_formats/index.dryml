@@ -1,0 +1,120 @@
+
+<page title="Setup">
+  <append-scripts:>
+    <jqgrid-includes/>
+  </append-scripts:>
+  <body:/>
+  <content:>
+
+<% this.member_class = User %>
+    <cs-jqgrid id="users"
+        edit
+        caption="Users (for NetOps system, i.e. staff)"
+        rownum="10"
+        pager
+        autowidth
+        forcefit
+        noscroll
+        rowlist="5,10,15"
+        viewrecords
+        delete
+        hiddengrid="true"
+        mymodel="User"
+        refresh/>
+
+<br/>
+<% this.member_class = Pin %>
+    <cs-jqgrid id="pins"
+        edit
+        colnames="'Id','PIN','Email','Person','Conference','System'"
+        colmodel="   {name:'id',index:'id'}\
+                    ,{name:'pin'}\
+                    ,{name:'email'}\
+                    ,{name:'person_id'}\
+                    ,{name:'conference_id'}\
+                    ,{name:'system_id'}"
+        editoptions="closeAfterEdit:true"
+        caption="PINs"
+        rownum="500"
+        pager
+        autowidth
+        forcefit
+        height="500"
+        rowlist="10,100,500,1000,5000,10000"
+        viewrecords
+        hiddengrid="true"
+        mymodel="Pin"
+        refresh/>
+
+<br/>
+<% this.member_class = Log %>
+    <cs-jqgrid id="logs"
+        caption="Logs, Reports & Files"
+        rownum="15"
+        pager
+        autowidth
+        forcefit
+        rowlist="5,10,50,100"
+        viewrecords
+        noscroll
+        hiddengrid="true"
+        mymodel="Log"
+        delete
+        colnames="'Time','Name','Path','Content Type','View','Download'"
+        colmodel="   {name:'updated_at'}\
+                    ,{name:'name'}\
+                    ,{name:'path'}\
+                    ,{name:'content_type'}\
+                    ,{name:'name', formatter:'showlink', formatoptions:{baseLinkUrl:'logs/view',addParam:''}}\
+                    ,{name:'name', formatter:'showlink', formatoptions:{baseLinkUrl:'logs/download',addParam:''}}"
+        sortname="id"
+        sortorder="desc"
+        refresh/>
+<!--
+        edit
+        editoptions="closeAfterEdit:true"
+        add
+        addoptions="closeAfterAdde:true"
+        colnames="'Name','Description','Configuration'"
+        colmodel="   {name:'name',editable:true}\
+                    ,{name:'description',editable:true}\
+                    ,{name:'configuration',editable:true}"
+-->
+
+<br/>
+<% this.member_class = ScriptFormat %>
+    <cs-jqgrid id="script_formats"
+        edit
+        caption="Script Formats"
+        rownum="10"
+        pager
+        autowidth
+        forcefit
+        noscroll
+        rowlist="5,10,15"
+        viewrecords
+        delete
+        hiddengrid="true"
+        mymodel="ScriptFormat"
+        refresh/>
+
+<br/>
+<% this.member_class = Webhook %>
+    <cs-jqgrid id="webhooks"
+        edit
+        caption="Webhooks"
+        rownum="10"
+        pager
+        autowidth
+        forcefit
+        noscroll
+        rowlist="5,10,15"
+        viewrecords
+        delete
+        hiddengrid="true"
+        mymodel="Webhook"
+        refresh/>
+
+  </content:>  
+</page>
+
