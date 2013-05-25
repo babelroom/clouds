@@ -4,11 +4,15 @@
 */
 var config = {
     groups: [{
+//        apps: ['api','live','mini'],
+//        apps: ['mini','api','live'],
+//        apps: ['api','live','mini'],
         apps: ['api','mini','live'],
         servers: [{
                 protocol: 'https',
                 bindaddr: '192.168.66.139',
                 bindport: 443,
+//                options: {key: './dev_certs/privatekey.pem', cert: './dev_certs/certificate.pem'},
                 options: {key: '/home/br/gits/netops/clouds/certs/wd.key', cert: '/home/br/gits/netops/clouds/certs/wd_bundle.crt'},
             },{
                 protocol: 'http',
@@ -25,7 +29,8 @@ var config = {
             },
         session_manager: {
             key: 'brv1_dev',
-            domain: '.babelroom.com',
+//            domain: '.babelroom.com',
+            domain: '',
             },
         mini: {
             root: '/home/br/gits/clouds/gen/cdn_root',

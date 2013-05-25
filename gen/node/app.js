@@ -14,6 +14,8 @@ var config_file = './app_example_cfg.js';
 for(var i=0; i<process.argv.length; i++)
     if (process.argv[i]=='-c')
         config_file = process.argv[i+1];    // will throw an exception if no arg
+console.log('reading configuration from ['+config_file+']');
+var config = require(config_file);
 
 /* --- */
 var protocol_factory = {

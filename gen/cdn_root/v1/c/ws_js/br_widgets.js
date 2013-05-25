@@ -40,8 +40,7 @@ var BRWidgets = {
             }
         BROverlays.generic({
             content: function(id) {
-                //var url = '/ws_js/fileuploader/index.html?url='
-                var url = '/cdn/v1/c/ws_js/fileuploader/index.html?url='
+                var url = BR.api.v1.get_host('cdn') + '/cdn/v1/c/ws_js/fileuploader/index.html?url='
                     + escape(BR.api.v1.get_host('myapi')+'/plugin/0/upload.js')
                     + '&ts=' + new Date().getTime()
                     + '&conference_id=' + BR.room.context.conference_id
@@ -90,20 +89,12 @@ var BRWidgets = {
             name = user_id;
 */
         var name = BRWidgets.full_name(user_id) || ' ';
-//console.log(name);
-        //if (typeof((connection_ids||{})[BRDashboard.connection])!=="undefined")
-//console.log(BRDashboard.connection_id, connection_ids, BRDashboard.connection_id in (connection_ids||{}));
         if (BRDashboard.connection_id in (connection_ids||{}))
             name = '<strong>'+name+'</strong> (you)';
-//name+=' ['+user_id+']';
         return name;
     },
 
     _commonToolbar: function(id) {
-        //return '<span id="'+id+'" style="padding: 2px; position: absolute; left: 340px; top: -30px;" class="ui-widget-header ui-corner-all"></span>';
-        //return '<span style="position: absolute; top: -30px; left: 0; width: 100%;"><span id="'+id+'" style="padding: 2px; tp: -30px;" class="ui-widget-header ui-corner-all"></span></span>';
-        //return '<span id="'+id+'" style="padding: 2px; position: relative; top: -30px; height:30px;" class="ui-widget-header ui-corner-all br-z-index-toolbar"></span>';
-        //return '<span id="'+id+'" style="padding: 2px; position: relative; tp: -29px;" class="ui-widget-header ui-corner-all br-z-index-toolbar"></span>';
         return '<div id="'+id+'" style="padding: 1px 3px 1px 3px; psition: relative; height: 27px; width: default; display: inline-block; overflow: hidden;" class="ui-widget-header ui-corner-all br-z-index-toolbar"></div>';   /* z-index is not having any effect here ... 'inline-block' ?? */
     },
 
@@ -183,7 +174,6 @@ var BRWidgets = {
         BRDashboard.subscribe(function(o){
             // TODO this won't scale to large numbers ...
             var selected = (grid.jqGrid('getGridParam','selarrrow').indexOf(o.id)>-1);
-//console.log(o.selected);
             if (selected != o.selected)
                 grid.jqGrid('setSelection',o.id,false);
             },'select_listener');
@@ -1526,7 +1516,7 @@ can't operate on individual connections as the last one will always overwrite...
                     case 'slideshow_pages':
                         switch(h.value) {
                             case undefined: tmp = '???'; break;
-                            case '-1': tmp = '<img src="/cdn/v1/c/img/arrows_spinner.gif" alt="Loading...">'; break;
+                            case '-1': tmp = '<img src="'+BR.api.v1.get_host('cdn')+'/cdn/v1/c/img/arrows_spinner.gif" alt="Loading...">'; break;
                             case '0': tmp = '<em>None</em>'; break;
                             default: tmp = h.value;
                             };
@@ -1579,8 +1569,6 @@ can't operate on individual connections as the last one will always overwrite...
             function remove(token) { jQuery('#'+id+'_'+token+'_line').remove(); }
             function newLine(token, state, full_number, sec) {
                 modified();
-//                var html = '<div id="'+id+'_'+token+'_line"><span id="'+id+'_'+token+'_spinner"><img src="/cdn/v1/c/img/arrows_spinner.gif" alt="" /></span>\
-//<span id="'+id+'_'+token+'_status"></span><button id="'+id+'_'+token+'_hup">Cancel</button></div><div style="clear:both;"></div>';
                 var html = '<div id="'+id+'_'+token+'_line">\
 <button id="'+id+'_'+token+'_hup" title="Hangup"><i class="icon icon-remove-sign" stle="color: red;"></i></button>\
 <button disabled><span id="'+id+'_'+token+'_status"></span></button>\

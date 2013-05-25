@@ -9,24 +9,6 @@ var BRCommands = {
                 case undefined:
                     BRDashboard.fire({type:'listener',command:(value==undefined?'del':'add'),mid:idx});
                     break;
-/*
-                    if (value==undefined) {
-                        var selected_ids = grid.jqGrid('getGridParam','selarrrow');
-                        if (selected_ids.indexOf(idx)>-1) {
-                            Application.selectedParticipantCount--;
-                            notifySelectedUpdated();
-                            }
-                        grid.jqGrid('delRowData',idx);
-                        Application.totalParticipantCount--;
-                        }
-                    else {
-                        grid.jqGrid('addRowData',idx,{icon: '<img src="'+BR.room.co..... OLD ... ntext.cdn_host+'/cdn/v1/c/img/blank.png" />'});
-                        Application.totalParticipantCount++;
-                        }
-*/
-//                    grid.jqGrid('setCell', idx, 'name', value, 'cs-participant-active',{});
-//                    BRDashboard.fire({type:'listener',command:'name',mid:idx,name:value});
-//                    break;
                 case 'mute':
                 case 'pa':
                 case 'deaf':
@@ -49,12 +31,6 @@ var BRCommands = {
                     o[attr] = value;
                     BRDashboard.fire({type:'listener',command:'attr',mid:idx,attrs:o});
                     break;
-/*
-                case 'poll':
-                    grid.jqGrid('setRowData',idx,{poll: value});
-                    Application.notifyListeners('poll',{index:idx, value:value});
-                    break;
-*/
                 default:
                 }
     },

@@ -272,7 +272,7 @@ console.log( $j(tab3sel).offset() ); */
             $j('#'+id+'_overlay').dialog('close');
             }
         $j('#'+id+'_dial').button().click(fn_dial);
-        var spin = function(do_spin) { jQuery('#'+id+'_callme_spinner').html(do_spin ?  "<img src='/cdn/v1/c/img/arrows_spinner.gif' alt='' />" : ""); }
+        var spin = function(do_spin) { jQuery('#'+id+'_callme_spinner').html(do_spin ?  "<img src='"+BR.api.v1.get_host('cdn')+"/cdn/v1/c/img/arrows_spinner.gif' alt='' />" : ""); }
         var text = function(text, bgcolor) {
             jQuery('#'+id+'_callme_status').html(text);
             if (bgcolor!=undefined) {

@@ -226,9 +226,9 @@ input.br-phone-display {
 <script type="text/javascript" src="/cdn/v1/c/ws_js/br_dynamic.js"></script>
 <script type="text/javascript" src="/cdn/v1/c/ws_js/br_toolbar.js"></script>
 <script type="text/javascript" src="/cdn/v1/AUTO/conference_options.js"></script>
-<script type='text/javascript' src='//cdn-dev.babelroom.com/cdn/v1/src/br_api.js'></script>
-<script type='text/javascript' src='//cdn-dev.babelroom.com/cdn/v1/src/br_api.streaming.js'></script>
-<script type='text/javascript' src='//cdn-dev.babelroom.com/cdn/v1/src/socket.io.min.js'></script>
+<script type='text/javascript' src="/cdn/v1/src/br_api.js"></script>
+<script type='text/javascript' src="/cdn/v1/src/br_api.streaming.js"></script>
+<script type='text/javascript' src="/cdn/v1/src/socket.io.min.js"></script>
 
 <script type="text/javascript">
 
@@ -339,12 +339,6 @@ function br_v1_c_ready() {
 
     /* align some heights TODO tmp. think this is going away ... */
     var pos = $j('#top-tabs').height();
-//console.log(pos);
-//console.log( $j('#main').height() );
-//    $j('#main > h3').height( $j('#top-tabs').height()-1 );
-    //$j('#main').css('padding-bottom', $j('#top-tabs').height()+'px');
-//console.log(pos);
-//console.log( $j('#main').height() );
 
     /* --- display (rest of) dashboard --- */
     $j(".bg > div:first").next().hide();
@@ -377,6 +371,7 @@ function br_v1_c_connect(loginTokenOrNull) {
 jQuery(document).ready(function(){ br_v1_c_ready(); });
 br_v1_c_loaded();
 </script>
-<form id="_ie_dynform" style="display: none;" action="//api-dev.babelroom.com/api/v1/_dynform"></form>
+<!--<form id="_ie_dynform" style="display: none;" action="//api-dev.babelroom.com/api/v1/_dynform"></form>-->
+<form id="_ie_dynform" style="display: none;" action="/api/v1/_dynform"></form>
 </body> 
 </html> 

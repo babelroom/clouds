@@ -25,11 +25,14 @@ EStream.prototype = {
             /*res.set({
                 'ETag': undefined,
                 }); */
+            //res.removeHeader('X-Powered-By');
             res.removeHeader('ETag');
             next();
             });
 
         app.get('/rest/:file', function (req, res) {
+            //res.sendfile(req.params.file, {root: options.dir, maxAge: undefined});
+            //res.set('ETag',false);
             res.removeHeader('accept-ranges');
             res.sendfile(req.params.file, {root: options.dir, 'accept-ranges': undefined});
             });

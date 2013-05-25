@@ -73,11 +73,14 @@ function _login_by_token(self, req, res, match, opts)
         if (rows.length!==1) return he.internal_server_error(res);
         var row = rows[0];
         result = {user: {id: row.user_id, email_address: row.email_address, email: row.email, name: row.name, last_name: row.last_name}};
+        /* this is how we would fake it: -- for reference
+        self.db.query("UPDATE tokens SET updated_at=NOW() WHERE id=?", [row.id], function(err, rows, fields){ */
         self.db.query("UPDATE tokens SET updated_at=NOW(), is_deleted=1 WHERE id=?", [row.id], function(err, rows, fields){
             if (err) return he.db_error(res, err);
             if (rows.affectedRows!==1) return he.internal_server_error(res);
             if (!self.sessionManager.set_rails_uid(res, row.user_id))
                 return he.internal_server_error(res);
+            //_maybe_redirect(req, res, result);
             he.ok(req, res, result);
             });
         });
@@ -151,6 +154,17 @@ function invitation(self, req, res, match, opts)
             a.push(db_cols[i][0] + ' AS ' + db_cols[i][1]);
         db_cols_sql = a.join(', ');
         }
+/* --- always get 1 row with or without any of user, conference and invitation data, example:
+   ---
+select u.id as user, c.id as conference, i.id as invitation
+FROM (SELECT 42 AS badass FROM dual) AS hack
+    left outer join users u on u.id = 371
+    left outer join (
+    conferences c left outer join invitations i
+        ON i.conference_id = c.id and i.user_id = 371 and i.is_deleted IS NULL
+    ) on c.uri = 'friday' AND c.is_deleted IS NULL;
+
+*/
 /*
     var suid = self.e(uid), sql = "SELECT "+db_cols_sql+" \
 FROM (SELECT 42 AS badass FROM dual) AS hack\
@@ -173,13 +187,27 @@ FROM (SELECT 42 AS badass FROM dual) AS hack\
         sql += 'c.uri=' + self.e(match[1]);
     self.db.query(sql, [], function(err, rows, fields){
         if (err) return he.db_error(res, err, sql);
+/*
+        if (rows.length<1)                        /* because we should always get exactly 1 row *./
+So this was kicking out where we pointed at a new environment with old session, it confused and created multiple invites for same
+user and conference -- question: how could it have created multople invites??? 
+
+*/
         if (rows.length!==1)                        /* because we should always get exactly 1 row */
             return he.internal_server_error(res);
+/*
+        if (rows.length==0) {   /* perhaps send 404 if conference does not exist vs. data: null if no invitation? *./
+            res.send(JSON.stringify({data: null}));
+            res.end();
+            return;
+            }
+*/
         data = [];
         var len = fields.length, row = rows[0];
         for(var i=0; i<fields.length; i++)
             data.push([fields[i].name, row[fields[i].name]]);
         /* extra *special* stuff */
+//        data.push(['media_server_uri', 'rtmp%3A%2F%2Fvideo.babelroom.com%3A1936%2FoflaDemo']);
         var a='', l=10, b = crypto.randomBytes(l);
         for(var i=0; i<l; i++)
             a += (b[i] & 0xff).toString(16);
@@ -194,8 +222,6 @@ FROM (SELECT 42 AS badass FROM dual) AS hack\
         obj.is_live = false;    /* set to true on client once it's caught up on stream history (when it sees it's only new connection id) */
         try {
             if (obj.conference_config) {
-
-
                 obj.conference_estream_id = obj.conference_config.split(',')[0].split('=')[1];
                 }
             }
@@ -204,6 +230,7 @@ FROM (SELECT 42 AS badass FROM dual) AS hack\
             }
         res.send(JSON.stringify({data: obj}));
         res.end();
+//console.log('<< ' + new Date().getTime());
         });
 }
 
@@ -232,6 +259,12 @@ function _enter(self, creating_uid, req, res, match, opts)
                 self.db.query("UPDATE pins SET updated_at=NOW(), invitation_id=? WHERE invitation_id IS NULL LIMIT 1", [iid], function(err, rows, fields){
                     if (err) return he.db_error(res, err);
                     if (rows.affectedRows!==1) return he.internal_server_error(res);
+// ---- extra query in case we need to get the pin ... do we? -- keep code for ref
+//                    self.db.query("SELECT pin FROM pins WHERE invitation_id=?", [iid], function(err, rows, fields){
+//                        if (err) return he.db_error(res, err);
+//                        if (rows.length!==1) return he.internal_server_error(res);
+//                        var pin = rows[0].pin;
+//                        self.db.query("UPDATE invitations SET updated_at=NOW(), pin=? WHERE id=?", [pin,iid], function(err, rows, fields){
                         self.db.query("UPDATE invitations SET updated_at=NOW(), pin=(SELECT pin FROM pins WHERE invitation_id=?) WHERE id=?", [iid,iid], function(err, rows, fields){
                             if (err) return he.db_error(res, err);
                             if (rows.affectedRows!==1)
@@ -259,6 +292,7 @@ function _enter(self, creating_uid, req, res, match, opts)
                                 return he.ok(req, res, resultset);
                                 }
                             });
+//                        });
                     });
                 });
             }
@@ -288,7 +322,6 @@ function _enter(self, creating_uid, req, res, match, opts)
         var vals = ") VALUES (NOW(),NOW()";
         for(var i in u)
             if (u.hasOwnProperty(i)) {
-//console.log(i);
                 if (i in {name:1,last_name:1,email:1,phone:1,origin_data:1,origin_id:1}) {
                     sql += ',`'+i+'`';
                     vals += ','+self.e(u[i]);
@@ -318,6 +351,7 @@ function enter(self, req, res, match, opts)
         });
 }
 
+/* this facility to be depreciated */
 var aq_commands = [
     "0",
     "user/select/SELECT phone FROM users WHERE id = ?",
@@ -327,13 +361,17 @@ var aq_commands = [
     "invitation/select/SELECT i.pin, i.user_id, u.name, u.last_name, CONCAT(u.name,' ',u.last_name) AS full_name, i.role, u.phone, u.email_address FROM invitations i, users u WHERE i.user_id = u.id AND i.conference_id = ?",
     "user/select/SELECT id FROM users WHERE email_address=? LIMIT 1",
     "skin/select/SELECT id,name,immutable,preview_url FROM skins",            // 7
+//                    "skin/sql/INSERT INTO skins (name) VALUES (?)",     // 8
     "skin/insert",     // 8
     "skin/copy",
     "skin/update",                                      // 10 
     "conference/update",                                // 11
+//                    "skin/select/SELECT body FROM skins WHERE id = ? -- ignore name param = ?", -- leave as example of using comment for unwanted parameters
     "skin/delete",            // 12
     "skin/select/SELECT id,name,body FROM skins WHERE id=?",
     "media_file/select/SELECT * FROM media_files WHERE ((user_id=? OR conference_id=?) AND slideshow_pages>0)", // AND access permissions ...
+// note, no need to exclude 1 or 2 letter words as the length is too short in any case ...
+//    "conference/select/SELECT id FROM conferences WHERE uri=:uri UNION SELECT 0 FROM DUAL WHERE :uri IN (\
     "conference/select/SELECT id FROM conferences WHERE uri=? UNION SELECT 0 FROM DUAL WHERE ? IN (\
 'login','logout','plugin','home','admin2548','admin_set_current_user2548','byid',\
 'users',\
@@ -391,6 +429,12 @@ Not implemented
         console.log(req.body);
         return he.not_implemented(res);
         }
+/*
+    console.log(act);
+    /.* kinda leaving off here ... *./
+    res.send("{}");
+    res.end();
+*/
 }
 
 var routes = [
@@ -443,13 +487,19 @@ express.bodyParser.parse['application/json'] = function(data) {
             next();
             });
         use(express.json());
-        use(express.urlencoded());
+        use(express.urlencoded());      /* TMP todo leave this in temporarily until we yank aq out */
         use(function(req, res, next){
             var mo = req.get('X-HTTP-Method-Override');
             req._method = mo ? mo : req.method;
             next();
             });
         use(express.logger('short'));
+
+        // *** actually we don't use this anymore as (like most express plugins) it's a colorful flavor of crap, i.e. creates 401 if no Authenticate header
+        // we use this to set the value of req.user for later use by session utils
+/*        app.use(express.basicAuth(function(user, pass){
+            return true;
+            })); */
 
         use(function(req, res, next){
             /* most of this copied from: ./node_modules/express/node_modules/connect/lib/middleware/basicAuth.js */
@@ -473,6 +523,11 @@ express.bodyParser.parse['application/json'] = function(data) {
             next();
             });
 
+        // empty response to top-level 'OK'
+/*        app.get('/', function (req, res) {
+            res.send('This is not the page you are looking for.');
+            res.end();
+            });*/
         },
 
     addHandlers: function(express, app, options) {
@@ -493,6 +548,7 @@ express.bodyParser.parse['application/json'] = function(data) {
             if (origin) {
                 res.setHeader('Access-Control-Allow-Origin', origin);
                 res.setHeader('Access-Control-Allow-Credentials', true);
+//                res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With'); -- what is this?
                 }
             }
 
@@ -510,7 +566,7 @@ express.bodyParser.parse['application/json'] = function(data) {
                 , path = req.params[0]
                 , input
                 , match;
-            input = (path==='/_dynform' && req.body._dynform_method && req.body._dynform_path && /^\/v1(\/.*)$/.exec(req.body._dynform_path)) ?
+            input = (path==='/_dynform' && req.body._dynform_method && req.body._dynform_path && /^\/api\/v1(\/.*)$/.exec(req.body._dynform_path)) ?
                 (req.body._dynform_method + ':' + RegExp.$1) :
                 (req._method + ':' + path)
             res.setHeader('Content-Type', 'application/json; charset=utf-8');       /* all responses are json */
