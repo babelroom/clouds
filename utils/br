@@ -157,7 +157,7 @@ __EOT__
 );
     add(red5, red5, 'prime_red5: {src: "red5_rc", file: "/etc/init.d/red5", mode: "0755"}');
     add(netops, netops,<<__EOT__
-netops_db_syscfg: {src: "netops_db_syscfg", file: "/tmp/br/netops_db_syscfg", mode "0600", s3_key_id: "$misc{s3_key_id}", s3_key: "$misc{s3_key}"}
+netops_db_syscfg: {src: "netops_db_syscfg", file: "/tmp/br/netops_db_syscfg", mode: "0600", s3_key_id: "$misc{s3_key_id}", s3_key: "$misc{s3_key}"}
 prime_netops: {src: "netops_rc", file: "/etc/init.d/netops", mode: "0755", deps: ['netops_db_syscfg']}
 __EOT__
 );
