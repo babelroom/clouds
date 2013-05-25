@@ -10,6 +10,9 @@ require 'rubygems'
 require 'mysql'
 require 'cheddargetter_client_ruby'
 
+# configuration line from prime (SQL) -- for reference
+#INSERT INTO `systems` VALUES (7,'CheddarGetter Gateway',NOW(),NOW(),'disabled,user=user@domain.bad,pass=XXXX','','cheddargetter',NULL);
+
 # ---
 STDOUT.sync = true
 
