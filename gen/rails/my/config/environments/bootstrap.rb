@@ -30,4 +30,4 @@ config.action_view.cache_template_loading            = true
 # config.threadsafe!
 
 # just trying to get this thing to make the DB already ...
-config.action_controller.session = { :key => "_my_app_session", :secret => "some secret phrase" }
+config.action_controller.session = { :key => "_my_app_session", :secret => "some secret phrase. rails makes me whales. and whale. and oh how I am not a fan of rails" }
