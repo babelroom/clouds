@@ -34,6 +34,8 @@ start()
         echo "netops is already running."
         RETVAL=1
     else
+        echo -n $"Setting system configuration (DB): "
+        /usr/bin/mysql -uroot netops </tmp/br/netops_db_syscfg;
         echo -n $"Starting $prog: "
         ( cd $NETOPS_DIR/br_scripts && /bin/su br -c ./init.pl >../log/init.pl.log 2>../log/init.pl.err) &
         RETVAL=$?

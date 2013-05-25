@@ -1,7 +1,6 @@
 open F, ">$R->{file}" or die;
 print F <<__EOT__
 
--- depreciate ??
 DELETE FROM `interconnects`;
 ALTER TABLE `interconnects` AUTO_INCREMENT=1;
 LOCK TABLES `interconnects` WRITE;
