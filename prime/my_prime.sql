@@ -33,7 +33,7 @@ UNLOCK TABLES;
 -- depreciate
 DELETE FROM `countries`; ALTER TABLE `countries` AUTO_INCREMENT=1;
 
-DELETE FROM `email_requests`; ALTER TABLE `email_requests` AUTO_INCREMENT=1;
+DELETE FROM `tokens`; ALTER TABLE `tokens` AUTO_INCREMENT=1;
 DELETE FROM `emails`; ALTER TABLE `emails` AUTO_INCREMENT=1;
 
 DELETE FROM `invitations`; ALTER TABLE `invitations` AUTO_INCREMENT=1;
