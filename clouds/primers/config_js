@@ -4,7 +4,7 @@ print F <<__EOT__
 /* --- */
 var config = {
     groups: [{
-        apps: ['api','live'],
+        apps: ['live','api','live'],
         servers: [{
                 protocol: 'https',
                 bindaddr: '$iface',
@@ -27,6 +27,10 @@ var config = {
             key: '$R->{cookie_key}',
             domain: '$R->{domain}',
             // secure: true, -- soon
+            },
+        mini: {
+            root: '/home/br/gits/clouds/gen/cdn_root',
+            index: '/v1/c/index_dev.html',
             },
         mysql: {
             poolsize: 20,
