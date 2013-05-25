@@ -45,12 +45,10 @@ DELETE FROM `phones`; ALTER TABLE `phones` AUTO_INCREMENT=1;
 -- skip pin -- done externally based on initial prime or reset
 -- DELETE FROM `pins`; ALTER TABLE `pins` AUTO_INCREMENT=1;
 
---- don't touch schema_migrations
+--- dont touch schema_migrations
 --- DELETE FROM `schema_migrations`;
 --- LOCK TABLES `schema_migrations` WRITE;
-/*!40000 ALTER TABLE `schema_migrations` DISABLE KEYS */;
 --- INSERT INTO `schema_migrations` VALUES ('20110109211852');
-/*!40000 ALTER TABLE `schema_migrations` ENABLE KEYS */;
 --- UNLOCK TABLES;
 
 DELETE FROM `skins`;
