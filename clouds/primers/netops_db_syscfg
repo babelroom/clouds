@@ -13,17 +13,35 @@ DELETE FROM `systems`;
 ALTER TABLE `systems` AUTO_INCREMENT=15;
 LOCK TABLES `systems` WRITE;
 /*!40000 ALTER TABLE `systems` DISABLE KEYS */;
-INSERT INTO `systems` VALUES (1,'Provisional provisioning system',NOW(),NOW(),'dsn=dbi:mysql:my:127.0.0.1:3306,dbuser=root,dbpass=,url_for_email=https://my.babelroom.com/users','no notes','provisioning',NULL);
+INSERT INTO `systems` VALUES (1,'Provisional provisioning system',NOW(),NOW(),'dsn=dbi:mysql:my:127.0.0.1:3306,dbuser=root,dbpass=,url_for_email=$R->{my_host}/users','no notes','provisioning',NULL);
 INSERT INTO `systems` VALUES (2,'FreeSWITCH instance',NOW(),NOW(),'hostname=127.0.0.1,ipv4=127.0.0.1,es_port=8888','No notes','freeswitch',NULL);
-INSERT INTO `systems` VALUES (3,'Outbound SMTP server (Production)',NOW(),NOW(),'disabled,mail_gw=SMTP/vps.babelroom.com:25','No notes','outbound_email',NULL);
-INSERT INTO `systems` VALUES (4,'Outbound SMTP server (Development)',NOW(),NOW(),'disabled,smtp_server=127.0.0.1:10025','No notes','outbound_email',NULL);
-INSERT INTO `systems` VALUES (6,'Amazon s3 Storage',NOW(),NOW(),'not_disabled,AWSAccessKeyId=$R->{s3_key_id},AWSSecretAccessKey=$R->{s3_key},Bucket=bblr-conference_recordings,URLPrefix=https://s3.amazonaws.com','','s3',NULL);
-INSERT INTO `systems` VALUES (8,'Recurly (sandbox)',NOW(),NOW(),'not_disabled,url=https://api-sandbox.recurly.com/,auth_user=api-test@babelroom-test.com,auth_pass=0f5c640857e343cfab9ccddd7753fa92,account_prefix=P','','recurly',NULL);
-INSERT INTO `systems` VALUES (9,'Gmail',NOW(),NOW(),'not_disabled,mail_gw=Gmail/notifications@babelroom.com/c4lpqK2e','No notes','outbound_email',NULL);
+INSERT INTO `systems` VALUES (4,'Outbound SMTP server (Example)',NOW(),NOW(),'disabled,smtp_server=127.0.0.1:10025','No notes','outbound_email',NULL);
 INSERT INTO `systems` VALUES (11,'Pricing Plan',NOW(),NOW(),'pool=100,in=29000/pool,inintl=29000/pool,out=29000/pool,outintl=29000/pool,tollfree=69000/0,webcall=0','','plans','free');
 INSERT INTO `systems` VALUES (12,'Pricing Plan',NOW(),NOW(),'pool=10,in=29000/pool,inintl=29000/pool,out=29000/pool,outintl=29000/pool,tollfree=69000/0,webcall=100000','','plans','solo_plan');
 INSERT INTO `systems` VALUES (13,'Pricing Plan',NOW(),NOW(),'pool=5000,in=19000/pool,inintl=19000/pool,out=19000/pool,outintl=19000/pool,tollfree=59000/0,webcall=0','','plans','pro_plan');
 INSERT INTO `systems` VALUES (14,'Pricing Plan',NOW(),NOW(),'inintl=19000/pool,out=19000/pool,outintl=19000/pool,tollfree=49000/0,webcall=0','','plans','flex_plan');
+__EOT__
+
+
+
+; if ($R->{s3_key_id}) { print F <<__EOT__
+INSERT INTO `systems` VALUES (6,'Amazon s3 Storage',NOW(),NOW(),'not_disabled,AWSAccessKeyId=$R->{s3_key_id},AWSSecretAccessKey=$R->{s3_key},Bucket=bblr-conference_recordings,URLPrefix=https://s3.amazonaws.com','','s3',NULL);
+__EOT__
+; }
+
+
+; if ($R->{recurly_user}) { print F <<__EOT__
+INSERT INTO `systems` VALUES (8,'Recurly (sandbox)',NOW(),NOW(),'not_disabled,url=https://api-sandbox.recurly.com/,auth_user=$R->{recurly_user},auth_pass=$R->{recurly_password},account_prefix=P','','recurly',NULL);
+__EOT__
+; }
+
+
+; if ($R->{gmail_user}) { print F <<__EOT__
+INSERT INTO `systems` VALUES (9,'Gmail',NOW(),NOW(),'not_disabled,mail_gw=Gmail/$R->{gmail_user}/$R->{gmail_password}','No notes','outbound_email',NULL);
+__EOT__
+; }
+
+print F <<__EOT__
 /*!40000 ALTER TABLE `systems` ENABLE KEYS */;
 UNLOCK TABLES;
 
