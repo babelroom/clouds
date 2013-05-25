@@ -2,9 +2,6 @@
 
 echo 'Rails...'
 
-# not just yet
-exit 0;
- 
 which rails >/dev/null && echo 'Already installed!' && exit 0;
 
 ./setup_mysql_client.sh  || exit -1
@@ -96,8 +93,9 @@ sudo gem install xml-simple -v 1.0.15 --no-rdoc --no-ri --ignore-dependencies ||
 # create DB(s)
 cd $HOME/gits/clouds/gen/rails/my
 ./install.sh 2>>/tmp/br/my.err
-cd public
-make    # make gen.min.js
+#cd public
+#make    # make gen.min.js
+
 cd $HOME/gits/clouds/gen/rails/netops
 ./install.sh 2>>/tmp/br/netops.err
 

@@ -44,8 +44,6 @@ print F <<__EOT__
 /*!40000 ALTER TABLE `systems` ENABLE KEYS */;
 UNLOCK TABLES;
 
-access_key_id: <%= ENV['AWS_ACCESS_KEY_ID'] || '$R->{key_id}' %>
-secret_access_key: <%= ENV['AWS_SECRET_ACCESS_KEY'] || '$R->{key}' %>
 __EOT__
 ;
 close F;
