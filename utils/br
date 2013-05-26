@@ -294,7 +294,8 @@ sub offline($) {
     print `$cmd`;
 }
 sub resetdb($) {
-    offline();
+    my $mod = shift;
+    offline($mod);
     $cmd = "echo 'drop database my; drop database netops; quit' | mysql -uroot";
     print "$cmd\n";
     print `$cmd`;
