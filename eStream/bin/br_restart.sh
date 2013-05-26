@@ -2,7 +2,7 @@
 
 if [ "$1" == '' ]
 then
-    echo "usage: cs_restart 'command to restart'"
+    echo "usage: br_restart 'command to restart'"
     exit -1
 fi
 

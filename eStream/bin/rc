@@ -35,7 +35,7 @@ stop()
     echo -n $"Stopping $prog: "
     pkill estream
 pkill FS_out.pl    # TODO: tmp!!
-pkill cs_restart.sh    # TODO: tmp!!
+pkill br_restart.sh    # TODO: tmp!!
 pkill FS_in.pl    # TODO: tmp!!
 
     sleep 5
