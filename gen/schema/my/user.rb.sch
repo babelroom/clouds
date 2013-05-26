@@ -32,13 +32,13 @@
 
   lifecycle do
 
-# to force activation email:
-# comment out next line
-    state :active, :default => true
-# the uncomment next
-#    state :active
-
-
+# not sure these next few lines are coherent
+## to force activation email:
+## comment out next line
+#    state :active, :default => true
+## the uncomment next
+##    state :active
+#
     state :active, :default => true
 
     create :signup, :available_to => "Guest",
