@@ -31,8 +31,8 @@ sudo install -o root -m 755 ./babelroom-prime /etc/init.d
 sudo /sbin/chkconfig --add babelroom-prime
 sudo service babelroom-prime start
 
-sudo install -o root -m 755 ./babelroom-services /etc/init.d
-sudo /sbin/chkconfig --add babelroom-services
+sudo install -o root -m 755 ./babelroom-run /etc/init.d
+sudo /sbin/chkconfig --add babelroom-run
 
 # copy initial files
 cd misc
