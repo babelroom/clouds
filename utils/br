@@ -270,7 +270,7 @@ sub list()
         &$fn() if $fn;
         }
 }
-sub online() {
+sub online($) {
     my $mod = shift;
     do_write_config() if $mod;
     print "Bring online...\n";
@@ -279,7 +279,7 @@ sub online() {
     $cmd = "sudo service start-instance start";
     print $cmd . "\n" . `$cmd`;
 }
-sub offline() {
+sub offline($) {
     my $mod = shift;
     do_write_config() if $mod;
     print "Bring offline...\n";
