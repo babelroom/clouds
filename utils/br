@@ -3,6 +3,8 @@
 use Getopt::Long;
 use Data::Dumper;   # for devel
 
+$|++;   # don't buffer stdout
+
 # ---
 $config_file = "/home/br/config";
 $prefx = "_br_";
