@@ -3,6 +3,7 @@
 use Getopt::Long;
 use Data::Dumper;   # for devel
 
+# ---
 $|++;   # don't buffer stdout
 
 # ---
