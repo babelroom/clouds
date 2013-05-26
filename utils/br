@@ -55,6 +55,7 @@ $result = GetOptions (
     "list=s" => \@list,
     "online" => \$commands{online},
     "offline" => \$commands{offline},
+    "resetdb" => \$commands{offline},
     "check" => \$commands{check},
     "status" => \$commands{status},
     "help" => \$commands{help},
@@ -292,6 +293,15 @@ sub offline($) {
     print "$cmd\n";
     print `$cmd`;
 }
+sub resetdb($) {
+    offline();
+    $cmd = "echo 'drop database my; drop database netops; quit' | mysql -uroot";
+    print "$cmd\n";
+    print `$cmd`;
+    $cmd = "(cd /home/br/gits/clouds/clouds && ./setup_db.sh)";
+    print "$cmd\n";
+    print `$cmd`;
+}
 sub check() {}
 sub status()
 {
@@ -329,6 +339,7 @@ sub logic
     $mod = 1 if defined($commands{write});
     online($mod) if defined($commands{online});
     offline($mod) if defined($commands{offline});
+    resetdb($mod) if defined($commands{resetdb});
 
     return if (!$mod);
 
