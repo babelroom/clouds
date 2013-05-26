@@ -13,5 +13,8 @@
 # setup and populate databases
 ./setup_db.sh || exit -1;
 
+# last step
+br --write
+
 exit 0;
 
