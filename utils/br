@@ -270,8 +270,22 @@ sub list()
         &$fn() if $fn;
         }
 }
-sub online() {}
-sub offline() {}
+sub online() {
+    my $mod = shift;
+    do_write_config() if $mod;
+    print "Bring online...\n";
+    $cmd = "sudo service init-instance start";
+    print $cmd . "\n" . `$cmd`;
+    $cmd = "sudo service start-instance start";
+    print $cmd . "\n" . `$cmd`;
+}
+sub offline() {
+    my $mod = shift;
+    do_write_config() if $mod;
+    print "Bring offline...\n";
+    $cmd = "sudo service start-instance stop";
+    print $cmd . "\n" . `$cmd`;
+}
 sub check() {}
 sub status()
 {
@@ -289,25 +303,30 @@ sub help($)
 }
 
 # ---
+sub do_write_config
+{
+    open OF, ">$config_file";
+    write_config(OF);
+    close OF;
+}
+
+# ---
 sub logic
 {
     # ---
     my $mod = shift;
     if (length(@on) or length(@off)) { $mod = 1 if onoff(); }
     list();
-    online() if defined($commands{online});
-    offline() if defined($commands{offline});
     check() if defined($commands{check});
     status() if defined($commands{status});
     help(0) if defined($commands{help});
     $mod = 1 if defined($commands{write});
+    online($mod) if defined($commands{online});
+    offline($mod) if defined($commands{offline});
 
     return if (!$mod);
 
-    # --- write out new value
-    open OF, ">$config_file";
-    write_config(OF);
-    close OF;
+    do_write_config();
 }
 
 # ---
