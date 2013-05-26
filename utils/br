@@ -277,16 +277,19 @@ sub online($) {
     do_write_config() if $mod;
     print "Bring online...\n";
     $cmd = "sudo service init-instance start";
-    print $cmd . "\n" . `$cmd`;
+    print "$cmd\n" 
+    print `$cmd`;
     $cmd = "sudo service start-instance start";
-    print $cmd . "\n" . `$cmd`;
+    print "$cmd\n" 
+    print `$cmd`;
 }
 sub offline($) {
     my $mod = shift;
     do_write_config() if $mod;
     print "Bring offline...\n";
     $cmd = "sudo service start-instance stop";
-    print $cmd . "\n" . `$cmd`;
+    print "$cmd\n" 
+    print `$cmd`;
 }
 sub check() {}
 sub status()
