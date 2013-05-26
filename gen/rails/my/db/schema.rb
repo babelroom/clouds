@@ -246,7 +246,7 @@ ActiveRecord::Schema.define(:version => 20130427061723) do
     t.boolean  "administrator",                           :default => false
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "state",                                   :default => "inactive"
+    t.string   "state",                                   :default => "active"
     t.datetime "key_timestamp"
     t.string   "last_name"
     t.string   "timezone",                                :default => "Pacific Time (US & Canada)"
