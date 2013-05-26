@@ -34,16 +34,20 @@ function adjusted_cols(f) {
 /* --- permission checks returns whether or not request was handled --- */
 function perm_the_same_user(f) {
     f.self.sessionManager.expect_uid(f.req,f.rest.id,function(uid, code){
-        if (uid<=0)
+        if (uid<=0) {
+            console.log("403 reason: ", uid);
             return he.code(f.res, code);
+            }
         f.perm = {uid: uid};
         f.rec.dbfn(f);
         });
 }
 function perm_valid_user(f) {
     f.self.sessionManager.uid_from_req2(f.req,function(uid, code){
-        if (uid<=0)
+        if (uid<=0) {
+            console.log("403 reason: ", uid);
             return he.code(f.res, code);
+            }
         f.perm = {uid: uid};
         f.rec.dbfn(f);
         });
@@ -69,8 +73,10 @@ function _is_conference_participant(f,uid,mustBeHost,fn_pass,fn_fail) {
 }
 function _perm_conference_owner_or_participant(f,mustBeHost) {
     f.self.sessionManager.uid_from_req2(f.req,function(uid, code){
-        if (uid<=0)
+        if (uid<=0) {
+            console.log("403 reason: ", uid);
             return he.code(f.res, code);
+            }
         function permitted() {
             f.perm = {uid: uid};
             f.rec.dbfn(f);
