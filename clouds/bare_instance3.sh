@@ -26,13 +26,13 @@ cd ./clouds/clouds
 # get basics right
 ./setup_base.sh || exit -1
 
-# setup init-instance, start-instance
-sudo install -o root -m 755 ./init-instance /etc/init.d
-sudo /sbin/chkconfig --add init-instance
-sudo service init-instance start
+# setup babelroom-prime, babelroom-run
+sudo install -o root -m 755 ./babelroom-prime /etc/init.d
+sudo /sbin/chkconfig --add babelroom-prime
+sudo service babelroom-prime start
 
-sudo install -o root -m 755 ./start-instance /etc/init.d
-sudo /sbin/chkconfig --add start-instance
+sudo install -o root -m 755 ./babelroom-services /etc/init.d
+sudo /sbin/chkconfig --add babelroom-services
 
 # copy initial files
 cd misc

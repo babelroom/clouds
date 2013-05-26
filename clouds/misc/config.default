@@ -1,1 +1,29 @@
-# default config
+autoprime:
+prime_mysqld: {script: "my_cnf", server_id: 37}
+node_config_app: {script: "config_js", iface: "eth0", secret: "418fa04bcaa238dea7fb46d3b522a6f75b8df48664f3b3cc39c234960b5c40bdce32a4f0c909589a5211bdb1c8308e1747ff33d6074c62d501dd6b38fa220bb0", key: "/home/br/gits/clouds/clouds/misc/dummy_privatekey.pem", cert: "/home/br/gits/clouds/clouds/misc/dummy_certificate.pem", cookie_key: "brv1_d30485d8", domain: "", file: "/tmp/br/app_config.js"}
+prime_node_app: {script: "node_rc", file: "/etc/init.d/node_app", path: "/home/br/gits/clouds/gen/node", config_file: "/tmp/br/app_config.js", label: "app", deps: ['node_config_app']}
+
+netops_db_syscfg: {script: "netops_db_syscfg", file: "/tmp/br/netops_db_syscfg", my_host: "", mode: "0600", s3_key_id: "", s3_key: "", gmail_user: "", gmail_password: "", recurly_user: "", recurly_password: ""}
+prime_netops: {src: "netops_rc", file: "/etc/init.d/netops", mode: "0755", deps: ['netops_db_syscfg']}
+
+# startup -- in order
+startup: mysqld node_app estream netops
+
+# -------------- CUT HERE --------------- If you are copying this data to the user-data field of Amazon ec2 you only need copy up to this line
+# --- All values from this point are used to preserve configuration for 'br' and not used directing in priming
+#_br_hostnames-rooms:http://please.ignore.test
+#_br_onoff-autoprime:1
+#_br_onoff-startup:1
+#_br_onoff-freeswitch:1
+#_br_onoff-mysqld:1
+#_br_onoff-rooms:1
+#_br_onoff-red5:0
+#_br_onoff-netops:1
+#_br_onoff-accounts:0
+#_br_privatekeys-api:/home/br/gits/clouds/clouds/misc/dummy_privatekey.pem
+#_br_privatekeys-live:/home/br/gits/clouds/clouds/misc/dummy_privatekey.pem
+#_br_certificates-api:/home/br/gits/clouds/clouds/misc/dummy_certificate.pem
+#_br_certificates-live:/home/br/gits/clouds/clouds/misc/dummy_certificate.pem
+#_br_misc-cookie_verification_secret:61a64eb372b76b362651e343405ae8fd0c8c14c81f3a74c4c6cd891a2d196836a46edb0a419bb38950e512ead74991f793e92d5a400118b182306800ee76efab
+#_br_misc-cookie_key:brv1_d30485d8
+#_br_misc-secret:418fa04bcaa238dea7fb46d3b522a6f75b8df48664f3b3cc39c234960b5c40bdce32a4f0c909589a5211bdb1c8308e1747ff33d6074c62d501dd6b38fa220bb0
