@@ -46,3 +46,15 @@ production:
   username: root
   password:
   socket: /var/lib/mysql/mysql.sock
+
+# this is used in system setup to get first migration out 
+bootstrap:
+  adapter: mysql
+  encoding: utf8
+  reconnect: false
+  database: my
+  pool: 5
+  username: root
+  password:
+  socket: /var/lib/mysql/mysql.sock
+

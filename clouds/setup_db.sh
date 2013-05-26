@@ -27,6 +27,7 @@ echo 'DELETE FROM `pins`; ALTER TABLE `pins` AUTO_INCREMENT=1;' | mysql -uroot m
 mysql -uroot my <$HOME/gits/clouds/gen/rails/my/db/pin.sql
 
 # 6. reset master so binlog isn't sucking thru all this setup
+echo "Ignore reset master failure (if any)"
 echo "reset master;" | /usr/bin/mysql -uroot 
 
 # 7. stop DB
