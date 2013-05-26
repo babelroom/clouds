@@ -10,5 +10,8 @@
 ./setup_netops.sh || exit -1;
 ./setup_fs.sh || exit -1;
 
+# setup and populate databases
+./setup_db.sh || exit -1;
+
 exit 0;
 

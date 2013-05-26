@@ -173,6 +173,7 @@ __EOT__
             print $fh "#$prefx$vn-$key:$h{$key}\n";
             }
         }
+    print $fh "# -------------- CUT HERE --------------- If you are copying this data to the user-data field of Amazon ec2 you only need copy up to this line\n";
     print $fh "# --- All values from this point are used to preserve configuration for 'br' and not used directing in priming\n";
     outvar(hostnames);
     outvar(onoff);
