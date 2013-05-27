@@ -11,15 +11,22 @@ class MediaFilesController < ApplicationController
     @media_files = current_user.media_files
   end
 
+  def aca
+    org = request.env['HTTP_ORIGIN']
+    if org.length>0
+      headers['Access-Control-Allow-Origin'] = org
+      headers['Access-Control-Allow-Headers'] = request.env['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']
+      headers['Access-Control-Allow-Credentials'] = 'true'
+    end
+  end
+
   def options
+    aca()
     # commented out lines are for reference
-    headers['Access-Control-Allow-Origin'] = request.env['HTTP_ORIGIN']
     #headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS'
     #headers['Access-Control-Allow-Methods'] = request.env['HTTP_ACCESS_CONTROL_REQUEST_METHOD']
     headers['Access-Control-Allow-Methods'] = 'POST, GET, PUT, DELETE, OPTIONS'
     #headers['Access-Control-Max-Age'] = '1000'
-    headers['Access-Control-Allow-Headers'] = request.env['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']
-    headers['Access-Control-Allow-Credentials'] = 'true'
     head :ok
   end
 
@@ -28,6 +35,7 @@ class MediaFilesController < ApplicationController
     upload = MediaFile.new(params[:media_file]);
 p upload.inspect
     if upload.save();
+        aca()
         render :json => [{
             :tmp_name => upload.url,
             :name => upload.name,
