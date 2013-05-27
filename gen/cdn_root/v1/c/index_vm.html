@@ -234,8 +234,8 @@ input.br-phone-display {
 
 /* --- globals (soon...) --- */
 var a = BR.api.v1;
-var myhost = //' + location.hostname + ':3001';
-var thishost = ''   /* '' means same address as page */
+var myhost = '//' + location.hostname + ':3001';
+var thishost = '';   /* '' means same address as page */
 a.init({
     query_string:window.location.search,
     hosts: {
