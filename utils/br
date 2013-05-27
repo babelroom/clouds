@@ -249,7 +249,7 @@ sub list_all()
 {
     list_services();
     list_flags();
-    list_keycerts();
+#    list_keycerts();
 }
 
 # ---

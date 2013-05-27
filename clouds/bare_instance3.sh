@@ -38,7 +38,7 @@ sudo /sbin/chkconfig --add babelroom-run
 cd misc
 sudo install -o root -m 644 issue.std /etc/issue
 cp config.default ~/config
-cp index.html ~/config
+cp index.html ~/.
 
 cat << EOT 
 ---
