@@ -91,8 +91,8 @@ sudo gem install will_paginate -v 2.3.15 --no-rdoc --no-ri --ignore-dependencies
 sudo gem install xml-simple -v 1.0.15 --no-rdoc --no-ri --ignore-dependencies || exit -1
 
 # -- later when accounts is migrated
-#cd $HOME/gits/clouds/gen/rails/my/public
-#make    # make gen.min.js
+cd $HOME/gits/clouds/gen/rails/my/public
+make
 
 ln -s /home/br/gits/clouds/gen/rails/my/log /var/log/br/rails_my
 ln -s /home/br/gits/clouds/gen/rails/netops/log /var/log/br/rails_netops
