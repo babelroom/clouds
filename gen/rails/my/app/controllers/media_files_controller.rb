@@ -12,12 +12,12 @@ class MediaFilesController < ApplicationController
   end
 
   def options
+    # commented out lines are for reference
     headers['Access-Control-Allow-Origin'] = request.env['HTTP_ORIGIN']
     #headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS'
     #headers['Access-Control-Allow-Methods'] = request.env['HTTP_ACCESS_CONTROL_REQUEST_METHOD']
-    headers['Access-Control-Allow-Methods'] = 'POST'
+    headers['Access-Control-Allow-Methods'] = 'POST, GET, PUT, DELETE, OPTIONS'
     #headers['Access-Control-Max-Age'] = '1000'
-    #headers['Access-Control-Allow-Headers'] = '*,x-requested-with'
     headers['Access-Control-Allow-Headers'] = request.env['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']
     headers['Access-Control-Allow-Credentials'] = 'true'
     head :ok
