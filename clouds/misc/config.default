@@ -17,9 +17,9 @@ startup: mysqld node_app estream netops
 #_br_onoff-freeswitch:1
 #_br_onoff-mysqld:1
 #_br_onoff-rooms:1
-#_br_onoff-red5:0
+#_br_onoff-red5:1
 #_br_onoff-netops:1
-#_br_onoff-accounts:0
+#_br_onoff-accounts:1
 #_br_privatekeys-api:/home/br/gits/clouds/clouds/misc/dummy_privatekey.pem
 #_br_privatekeys-live:/home/br/gits/clouds/clouds/misc/dummy_privatekey.pem
 #_br_certificates-api:/home/br/gits/clouds/clouds/misc/dummy_certificate.pem

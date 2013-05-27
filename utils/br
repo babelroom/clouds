@@ -30,7 +30,7 @@ $dummy_cert = "/home/br/gits/clouds/clouds/misc/dummy_certificate.pem";
     mysqld => {installed=>sub{-d '/var/log/br/mysql';}, running=>sub{_ps_grep('/usr/libexec/mysqld');}, required=>1},
     netops => {installed=>sub{1;}, running=>sub{_ps_grep('/bin/su br -c ./init.pl');}, required=>1},
 );
-%onoff = (autoprime=>1, startup=>1,    'rooms'=>1, 'freeswitch'=>1, 'red5'=>0, 'my'=>0, 'netops'=>1, 'mysqld'=>1);  # defaults
+%onoff = (autoprime=>1, startup=>1,    'rooms'=>1, 'freeswitch'=>1, 'red5'=>1, 'my'=>1, 'netops'=>1, 'mysqld'=>1);  # defaults
 %list_functions = (
     services => list_services,
     flags => list_flags,
@@ -112,6 +112,20 @@ sub read_config
 sub write_config
 {
     my $fh = shift;
+    
+    # --- improvised solution to merge in "advanced" configuration for larger, scaled configurations
+    my %oo = %onoff;
+    my $adv = "/home/br/.advanced";
+    if (-f $adv) {
+        open AIF, "<$adv" || die;
+        foreach (<AIF>) {
+            print $fh $_;
+            }
+        close AIF;
+        $oo{autoprime} = undef;
+        $oo{startup} = undef;
+        }
+
     my $dummy =<<__EOT__
 autoprime:
 ngx_cln:     {script: "mk_clean_dir", dir: "/etc/nginx/br_conf.d"}
@@ -141,8 +155,8 @@ startup:    mysqld freeswitch fail2ban nginx   node_app mongrel_my mongrel_no es
 __EOT__
 ;
     my $startup = '';
-    print $fh "autoprime:\n" if ($onoff{autoprime});
-    sub add($$$) {my ($s,$p,$l)=@_; if ($onoff{$s}) { print $fh "$l\n"; $startup .= "$p "; } }
+    print $fh "autoprime:\n" if ($oo{autoprime});
+    sub add($$$) {my ($s,$p,$l)=@_; if ($oo{$s}) { print $fh "$l\n"; $startup .= "$p "; } }
     add(mysqld, mysqld, 'prime_mysqld: {script: "my_cnf", server_id: 37}');
     # netops last
     add(rooms,node_app,<<__EOT__
@@ -165,7 +179,7 @@ netops_db_syscfg: {script: "netops_db_syscfg", file: "/tmp/br/netops_db_syscfg",
 prime_netops: {src: "netops_rc", file: "/etc/init.d/netops", mode: "0755", deps: ['netops_db_syscfg']}
 __EOT__
 );
-    if ($onoff{startup}) {
+    if ($oo{startup}) {
         print $fh "# startup -- in order\nstartup: $startup\n";
         }
     print $fh "\n";
