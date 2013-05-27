@@ -47,7 +47,6 @@ $dummy_cert = "/home/br/gits/clouds/clouds/misc/dummy_certificate.pem";
 );
 %misc = ();
 
-
 # ---
 $result = GetOptions (
     "host=s" => \%hosts,
