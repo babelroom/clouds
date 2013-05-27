@@ -30,7 +30,7 @@ var config = {
             },
         mini: {
             root: '/home/br/gits/clouds/gen/cdn_root',
-            dashboard: '/v1/c/index.html',
+            dashboard: '/v1/c/index_vm.html',
             index: '/home/br/index.html',
             },
         mysql: {
