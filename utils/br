@@ -3,6 +3,10 @@
 use Getopt::Long;
 use Data::Dumper;   # for devel
 
+# coming soon ...
+#use Getopt::Long::Descriptive;
+# see: http://stackoverflow.com/questions/3515877/how-to-print-program-usage-in-perl
+
 # ---
 $|++;   # don't buffer stdout
 
@@ -329,10 +333,25 @@ sub status()
 # ---
 sub help($) 
 {
-    my $rc = shift;
-# TODO
-    print "There is no help coming\n";
-    exit $rc;
+    my $mod = shift;
+#[ rooms | freeswitch | red5 | my | netops | mysqld ]
+    print <<__EOT__
+# this feature is under development and not yet documented
+--host
+--on
+--off
+--list
+--online
+--offline
+--resetdb
+--check
+--status
+--cyclekeys
+--help
+--write
+__EOT__
+;
+    return 0;
 }
 
 # ---
