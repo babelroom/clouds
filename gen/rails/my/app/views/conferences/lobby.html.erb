@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+
+<% content_for :flash_notices do %>
+    <% if false %>
+        # msg_info, msg_error, msg_warn, msg_ok
+    <% end %>
+    <% if flash[:error] %><p class="msg msg_error"><%= flash[:error] %></p><% end %>
+    <% if flash[:notice] %><p class="msg msg_ok"><%= flash[:notice] %></p><% end %>
+    <% if flash[:warn] %><p class="msg msg_warn"><%= flash[:warn] %></p><% end %>
+<% end %>
+
+<% user_name = (((!current_user.nil?) && (current_user.signed_up?)) ? cstr(current_user.full_name) : 'guest') %>
+
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+  <meta name="viewport" content="width=1000" />
+  <title></title>
+
+    <script>
+        /* context */
+        var context = [];
+        context.user_id = '<%= ((!current_user.nil?) && (current_user.signed_up?)) ? current_user.id.to_s : 0.to_s %>';
+        <% if not current_user.accounts.nil? and not current_user.accounts[0].nil?; acct_id = current_user.accounts[0].id.to_s  %>
+        context.account_id = <%= jstr(acct_id) %>;
+        <% end %>
+
+        <% def cua(attr); (current_user.present? and current_user.signed_up?) ? escape_javascript(current_user[attr]) : ''; end %>
+        context.first_name = '<%= cua(:name) %>';
+        context.last_name = '<%= cua(:last_name) %>';
+        context.email = '<%= cua(:email_address) %>';
+        context.full_name = '<%= escape_javascript(current_user.full_name) %>';
+    </script>
+
+<% if $babelroom[:environment].eql? 'DEVELOPMENT' %>
+    <!--[if (!IE)|(gte IE 8)]><!-->
+        <link href="/lobby/customized.min.css" media="all" rel="stylesheet" type="text/css" />
+    <!--<![endif]-->
+    <!--[if lte IE 7]>
+        <link href="/lobby/app.min.css" media="all" rel="stylesheet" type="text/css" />
+    <![endif]-->
+    <link href="/lobby/br_override.css" media="all" rel="stylesheet" type="text/css" />
+    <link href="/css/widget.css" rel="stylesheet" type="text/css" /> <!-- this is needed for some recurly stuff -->
+    <link href="/recurly-js/recurly-customized.css" rel="stylesheet" type="text/css" /> 
+<% else %>
+    <!--[if (!IE)|(gte IE 8)]><!-->
+        <link href="/css/gen_lobby.css" media="all" rel="stylesheet" type="text/css" />
+    <!--<![endif]-->
+    <!--[if lte IE 7]>
+        <link href="/css/gen_lobby_old_IE.css" media="all" rel="stylesheet" type="text/css" />
+    <![endif]-->
+<% end %>
+
+
+  <script src="/lobby/app.js" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+  <script src="/lobby/ie.html5shiv.js" type="text/javascript"></script>
+  <![endif]-->
+  <script type="text/javascript" src="/jquery/js/jquery.tools.min.js"></script>
+  <script src="/recurly-js/recurly.min.js" type="text/javascript"></script> 
+
+<style type="text/css">
+.right_column {
+  float: right;
+  width: 235px;
+  margin: 0px 40px 40px 40px;
+  text-align: center;
+}
+img.enterprise_feature {
+  margin-bottom: 40px;
+}
+p.note {
+  margin-top :0;
+  font-size: 90%;
+}
+article > p {
+  margin-bottom: 2.5em;
+}
+</style>
+
+<%= google_tracker_js %>
+</head>
+
+<%
+    def mapped(nav)
+        {
+            'personal' => 'recurly_account',
+            'call_log' => 'site_settings',
+            'files' => 'transparent_post',
+            'api' => 'api_credentials',
+            'plan' => 'plans',
+            }[nav]
+    end
+    def nav_link(nav,desc)
+        '<li class="' + mapped(nav) + '"><a href="?nav=' + nav + '">' + desc + '</a></li>'
+    end
+%>
+
+<body class="app site_test nav_<%= mapped(params[:nav]) %>">
+
+<div id="container">
+
+<header>
+    <div class="logo">
+        <h1>
+            <a href="/home" class="main-logo"><span></span></a>
+        </h1>
+    </div>
+
+  <div class="content">
+    
+
+    <div id="br_top_left_menu">
+        <ul>
+        <% if @conference.present?
+            room_uri = $babelroom[:page_url] + '/'
+            if @conference.uri.nil?
+                room_uri += 'i/' + @conference.id.to_s
+            else
+                room_uri += @conference.uri
+            end
+        %>
+<!--
+            <li class="br_enter_room"><a href="<%= room_uri %>" target="_blank"><%= room_uri %></a></li>
+            <a href="<%= room_uri %>" target="_blank" class="button" style="background-color: #709924; background-image: none;">Go To Room</a> -->
+            <a href="<%= room_uri %>" target="_blank" class="button">Go To My Room...</a>
+        <% end %>
+        </ul>
+    </div>
+
+    <div id="user_menu">
+        <ul>
+        <li class="profile"><a href="#" onClick="do_personal(); return false;"><%= user_name %></a></li>
+        <li class="logout"><a href="/logout">Log out</a></li>
+        </ul>
+
+    </div>
+  </div>
+</header>
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript"> 
+    
+  Recurly.config({
+<% if $babelroom[:environment].blank? or $babelroom[:environment].eql? 'PRODUCTION' %>
+    environment: 'production'
+  , subdomain: 'babelroom'
+<% else %>
+    environment: 'sandbox'
+  , subdomain: 'babelroom-test'
+<% end %>
+  , accountCode: '<%= $babelroom[:new_account_prefix] %>' + context.account_id
+, firstName: 'bar'
+  , currency: 'USD'
+  , country: 'US'
+  });
+ 
+    function do_subscribe_overlay(plan) {
+        Recurly.buildSubscriptionForm({
+            target: '#recurly-subscribe'
+            , planCode: plan
+            , afterInject: function(form){
+                $('.due_now').css('display','none');
+                $('.contact_info').css('display','none');
+                $(form).find('.first_name input[type="text"]').val(context.first_name).change();
+                $(form).find('.last_name input[type="text"]').val(context.last_name).change();
+                $(form).find('.email input[type="text"]').val(context.email).change();
+                }
+            , enableAddOns: true
+            , enableCoupons: false
+            , addressRequirement: 'full'
+            , successURL: '/home'
+            , distinguishContactFromBillingInfo: true
+            , termsOfServiceURL: 'babelroom.com/legal/terms'
+            });
+
+        $('#overlay').overlay({
+            /* top: 260, */
+            mask: {
+                // you might also consider a "transparent" color for the mask
+                color: '#555',
+                // load mask a little faster
+                loadSpeed: 200,
+                // very transparent
+                opacity: 0.7
+                },
+            /* closeOnClick: false */
+            closeOnClick: false,
+            load: true
+            });
+        }
+
+</script>
+
+<%
+    @plan_description = {
+        nil => 'Unsubscribed',
+        'free' => 'Free Plan',
+        'solo_plan' => 'Solo Plan',
+        'pro_plan' => 'Pro Plan',
+        'flex_plan' => 'Flex Plan',
+        }
+    @plan_description['unsubscribe'] = @plan_description[nil];
+%>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div id="pane" >
+
+
+
+<div id="non_iframe_view">
+
+
+<% if params[:nav].blank? %>
+<div id="view">
+<div id="content_view">
+
+  <div class="page_header"> 
+    <div class="breadcrumbs"> 
+    </div> 
+    <h2>Welcome</h2> 
+  </div> 
+  <%= yield :flash_notices %>
+
+  <div id="content"> 
+    <article>
+ 
+<div style="height: 200px; text-align: center; background-color: white;">
+    <h2><!--Splash!--></h2>
+</div>
+
+    </article>
+  </div>
+
+</div><!-- /CONTENT -->
+</div><!-- /view -->
+<% elsif params[:nav].eql? 'subscribe' %>
+<div id="view">
+<div id="content_view">
+
+  <div class="page_header"> 
+    <div class="breadcrumbs"> 
+    </div> 
+    <h2>Subscribe</h2> 
+  </div> 
+  <%= yield :flash_notices %>
+ 
+  <div id="content"> 
+ 
+    <center>
+    <div id="subscribe2">
+    </div>
+    </center>
+
+  </div>
+ 
+<script type="text/javascript"> 
+    
+  Recurly.buildSubscriptionForm({
+    target: '#subscribe2'
+  , planCode: '<%= escape_javascript(params[:plan]) %>'
+  , afterInject: function(form){
+        $(form).find('.first_name input[type="text"]').val(context.first_name).change();
+        $(form).find('.last_name input[type="text"]').val(context.last_name).change();
+        $(form).find('.email input[type="text"]').val(context.email).change();
+        }
+  , enableAddOns: true
+  , enableCoupons: false
+  , addressRequirement: 'full'
+  , successURL: '/home'
+  , distinguishContactFromBillingInfo: true
+  , termsOfServiceURL: 'babelroom.com/legal/terms'
+  });
+
+</script>
+
+</div><!-- /CONTENT -->
+</div><!-- /view -->
+<% elsif params[:nav].eql? 'signup' %>
+<div id="view">
+<div id="content_view">
+
+  <div class="page_header"> 
+    <div class="breadcrumbs"> 
+    </div> 
+    <h2>Welcome</h2> 
+  </div> 
+  <%= yield :flash_notices %>
+
+  <div id="content"> 
+    <article>
+ 
+<div style="height: 100px; text-align: center;">
+    <h2>Welcome!</h2>
+</div>
+
+    </article>
+  </div>
+
+<div id="overlay" class="br_overlay" style="display: none;">
+    <div id="recurly-subscribe" style="width: 500px;">
+    </div>
+</div>
+<script type="text/javascript"> 
+
+    do_subscribe_overlay('<%= escape_javascript(params[:plan]) %>');
+    
+</script>
+
+</div><!-- /CONTENT -->
+</div><!-- /view -->
+<% elsif params[:nav].eql? '__placeholder' %>
+<div id="view">
+<div id="content_view">
+
+
+</div><!-- /CONTENT -->
+</div><!-- /view -->
+<% elsif params[:nav].eql? 'plan' %>
+<div id="view">
+<div id="content_view">
+
+  <div class="page_header"> 
+    <div class="breadcrumbs"> 
+    </div> 
+    <h2>Plan</h2> 
+  </div> 
+  <%= yield :flash_notices %>
+ 
+  <% if @account.nil? %>
+    <p class="msg msg_warn">Account signup is not complete. An account must be attached to use this section. Account signup is located <a href="<%= $babelroom[:marcom_url] %>/signup/">here</a>.</p>
+  <% else %>
+  <% if @account.changing_flag %>
+    <p class="msg msg_warn">We are currently updating your account, which can take several minutes to complete. Hit the refresh button to the right to display your updated account info below. <a href="/home?nav=plan" class="button" style="float: right;">Refresh</a><div style="clear: both;"></div></p>
+  <% end %>
+    
+  <div id="content"> 
+
+    <article>
+        <center>
+            <%= @plan_description[@account.plan_code] %>
+
+            <% if @account.plan_usage.present? && @account.plan_usage.match(/=(\d+)$/); minutes=$1 %>
+            <p><h3><%= minutes %> minutes used</h3></p>
+            <% end %>
+
+            <% if not @account.changing_flag %>
+            <p><table><tr><%=
+            def do_plan_form(title,code)
+                rfpt = request_forgery_protection_token
+                fat = escape_javascript(form_authenticity_token)
+                plan_form = <<CODE
+    <td><center>#{@plan_description[code]}<br><br> <form action="/home?nav=plan" method="POST">
+        <input name="#{rfpt}" type="hidden" value="#{fat}" />
+        <input type="hidden" name="page_path" value="/home?nav=plan">
+        <input type="hidden" name="after_submit" value="/home?nav=plan">
+        <input type="hidden" name="plan_code" value="#{code}">
+        <button class="button" type="submit">#{title}</button>
+    </form></center></td>
+CODE
+            end
+            def do_plan_link(title,code)
+                plan_link = <<CODE
+    <td><center> #{@plan_description[code]}<br><br> <a href="#" onClick="javascript:do_subscribe_overlay('#{code}'); return false;" class="button">#{title}</a></center> </td>
+CODE
+            end
+            plan_html = ''
+            if @account.plan_code.nil?
+                plan_html += do_plan_link('Free','free')
+                plan_html += do_plan_link('Solo Plan','solo_plan')
+                plan_html += do_plan_link('Pro Plan','pro_plan')
+                plan_html += do_plan_link('Flex Plan','flex_plan')
+            else
+                plan_html += do_plan_form('Unsubscribe','unsubscribe')
+                if not @account.plan_code.eql? 'free'
+                    plan_html += do_plan_form('Free','free')
+                end
+                if not @account.plan_code.eql? 'solo_plan'
+                    plan_html += do_plan_form('Solo Plan','solo_plan')
+                end
+                if not @account.plan_code.eql? 'pro_plan'
+                    plan_html += do_plan_form('Pro Plan','pro_plan')
+                end
+                if not @account.plan_code.eql? 'flex_plan'
+                    plan_html += do_plan_form('Flex Plan','flex_plan')
+                end
+            end
+            plan_html
+            %></tr></table></p>
+            <% end %>
+        </center>
+    </article>
+ 
+  </div>
+<div id="overlay" class="br_overlay" style="display: none;">
+    <div id="recurly-subscribe" style="width: 500px;">
+    </div>
+</div>
+  <% end %>
+ 
+</div><!-- /CONTENT -->
+</div><!-- /view -->
+<% elsif params[:nav].eql? 'call_log' %>
+<div id="view">
+<div id="content_view">
+
+ 
+  <div class="page_header"> 
+    <div class="breadcrumbs"> 
+    </div> 
+ 
+    <h2>Call Activity</h2> 
+ 
+    <div class="external_links">
+
+    Your timezone is <%= cua(:timezone) %> <a href="#" class="button" onClick="do_personal();">Change</a>
+      
+    </div>
+  </div> 
+  <%= yield :flash_notices %>
+
+  <div id="content"> 
+ 
+ 
+<!-- accounts-list --> 
+<div class="table with_advanced_filters full_page "> 
+ 
+  <!-- div class="header">
+    <h4>Accounts</h4>
+  </div --> 
+    
+  <div class="filters"> 
+    <h4><!--Filter--></h4> 
+
+<br><center><div style="width:80%;">
+Babelroom retains 90 days of call activity data
+</div></center></br>
+
+<% if false %>
+    <ul> 
+        <li class="selected account_active"> 
+          <a href="https://babelroom.recurly.com/accounts"> 
+            <span class="status_icon"></span> 
+            <span class="filter_label">Open</span> 
+            <span class="filter_total">108</span> 
+</a>        </li> 
+        <li class=" account_nonsubscriber"> 
+          <a href="https://babelroom.recurly.com/accounts?show=non_subscribers"> 
+            <span class="status_icon"></span> 
+            <span class="filter_label">Non-Subscribers</span> 
+            <span class="filter_total">108</span> 
+</a>        </li> 
+        <li class=" account_subscriber"> 
+          <a href="https://babelroom.recurly.com/accounts?show=active_subscribers"> 
+            <span class="status_icon"></span> 
+            <span class="filter_label">Subscribers</span> 
+            <span class="filter_total">0</span> 
+</a>        </li> 
+        <li class=" account_intrial"> 
+          <a href="https://babelroom.recurly.com/accounts?show=trial_subscribers"> 
+            <span class="status_icon"></span> 
+            <span class="filter_label">In Trial</span> 
+            <span class="filter_total">0</span> 
+</a>        </li> 
+        <li class=" account_pastdue"> 
+          <a href="https://babelroom.recurly.com/accounts?show=past_due"> 
+            <span class="status_icon"></span> 
+            <span class="filter_label">Past Due</span> 
+            <span class="filter_total">0</span> 
+</a>        </li> 
+        <li class=" account_canceled"> 
+          <a href="https://babelroom.recurly.com/accounts?show=canceled_subscribers"> 
+            <span class="status_icon"></span> 
+            <span class="filter_label">Non-renewing</span> 
+            <span class="filter_total">0</span> 
+</a>        </li> 
+        <li class=" account_future"> 
+          <a href="https://babelroom.recurly.com/accounts?show=future_subscribers"> 
+            <span class="status_icon"></span> 
+            <span class="filter_label">Future</span> 
+            <span class="filter_total">0</span> 
+</a>        </li> 
+        <li class=" account_closed"> 
+          <a href="https://babelroom.recurly.com/accounts?show=closed"> 
+            <span class="status_icon"></span> 
+            <span class="filter_label">Closed</span> 
+            <span class="filter_total">103</span> 
+</a>        </li> 
+    </ul> 
+<% end %>
+  </div> 
+ 
+  <div class="data"> 
+    <table> 
+      <thead> 
+        <tr> 
+          <% def tfoo(col)
+                "/home?nav=call_log&page=" + @summary[:page].to_s + "&sort=" + col + "&order=" + @summary[:order_inverted]
+            end %>
+          <!--th></th--> 
+          <th class="sortable"><a href="<%=tfoo('started')%>">Started</a></th> 
+          <th class="sortable"><a href="<%=tfoo('participant')%>">Participant</a></th> 
+          <th class="sortable"><a href="<%=tfoo('accounting_desc')%>">Call Method</a></th> 
+          <th class="sortable"><a href="<%=tfoo('number')%>">Number</a></th> 
+          <th class="sortable"><a href="<%=tfoo('duration')%>">Duration</a></th> 
+        </tr> 
+      </thead> 
+ 
+      <tbody> 
+        <% @callees.each() do |c| %>
+          <tr class="account
+             account_active
+             account_nonsubscriber
+            "> 
+            <!--td class="status_icon"></td--> 
+            <td> <%= pretty_datetime(c.started) %> </td> 
+            <td> <%= c.participant %></td> 
+            <td> <%= c.accounting_desc %> </td> 
+            <td> <%= c.number %> </td> 
+            <td> <%= distance_of_time_in_words(c.started,c.ended,true) %> </td> 
+        <% end %>
+
+      </tbody> 
+      <!-- /body -->    
+    </table> 
+  </div> 
+ 
+  <div class="footer"> 
+    <div class="pagination_summary"> 
+    <% if @summary[:last_record_on_page].eql? 0 %>
+    There are no calls to display
+    <% else %>
+    
+    Displaying calls <b><%= @summary[:first_record_on_page] %>&nbsp;-&nbsp;<%= @summary[:last_record_on_page] %></b> of <b><%= @summary[:count] %></b> in total
+    </div> 
+    
+    <div class="pagination"> 
+    <div class="pagination">
+    <% if @summary[:prev].eql? @summary[:page] %>
+        <span class="next_page disabled">Previous</span>
+    <% else %>
+        <a class="previous_page" rel="previous" href="/home?nav=call_log&page=<%=@summary[:prev]%>&sort=<%=@summary[:sort]%>&order=<%=@summary[:order]%>">Previous</a>
+    <% end %>
+    <% for p in (@summary[:paginate_first] .. @summary[:paginate_last]) %>
+        <% if p == @summary[:page] %>
+            <em><%= p %></em>
+        <% else %>
+            <a href="/home?nav=call_log&page=<%=p%>&sort=<%=@summary[:sort]%>&order=<%=@summary[:order]%>"><%=p%></a>
+        <% end %>
+    <% end %>
+    <% if @summary[:next].eql? @summary[:page] %>
+        <span class="next_page disabled">Next</span>
+    <% else %>
+        <a class="next_page" rel="next" href="/home?nav=call_log&page=<%=@summary[:next]%>&sort=<%=@summary[:sort]%>&order=<%=@summary[:order]%>">Next</a>
+    <% end %>
+    </div> 
+
+    <% end %>
+    </div> 
+
+  </div> 
+    
+</div> 
+ 
+ 
+    <div style="clear:both;"></div> 
+  </div> 
+ 
+
+
+</div><!-- /CONTENT -->
+</div><!-- /view -->
+<% elsif params[:nav].eql? 'files' %>
+<div id="view">
+<div id="content_view">
+
+ 
+  <div class="page_header"> 
+    <div class="breadcrumbs"> 
+    </div> 
+ 
+    <h2>Files</h2> 
+  </div> 
+  <%= yield :flash_notices %>
+ 
+ 
+    
+  <div id="content"> 
+ 
+      
+ 
+ 
+<!-- accounts-list --> 
+<div class="table with_advanced_filters full_page "> 
+ 
+  <!-- div class="header">
+    <h4>Accounts</h4>
+  </div --> 
+    
+  <div class="filters"> 
+    <h4>Filter</h4> 
+    <ul> 
+        <%
+            def fl(h)
+                "/home?nav=files&bucket=" + (h[:bucket].nil? ? @summary[:bucket].to_s : h[:bucket]) + "&page=" + (h[:page].nil? ? @summary[:page].to_s : h[:page]) + "&sort=" + (h[:sort].nil? ? @summary[:sort].to_s : h[:sort]) + "&order=" + (h[:invert].present? ? @summary[:order].to_s : @summary[:order_inverted])
+            end
+
+            def fs(bucket)
+                (bucket.eql? @summary[:bucket]) ? 'class="selected"' : ''
+            end
+        %>
+        <li <%= fs("") %>> 
+          <a href="<%= fl({:bucket => ''}) %>"> 
+            <span class="filter_label">- All Files -</span> 
+            <span class="filter_total"></span> 
+</a>        </li> 
+        <li <%= fs("Presentations") %>> 
+          <a href="<%= fl({:bucket => 'Presentations'}) %>"> 
+            <span class="filter_label">Presentations</span> 
+            <span class="filter_total"></span> 
+</a>        </li> 
+        <li <%= fs("Recordings") %>> 
+          <a href="<%= fl({:bucket => 'Recordings'}) %>"> 
+            <span class="filter_label">Recordings</span> 
+            <span class="filter_total"></span> 
+</a>        </li> 
+        <li <%= fs("Uploads") %>> 
+          <a href="<%= fl({:bucket => 'Uploads'}) %>"> 
+            <span class="filter_label">Uploads</span> 
+            <span class="filter_total"></span> 
+</a>        </li> 
+    </ul> 
+    <h4>File Upload</h4>
+        <br>
+        <center>
+        <% form_for :media_file, :url => "/plugin/0/media_files", :html => { :id => "file_upload_form", :multipart => true } do |f| %>
+        <input type="hidden" name="page_path" value="/home?nav=files">
+        <input type="hidden" name="after_submit" value="/home?nav=files">
+        <% if not @conference.nil? %><input type="hidden" name="media_file[conference_id]" value="<%= @conference.id.to_s %>"><% end %>
+        <input type="hidden" name="media_file[bucket]" value="Uploads">
+        <%= f.file_field :upload %>
+        <%= submit_tag("Upload", "id" => "file_upload_submit_button") %>
+        <% end %>
+        </center>
+  </div> 
+ 
+  <div class="data"> 
+    <table> 
+      <thead> 
+        <tr> 
+          <th class="sortable"><a href="<%=fl({:sort=>'name', :invert => ''})%>">Name</a></th> 
+          <!--th class="sortable"><a href="<%=fl({:sort=>'content_type', :invert => ''})%>">Content Type</a></th--> 
+          <th class="sortable"><a href="<%=fl({:sort=>'length', :invert => ''})%>">Length</a></th> 
+          <!--th class="sortable"><a href="<%=fl({:sort=>'slideshow_pages', :invert => ''})%>">Slide Pages</a></th--> 
+          <th></th> 
+          <th></th> 
+        </tr> 
+      </thead> 
+ 
+      <tbody> 
+        <% @files.each() do |f| %>
+          <tr class="account
+             account_active
+             account_nonsubscriber
+            "> 
+            <td> <%= f.name %> </td> 
+            <!--td> <%= f.content_type %></td--> 
+            <td> <%= f.length %> </td> 
+            <!--td> <%= f.slideshow_pages %> </td--> 
+            <td><a href="<%= f.url %>" class="button">Download</a> </td> 
+            <td align="center">
+                <form method="POST" action="/plugin/0/media_files/<%= f.id %>">
+                <input name="_method" type="hidden" value="delete" />
+                <button onclick="return confirm('Are you sure you wish to delete the following file?\n\n\'<%=f.name%>\'\n\nThis action cannot be undone.');" type="submit" value="Delete" title="Delete">
+                <!--img src="/lobby/icons/general/delete.png" alt="Delete"-->Delete</button>
+                <input name="<%= request_forgery_protection_token %>" type="hidden" value="<%= escape_javascript(form_authenticity_token) %>" />
+                <input type="hidden" name="page_path" value="<%= fl({}) %>">
+                <input type="hidden" name="after_submit" value="<%= fl({}) %>">
+                </form>
+            </td>
+        <% end %>
+
+      </tbody> 
+      <!-- /body -->    
+    </table> 
+  </div> 
+ 
+  <div class="footer"> 
+    <div class="pagination_summary"> 
+    <% if @summary[:last_record_on_page].eql? 0 %>
+    No files match selected criteria
+    <% else %>
+    
+    Displaying files <b><%= @summary[:first_record_on_page] %>&nbsp;-&nbsp;<%= @summary[:last_record_on_page] %></b> of <b><%= @summary[:count] %></b>
+    </div> 
+    
+    <div class="pagination"> 
+    <div class="pagination">
+    <% if @summary[:prev].eql? @summary[:page] %>
+        <span class="next_page disabled">Previous</span>
+    <% else %>
+        <a class="previous_page" rel="previous" href="/home?nav=files&page=<%=@summary[:prev]%>&sort=<%=@summary[:sort]%>&order=<%=@summary[:order]%>">Previous</a>
+    <% end %>
+    <% for p in (@summary[:paginate_first] .. @summary[:paginate_last]) %>
+        <% if p == @summary[:page] %>
+            <em><%= p %></em>
+        <% else %>
+            <a href="/home?nav=files&page=<%=p%>&sort=<%=@summary[:sort]%>&order=<%=@summary[:order]%>"><%=p%></a>
+        <% end %>
+    <% end %>
+    <% if @summary[:next].eql? @summary[:page] %>
+        <span class="next_page disabled">Next</span>
+    <% else %>
+        <a class="next_page" rel="next" href="/home?nav=files&page=<%=@summary[:next]%>&sort=<%=@summary[:sort]%>&order=<%=@summary[:order]%>">Next</a>
+    <% end %>
+    </div> 
+
+    <% end %>
+    </div> 
+
+  </div> 
+    
+</div> 
+ 
+ 
+    <div style="clear:both;"></div> 
+  </div> 
+ 
+
+
+</div><!-- /CONTENT -->
+</div><!-- /view -->
+<% elsif params[:nav].eql? 'api' %>
+<div id="view" class="aside_content">
+<div id="content_view">
+
+  <div class="page_header"> 
+    <div class="breadcrumbs"> 
+    </div> 
+ 
+    <h2>API Access</h2> 
+  </div> 
+  <%= yield :flash_notices %>
+ 
+  <div id="content" class="aside_content"> 
+
+<!-- subnav and main view --> 
+<!--
+-->
+<aside class='right'><h4>API Integration</h4> 
+<p>Documentation pending...</p> 
+<p> 
+<a href="javascript:void(0);"><!--target="_blank"--> 
+Learn More &rarr;
+</a> 
+</p> 
+</aside> 
+    <%
+    api_key = (((!current_user.nil?) && (current_user.signed_up?)) ? current_user.api_key : nil);
+    def do_api_button(form_attr,title,onclick,type,api_action)
+        rfpt = request_forgery_protection_token
+        fat = escape_javascript(form_authenticity_token)
+        api_button = <<CODE
+    <form action="/home?nav=api" method="POST"#{form_attr}>
+        <input name="#{rfpt}" type="hidden" value="#{fat}" />
+        <input type="hidden" name="page_path" value="/home?nav=api">
+        <input type="hidden" name="after_submit" value="/home?nav=api">
+        <input type="hidden" name="api_action" value="#{api_action}">
+        <button class="button#{type}"#{onclick} type="submit">#{title}</button>
+    </form>
+CODE
+    end
+    if api_key.nil? %>
+        <div class='page_footer'><%= do_api_button('','Enable API Access','','',2); %></div>
+    <% else %>
+<dl> 
+<dt>API Key</dt> 
+<dd> 
+&nbsp;
+<code><%= api_key %></code> 
+<%= do_api_button('style="float: right;"','Regenerate API Key','onclick="return confirm(\'Are you sure you want to regenerate the API Key?\n\nThis will immediately disable the existing API key\');"','',1); %>
+</dd> 
+<dt>Example</dt> 
+<dd> 
+<code>
+<pre>
+curl -u <%= api_key %>: <%= $babelroom[:api_url] %>/api/v1/users/<%= current_user.id %>
+</pre>
+</code> 
+</dd> 
+</dl> 
+    <div class='page_footer'><%= do_api_button('','Disable API Access','onclick="return confirm(\'Are you sure you want to disable API access?\n\nThis will immediately disable the existing API key\');"',' caution',0); %></div>
+    <% end %>
+
+    <div style="clear:both;"></div> 
+  </div>
+
+</div><!-- /CONTENT -->
+</div><!-- /view -->
+<% end %>
+
+
+
+
+</div><!-- non_iframe_view -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<% if true %>
+<div id="iframe_view" style="display: none;">
+<div id="view">
+<div id="content_view">
+  <div class="page_header" id="frame_header" style="display: none;">
+    <div class="breadcrumbs">
+    </div>
+    <h2 id="frame_title"></h2>
+  </div>
+    
+  <div id="content" style="margin-top: 0;"> 
+
+<!--article-->
+
+<div id="frame_background" style="display: block;">
+<div id="frame_loading" style="width: 100%;"><div style="height: 175px;"></div><center><img src="/lobby/clock_spinner.gif" width="50" height="50"></center></div>
+</div>
+
+<iframe id="frame" style="" frameborder="0"
+width="100%"
+vspace="0" hspace="0"
+marginwidth="0" marginheight="0" 
+allowtransparency="true"
+></iframe>
+
+<!--/article-->
+
+    <div style="clear:both;"></div>
+  </div>
+
+</div><!-- /CONTENT -->
+</div><!-- /view -->
+</div>
+<% end %>
+
+
+
+<footer>
+  <%= render :partial => "shared/lobby_footer_links" %>
+
+  <p class="copyright">&copy; 2012–2013 Babelroom, Inc.</p>
+
+</footer>
+
+</div>
+
+<nav><ul>
+    
+  <li id="profile_group" class="profile group">
+    <h3>Profile</h3>
+    <ul>
+        <li class="recurly_account"><a href="#" onClick="do_personal(); return false;">Personal</a></li>
+        <li class="currencies"><a href="#" onClick="do_frame({url:'/plugin/0/users/'+context.user_id+'/password?css=/lobby/lobby_plugin.css',nav_class:'currencies',title:'Change Password',height:'400px'}); return false;">Password</a></li>
+    </ul>
+  </li>
+
+  <li id="account_group" class="account group">
+    <h3>Account</h3>
+    <ul>
+        <li class="invoices"><a href="#" onClick="do_account(); return false;">Account</a></li>
+<!--
+        <%= nav_link('plan','Plan') %>
+        < ! - -li class="subscribe_solo"><a href="?nav=subscribe&plan=solo_plan">Subscribe (Example) - Solo</a></li- - >
+-->
+        <%= nav_link('call_log','Call Activity') %>
+    </ul>
+  </li>
+
+  <li id="files_group" class="files group">
+    <h3>Files</h3>
+    <ul>
+        <%= nav_link('files','Files') %>
+        <!--li class="transparent_post"><a href="#" onClick="do_frame({url:'/plugin/0/media_files?css=/css/plugin.css',nav_class:'transparent_post',title:'Files2'}); return false;">Files2</a></li-->
+    </ul>
+  </li>
+
+  <li id="developer_group" class="developer group">
+    <h3>Developer</h3>
+    <ul>
+        <%= nav_link('api','API Credentials') %>
+    </ul>
+  </li>
+
+  <li id="support_group" class="support group">
+    <h3>Support</h3>
+    <ul>
+        <li class="email_templates"><a href="<%= $babelroom[:marcom_url] %>/" target="_blank">Babelroom Home</a></li>
+        <!--li class="email_templates"><a href="#" onClick="Zenbox.show(event); return false;">Feedback...</a></li-->
+<!--
+        <li class="email_templates"><a href="#" onClick="do_frame({url:'https://babelroom.zendesk.com/account/dropboxes/20091106?name='+context.full_name+'&email='+context.email,title:'Feedback',height:'500px'}); return false;">Feedback</a></li>
+-->
+    </ul>
+  </li>
+
+</ul></nav>
+
+</div> <!--/#container-->
+
+<script type='text/javascript'>
+
+    var current_nav_class = 'nav_<%= mapped(params[:nav]) %>';
+    var frame_header_selector = '#frame_header';
+
+    $('#frame').load(function(){
+        $('#frame_background').css('display','none');
+        $('#frame').css('display','block');
+        });
+
+    function do_frame(o) {
+
+        $('#frame_background').css('display','block');
+        $('#frame').css('display','none');
+
+        $('#non_iframe_view').css('display','none');
+        $('#iframe_view').css('display','block');
+        $(frame_header_selector).css('display','none');
+        if (o.header_selector) {
+            frame_header_selector = o.header_selector;
+            }
+        else if (o.title) {
+            $('#frame_title').text(o.title);
+            frame_header_selector = '#frame_header'
+            }
+        $(frame_header_selector).css('display','block');
+
+        if (o.height)  {
+            $('#frame_background').height(o.height);
+            $('#frame').height(o.height);
+            }
+        $('#frame').attr('src',o.url);
+        $('body').removeClass(current_nav_class);
+        current_nav_class = 'nav_' + o.nav_class;
+        $('body').addClass(current_nav_class);
+        }
+
+    function do_personal() {
+        do_frame({url:'/plugin/0/users/'+context.user_id+'/edit?css=/lobby/lobby_plugin.css',nav_class:'recurly_account',title:'Personal Settings',height:'400px'});
+        }
+
+    function do_account() {
+<% if @account_external_url.nil?  %>
+        alert('Account information is not yet available.');
+<%  else %>
+        do_frame({url:'<%= escape_javascript(@account_external_url) %>',nav_class:'invoices',title:'Account',height:'860px'});
+<%  end %>
+        }
+
+    /* image upload */
+    (function(){
+        var mf = $('#media_file_upload')
+        $('#file_upload_submit_button').hide();
+        mf.live('change',function(){ /* note change to .delegate, then .on with newer versions of jQuery ... this one is really old ... 1.2.x */
+            var fb = $(this);
+            if (fb.val()) {
+                $('#file_upload_form').submit();
+                fb.attr('disabled','disabled');
+                }
+            });
+    }());
+
+</script>
+</body>
+</html>
+

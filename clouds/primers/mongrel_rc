@@ -1,4 +1,5 @@
-my ($file, $port, $label, $path, $rails_env) = ($R->{file}, $R->{port}, $R->{label}, $R->{path}, $R->{rails_env});
+my ($file, $addr, $port, $label, $path, $rails_env) = ($R->{file}, $R->{addr}, $R->{port}, $R->{label}, $R->{path}, $R->{rails_env});
+$addr = "127.0.0.1" if not length($addr);
 open F, ">$file" or die;
 print F <<__EOT__
 # -- automatically created by BR primer MODIFICATIONS MAY BE LOST
@@ -29,7 +30,7 @@ start()
     echo -n \$"Starting \$prog: "
 #    \$SRC_DIR/\$NETOPS \$OPTIONS & && success || failure .. what is this?
     cd \$SRC_DIR && rm -f log/*.pid
-    cd \$SRC_DIR && /bin/su br -c '/usr/bin/mongrel_rails start -d -e $rails_env -p $port -a 127.0.0.1'
+    cd \$SRC_DIR && /bin/su br -c '/usr/bin/mongrel_rails start -d -e $rails_env -p $port -a $addr'
     RETVAL=\$?
     [ "\$RETVAL" = 0 ] && echo \$! >\$PID_FILE && touch /var/lock/subsys/$label
     echo

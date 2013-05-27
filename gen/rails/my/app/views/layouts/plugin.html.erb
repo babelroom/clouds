@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<% page_subtitle=yield('subtitle') %>
+<title>Babelroom | <%= page_subtitle %></title>
+<meta name="description" content="" />
+<meta name="keywords" content="" />
+
+<% if params[:css].present? %>
+<link media="all" rel="stylesheet" type="text/css" href="<%= cstr(params[:css]) %>" />
+<% end %>
+
+<%= yield :append_head %>
+<%= google_tracker_js %>
+</head>
+
+<body style="margin:0px;" <%= yield('append_body_attributes') %>>
+
+<% if flash[:notice] %><div class="msg msg_ok"><%= flash[:notice] %></div><% end %>
+<% if flash[:error] %><div class="errorbox"><%= flash[:error] %></div><% end %>
+
+<%= yield %>
+
+</body></html>
+

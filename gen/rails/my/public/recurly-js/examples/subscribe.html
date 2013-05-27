@@ -1,0 +1,34 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>RecurlyJS Subscribe Example</title> 
+<!-- <link rel="stylesheet" href="../style/reset.css" type="text/css" />  -->
+<link rel="stylesheet" href="examples.css" type="text/css" /> 
+<link rel="stylesheet" href="../recurly.css" type="text/css" /> 
+<script src="lib/jquery-1.6.1.js"></script> 
+<script src="../recurly.js"></script> 
+<script>
+  Recurly.config({
+    environment: 'sandbox'
+  , subdomain: 'recurlyjsdemo-test'
+  , currency: 'USD'
+  , country: 'US'
+  });
+
+  Recurly.buildSubscriptionForm({
+    target: '#recurly-subscribe'
+  , planCode: 'simpleplan'
+  , successURL: 'confirmation.html'
+  , distinguishContactFromBillingInfo: true
+  , termsOfServiceURL: 'http://example.com/tos'
+  });
+</script> 
+</head> 
+  <body> 
+    <h1>Subscribe to Plan</h1>
+    <h2>Plan Code: simpleplan (exists)</h2>
+    <div id="recurly-subscribe">
+    </div>
+  </body>
+</html>

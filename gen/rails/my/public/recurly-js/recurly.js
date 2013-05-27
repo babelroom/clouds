@@ -1,0 +1,1831 @@
+//   Recurly.js - v1.0.4 
+//
+//   Communicates with Recurly <https://recurly.com> via a JSONP API, 
+//   generates UI, handles user error, and passes control to the client
+//   to handle the successful events such as subscription creation.
+//
+//   Author: Emery Denuccio <emery@recurly.com>
+//
+//   (MIT License)
+//
+//   Copyright (C) 2011 by Recurly, Inc. 
+// 
+//   Permission is hereby granted, free of charge, to any person obtaining a copy
+//   of this software and associated documentation files (the "Software"), to deal
+//   in the Software without restriction, including without limitation the rights
+//   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//   copies of the Software, and to permit persons to whom the Software is
+//   furnished to do so, subject to the following conditions:
+// 
+//   The above copyright notice and this permission notice shall be included in
+//   all copies or substantial portions of the Software.
+// 
+//   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//   THE SOFTWARE.
+
+
+
+(function($){
+
+"use strict";
+
+
+
+//////////////////////////////////////////////////
+// Compiled from js/recurly.core.js
+//////////////////////////////////////////////////
+
+// Non-intrusive Object.create
+function createObject(o) {
+  function F() {}
+  F.prototype = o || this;
+  return new F();
+};
+
+var R = {}; 
+R.settings = {};
+
+R.Error = {
+  toString: function() {
+    return 'RecurlyJS Error: ' + this.message;
+  }
+};
+
+R.raiseError = function(message) {
+  var e = createObject(R.Error);
+  e.message = message;
+  throw e;
+};
+
+
+R.config = function(settings) { 
+  $.extend(true, R.settings, settings); 
+
+  if(!settings.baseURL) {
+
+    switch(R.settings.environment) {
+      case 'sandbox':
+        R.settings.baseURL = 'https://api-sandbox.recurly.com/jsonp/'; 
+        break;
+
+      case 'production':
+        R.settings.baseURL = 'https://api-production.recurly.com/jsonp/'; 
+        break;
+
+      default:
+        R.raiseError('environment not configured (sandbox or production)');
+        break;
+    }
+
+    var subdomain = R.settings.subdomain || R.raiseError('company subdomain not configured');
+    R.settings.baseURL += subdomain + '/';
+  }
+};
+
+
+function pluralize(count, term) {
+  if(count == 1) {
+    return term.substr(0,term.length-1);
+  }
+
+  return '' + count + ' ' + term;
+}
+
+// Immutable currency-amount object
+// This will eventually handle multi-currency
+// where it will store a list of costs per currency
+// and accessors will return the appropriate one
+// based on the current currency
+//
+
+(R.Cost = function(cents) {
+  this._cents = cents || 0; 
+}).prototype = {
+  toString: function() {
+    return R.formatCurrency(this.dollars());
+  }
+, cents: function(val) {
+    if(val === undefined)
+      return this._cents;
+
+    return new Cost(val);
+  }
+, dollars: function(val) {
+    if(val === undefined)
+      return this._cents/100;
+
+    return new R.Cost(val*100);
+  }
+, mult: function(n) {
+    return new R.Cost(this._cents * n);
+  }
+, add: function(n) {
+    if(n.cents) n = n.cents();
+    return new R.Cost(this._cents + n);
+  }
+, sub: function(n) {
+    if(n.cents) n = n.cents();
+    return new R.Cost(this._cents - n);
+  }
+};
+
+R.Cost.FREE = new R.Cost(0);
+
+(R.TimePeriod = function(length,unit) { 
+    this.length = length;
+    this.unit = unit;
+}).prototype = {
+  toString: function() {
+    return '' + pluralize(this.length, this.unit);
+  }
+, toDate: function() {
+    var d = new Date();
+    switch(this.unit) {
+      case 'month':
+        d.setMonth( d.getMonth() + this.length );
+        break;
+      case 'day':
+        d.setDay( d.getDay() + this.length );
+        break;
+    }
+    return d;
+  }
+, clone: function() {
+    return new R.TimePeriod(this.length,this.unit);
+  }
+};
+
+(R.RecurringCost = function(cost,interval) {
+  this.cost = cost;
+  this.interval = interval;
+}).prototype = {
+  toString: function() {
+    return '' + this.cost  + ' every ' + this.interval;
+  }
+, clone: function() {
+    return new R.TimePeriod(this.length,this.unit);
+  }
+};
+
+R.RecurringCost.FREE = new R.RecurringCost(0,null);
+
+(R.RecurringCostStage = function(recurringCost, duration) {
+  this.recurringCost = recurringCost;
+  this.duration = duration;
+}).prototype = {
+  toString: function() {
+    this.recurringCost.toString() + ' for ' + this.duration.toString();
+  }
+};
+
+
+
+
+
+
+//////////////////////////////////////////////////
+// Compiled from js/recurly.locale.js
+//////////////////////////////////////////////////
+
+R.locale = {};
+
+R.locale.errors = {
+  emptyField: 'Required field'
+, missingFullAddress: 'Please enter your full address.'
+, invalidEmail: 'Invalid'
+, invalidCC: 'Invalid'
+, invalidCVV: 'Invalid'
+, invalidCoupon: 'Invalid' 
+, cardDeclined: 'Transaction declined' 
+, acceptTOS: 'Please accept the Terms of Service.' 
+};
+
+R.locale.currencies = {};
+
+R.locale.currency = {
+  format: "%u%n"
+, separator: "."
+, delimiter: ","
+, precision: 2
+};
+
+function C(key, def) {
+  var c = R.locale.currencies[key] = createObject(R.locale.currency);
+  for(var p in def) {
+    c[p] = def[p];
+  }
+};
+
+C('USD', {
+  symbol: '$'
+});
+
+C('AUD', {
+  symbol: '$'
+});
+
+C('CAD', {
+  symbol: '$'
+});
+
+C('EUR', {
+  symbol: '\u20ac'
+});
+
+C('GBP', {
+  symbol: '\u00a3'
+});
+
+C('CZK', {
+  symbol: '\u004b'
+});
+
+C('DKK', {
+  symbol: '\u6b72'
+});
+
+C('HUF', {
+  symbol: 'Ft'
+});
+
+C('JPY', {
+  symbol: '\u00a5'
+});
+
+C('NOK', {
+  symbol: 'kr'
+});
+
+C('NZD', {
+  symbol: '$'
+});
+
+C('PLN', {
+  symbol: '\u007a'
+});
+
+C('SGD', {
+  symbol: '$'
+});
+
+C('SEK', {
+  symbol: 'kr'
+});
+
+C('CHF', {
+  symbol: 'Fr'
+});
+
+C('ZAR', {
+  symbol: 'R'
+});
+
+
+
+R.settings.locale = R.locale;
+
+
+
+
+//////////////////////////////////////////////////
+// Compiled from js/recurly.util.js
+//////////////////////////////////////////////////
+
+
+
+// Credit card type functions
+R.detectCardType = function(cardnumber) {
+
+  cardnumber = cardnumber.replace(/\D/g, '');
+
+  var cards = [
+    { name: 'visa', prefixes: [4] },
+    { name: 'mastercard', prefixes: [51, 52, 53, 54, 55] },
+    { name: 'american_express', prefixes: [34, 37] },
+    { name: 'discover', prefixes: [6011, 62, 64, 65] },
+    { name: 'diners_club', prefixes: [305, 36, 38] },
+    { name: 'carte_blanche', prefixes: [300, 301, 302, 303, 304, 305] },
+    { name: 'jcb', prefixes: [35] },
+    { name: 'enroute', prefixes: [2014, 2149] },
+    { name: 'solo', prefixes: [6334, 6767] },
+    { name: 'switch', prefixes: [4903, 4905, 4911, 4936, 564182, 633110, 6333, 6759] },
+    { name: 'maestro', prefixes: [5018, 5020, 5038, 6304, 6759, 6761] },
+    { name: 'visa', prefixes: [417500, 4917, 4913, 4508, 4844] }, // visa electron
+    { name: 'laser', prefixes: [6304, 6706, 6771, 6709] }
+  ];
+
+  for (var c = 0; c < cards.length; c++) {
+    for (var p = 0; p < cards[c].prefixes.length; p++) {
+      if (new RegExp('^' + cards[c].prefixes[p].toString()).test(cardnumber))
+        return cards[c].name;
+    }
+  }
+
+};
+
+// Formats currency amount in the current denomination or one provided
+// based on R.locale.currencies rules
+R.formatCurrency = function(num,denomination) {
+
+  if(num < 0) {
+    num = -num;
+    var negative = true;
+  }
+  else {
+    var negative = false;
+  }
+
+  denomination = denomination || R.settings.currency ||
+    R.raiseError('currency not configured');
+
+  var langspec = R.locale.currency;
+  var currencyspec = R.locale.currencies[denomination];
+
+  // Format to precision
+  var str = num.toFixed(currencyspec.precision);
+
+  // Replace default period with format separator
+  if(langspec.separator != '.') {
+    str = str.replace(/\./g, langspec.separator);
+  } 
+
+  function insertDelimiters(str) {
+    var sRegExp = new RegExp('(-?[0-9]+)([0-9]{3})');
+    while(sRegExp.test(str)) {
+      str = str.replace(sRegExp, '$1'+langspec.delimiter+'$2');
+    }
+    return str;
+  }
+
+  // Apply thousands delimiter
+  str = insertDelimiters(str); 
+
+  // Format unit/number order
+  var format = langspec.format;
+  format = format.replace(/%u/g, currencyspec.symbol);
+  format = format.replace(/%n/g, str);
+  str = format;
+
+  if(negative) {
+    str = '-' + str;
+  }
+
+  return str;
+};
+
+var euCountries = ["AT","BE","BG","CY","CZ","DK","EE","FI","FR","DE","GR","HU","IE","IT","LV","LT","LU","MT","NL","PL","PT","RO","SK","SI","ES","SE","GB"];
+R.isCountryInEU = function(country) {
+  return $.inArray(country, euCountries) !== -1;
+}
+
+R.isVATNumberApplicable = function(buyerCountry, sellerCountry) {
+  if(!R.settings.VATPercent) return false;
+
+  if(!R.settings.country) {
+    R.raiseError('you must configure a country for VAT to work');
+  }
+
+  if(!R.isCountryInEU(R.settings.country)) {
+    R.raiseError('you cannot charge VAT outside of the EU');
+  }
+
+  // Outside of EU don't even show the number
+  if(!R.isCountryInEU(buyerCountry)) {
+    return false;
+  }
+
+  return true;
+}
+
+R.isVATChargeApplicable = function(buyerCountry, vatNumber) {
+  // We made it so the VAT Number is collectable in any case
+  // where it could be charged, so this is logically sound:
+  if(!R.isVATNumberApplicable(buyerCountry)) return false;
+
+  var sellerCountry = R.settings.country;
+
+  // 1) Outside EU never pays
+  // 2) Same country in EU always pays
+  // 3) Different countries in EU, pay only without vatNumber
+  return (sellerCountry == buyerCountry || !vatNumber);
+};
+
+R.flattenErrors = function(obj, attr) {
+  var arr = [];
+
+  var baseErrorKeys = ['base','account_id'];
+
+  var attr = attr || '';
+
+  if(  typeof obj == 'string'
+    || typeof obj == 'number'
+    || typeof obj == 'boolean') {
+    
+    if($.inArray(baseErrorKeys, attr)) {
+      return [obj];
+    }
+
+    return ['' + attr + ' ' + obj];
+  }
+
+  for(var k in obj) {
+    // console.log(k);
+    if(obj.hasOwnProperty(k)) {
+      // Inherit parent attribute names when property key
+      // is a numeric string; how we deal with arrays
+      attr = (parseInt(k).toString() == k) ? attr : k; 
+      var children = R.flattenErrors(obj[k], attr);
+      for(var i=0, l=children.length; i < l; ++i) {
+        arr.push(children[i]);
+      }
+    }
+  }
+
+  return arr;
+};
+
+
+R.replaceVars = function(str, vars) {
+  for(var k in vars) {
+    if(vars.hasOwnProperty(k)) {
+      var v = encodeURIComponent(vars[k]);
+      str = str.replace(new RegExp('\\{'+k+'\\}', 'g'), v);
+    }
+  }
+
+  return str;
+};
+
+R.post = function(url, params, urlEncoded) {
+    var form = $('<form />').hide();
+    form.attr('action', url)
+        .attr('method', 'POST')
+        .attr('enctype', urlEncoded ? 'application/x-www-form-urlencoded' : 'multipart/form-data');
+
+    function addParam(name, value, parent) {
+      var fullname = (parent.length > 0 ? (parent + '[' + name + ']') : name);
+      if(typeof value === 'object') {
+        for(var i in value) {
+          if(value.hasOwnProperty(i)) {
+            addParam(i, value[i], fullname);
+          }
+        }
+      }
+      else $('<input type="hidden" />').attr({name: fullname, value: value}).appendTo(form);
+    };
+
+    addParam('', params, '');
+
+    $('body').append(form);
+    form.submit();
+};
+
+
+
+
+//////////////////////////////////////////////////
+// Compiled from js/recurly.validators.js
+//////////////////////////////////////////////////
+
+
+(R.isValidCC = function($input) {
+  var v = $input.val();
+  // accept only digits and dashes
+  if (/[^0-9-]+/.test(v))
+    return false;
+
+  var nCheck = 0,
+      nDigit = 0,
+      bEven = false;
+
+  v = v.replace(/\D/g, "");
+
+  for (var n = v.length - 1; n >= 0; n--) {
+    var cDigit = v.charAt(n);
+    var nDigit = parseInt(cDigit, 10);
+    if (bEven) {
+      if ((nDigit *= 2) > 9)
+        nDigit -= 9;
+    }
+    nCheck += nDigit;
+    bEven = !bEven;
+  }
+
+  return (nCheck % 10) == 0;
+}).defaultErrorKey = 'invalidCC';
+
+(R.isValidEmail = function($input) {
+  var v = $input.val();
+  return /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i.test(v);
+}).defaultErrorKey = 'invalidEmail';
+
+function wholeNumber(val) {
+  return /^[0-9]+$/.test(val);
+}
+
+(R.isValidCVV = function($input) {
+  var v = $input.val();
+  return (v.length == 3 || v.length == 4) && wholeNumber(v);
+}).defaultErrorKey = 'invalidCVV';
+
+(R.isNotEmpty = function($input) {
+  var v = $input.val();
+  return !!v;
+}).defaultErrorKey = 'emptyField';
+
+(R.isChecked = function($input) {
+  return $input.is(':checked');
+}).defaultErrorKey = 'acceptTOS';
+
+
+
+
+
+//////////////////////////////////////////////////
+// Compiled from js/recurly.plan.js
+//////////////////////////////////////////////////
+
+R.Plan = {
+  create: createObject
+, fromJSON: function(json) {
+    var p = this.create();
+
+    p.name = json.name;
+    p.code = json.plan_code;
+    p.cost = new R.Cost(json.unit_amount_in_cents);
+
+    p.displayQuantity = json.display_quantity;
+
+    p.interval = new R.TimePeriod(
+        json.plan_interval_length,
+        json.plan_interval_unit
+      );
+
+    if(json.trial_interval_length) {
+      p.trial = new R.TimePeriod(
+          json.trial_interval_length,
+          json.trial_interval_unit
+        );
+    }
+
+    if(json.setup_fee_in_cents) {
+      p.setupFee = new R.Cost(json.setup_fee_in_cents);
+    }
+
+    p.addOns = [];
+    if(json.add_ons) {
+      for(var l=json.add_ons.length, i=0; i < l; ++i) {
+        var a = json.add_ons[i];
+        p.addOns.push(R.AddOn.fromJSON(a));
+      }
+    }
+
+    return p;
+  }
+, get: function(plan_code, callback) {
+    $.ajax({
+      url: R.settings.baseURL+'plans/'+plan_code,
+      // data: params,
+      dataType: "jsonp",
+      jsonp: "callback",
+      timeout: 10000,
+      success: function(data) {
+        var plan = R.Plan.fromJSON(data);
+        callback(plan);
+      }
+    });
+  }
+, createSubscription: function() {
+    var s = createObject(R.Subscription);
+    s.plan = createObject(this);
+    s.plan.quantity = 1;
+    s.addOns = [];
+    return s;
+  }
+};
+
+
+R.AddOn = {
+  fromJSON: function(json) {
+    var a = createObject(R.AddOn);
+    a.name = json.name;   
+    a.code = json.add_on_code;
+    a.cost = new R.Cost(json.default_unit_amount_in_cents);
+    a.displayQuantity = json.display_quantity;
+    return a;
+  }
+
+, toJSON: function() {
+    return {
+      name: this.name
+    , add_on_code: this.code
+    , default_unit_amount_in_cents: this.default_unit_amount_in_cents
+    };
+  }
+};
+
+
+
+
+//////////////////////////////////////////////////
+// Compiled from js/recurly.account.js
+//////////////////////////////////////////////////
+
+R.Account = {
+  create: createObject
+, toJSON: function() {    
+    return {
+      first_name: this.firstName
+    , last_name: this.lastName
+    , account_code: this.code
+    , email: this.email
+    };
+  }
+};
+
+
+
+
+
+//////////////////////////////////////////////////
+// Compiled from js/recurly.billing_info.js
+//////////////////////////////////////////////////
+
+R.BillingInfo = {
+  create: createObject
+, toJSON: function() {    
+    return {
+      first_name: this.firstName
+    , last_name: this.lastName
+    , month: this.expires.getMonth() + 1
+    , year: this.expires.getFullYear()
+    , number: this.number
+    , verification_value: this.cvv
+    , address1: this.address1
+    , address2: this.address2
+    , city: this.city
+    , state: this.state
+    , zip: this.zip
+    , country: this.country
+    };
+  }
+, save: function(options) { 
+    var json = {
+      billing_info: this.toJSON() 
+    , signature: options.signature
+    };
+
+    $.ajax({
+      url: R.settings.baseURL+'accounts/'+options.accountCode+'/billing_info/update'
+    , data: json
+    , dataType: 'jsonp'
+    , jsonp: 'callback'
+    , timeout: 60000
+    , success: function(data) {
+        if(data.success && options.success) {
+          options.success(data.success);
+        }
+        else if(data.errors && options.error) {
+          options.error( R.flattenErrors(data.errors) );
+        }
+      }
+    , error: function() {
+        if(options.error) {
+          options.error(['Unknown error processing transaction. Please try again later.']);
+        }
+      }
+    , complete: options.complete || $.noop
+    });
+  }
+};
+
+
+
+
+
+//////////////////////////////////////////////////
+// Compiled from js/recurly.subscription.js
+//////////////////////////////////////////////////
+
+// Base Subscription prototype
+R.Subscription = {
+  create: createObject
+, plan: R.Plan
+, addOns: []
+
+, calculateTotals: function() {
+    var totals = {
+      stages: {}
+    };
+
+    // PLAN
+    totals.plan = this.plan.cost.mult(this.plan.quantity);
+
+    // ADD-ONS
+    totals.allAddOns = new R.Cost(0);
+    totals.addOns = {};
+    for(var l=this.addOns.length, i=0; i < l; ++i) {
+      var a = this.addOns[i],
+          c = a.cost.mult(a.quantity);
+      totals.addOns[a.code] = c;
+      totals.allAddOns = totals.allAddOns.add(c);
+    }
+
+    totals.stages.recurring = totals.plan.add(totals.allAddOns);
+
+    totals.stages.now = totals.plan.add(totals.allAddOns);
+
+    // FREE TRIAL 
+    if(this.plan.trial) {
+      totals.stages.now = R.Cost.FREE; 
+    }
+
+    // SETUP FEE
+    if(this.plan.setupFee) {
+      totals.stages.now = totals.stages.now.add(this.plan.setupFee);
+    }
+
+    // COUPON
+    if(this.coupon) {
+      var beforeDiscount = totals.stages.now;
+      var afterDiscount = totals.stages.now.discount(this.coupon);
+      totals.coupon = afterDiscount.sub(beforeDiscount);
+      totals.stages.now = afterDiscount;
+    }
+
+    // VAT
+    if(this.billingInfo && R.isVATChargeApplicable(this.billingInfo.country,this.billingInfo.vatNumber)) {
+      totals.vat = totals.stages.now.mult( (R.settings.VATPercent/100) );
+      totals.stages.now = totals.stages.now.add(totals.vat);
+    }
+
+    return totals;
+  }
+, redeemAddOn: function(addOn) {
+  var redemption = addOn.createRedemption();
+  this.addOns.push(redemption); 
+  return redemption;
+}
+
+, removeAddOn: function(code) {
+  for(var a=this.addOns, l=a.length, i=0; i < l; ++i) {
+    if(a[i].code == code) {
+      return a.splice(i,1);
+    }
+  }
+}
+
+, findAddOnByCode: function(code) {
+    for(var l=this.addOns.length, i=0; i < l; ++i) {
+      if(this.addOns[i].code == code) {
+        return this.addOns[i];
+      }
+    }
+    return false;
+  }
+
+, toJSON: function() {
+    var json = {
+      plan_code: this.plan.code
+    , quantity: this.plan.quantity
+    , coupon_code: this.coupon ? this.coupon.code : undefined
+    , add_ons: []
+    };
+
+    for(var i=0, l=this.addOns.length, a=json.add_ons, b=this.addOns; i < l; ++i) {
+      a.push({
+        add_on_code: b[i].code
+      , quantity: b[i].quantity
+      });
+    }
+
+    return json;
+  }
+
+, save: function(options) {
+    var json = {
+      subscription: this.toJSON()
+    , account: this.account.toJSON()
+    , billing_info: this.billingInfo.toJSON()
+    };
+
+    $.ajax({
+      url: R.settings.baseURL+'subscribe',
+      data: json,
+      dataType: "jsonp",
+      jsonp: "callback",
+      timeout: 60000,
+      success: function(data) {
+        if(data.success && options.success) {
+          options.success(data.success);
+        }
+        else if(data.errors && options.error) {
+          var errorCode = data.errors.error_code;
+          delete data.errors.error_code;
+          options.error( R.flattenErrors(data.errors), errorCode );
+        }
+      },
+      error: function() {
+        if(options.error) {
+          options.error(['Unknown error processing transaction. Please try again later.']);
+        }
+      },
+      complete: options.complete
+    });
+
+  }
+};
+
+R.AddOn.createRedemption = function(qty) {
+  var r = createObject(this);
+  r.quantity = qty || 1;
+  return r;
+};
+
+R.Coupon = {
+  fromJSON: function(json) {
+    var c = createObject(R.Coupon);
+
+    if(json.discount_in_cents)
+      c.discountCost = new R.Cost(-json.discount_in_cents);
+    else if(json.discount_percent)
+      c.discountRatio = json.discount_percent/100;
+
+    c.description = json.description;
+
+    return c;
+  }
+
+, toJSON: function() {
+  }
+};
+
+R.Cost.prototype.discount = function(coupon){ 
+  if(coupon.discountCost)
+    return this.add(coupon.discountCost);
+  
+  var ret = this.sub( this.mult(coupon.discountRatio) );
+  if(ret.cents() < 0) {
+    return R.Cost.FREE;
+  }
+
+  return ret;
+};
+
+R.Subscription.getCoupon = function(couponCode, successCallback, errorCallback) {
+
+  if(!R.settings.baseURL) { R.raiseError('Company subdomain not configured'); }
+
+  return $.ajax({
+    url: R.settings.baseURL+'plans/'+this.plan.code+'/coupons/'+couponCode,
+    // data: params,
+    dataType: "jsonp",
+    jsonp: "callback",
+    timeout: 10000,
+    success: function(data) {
+      var coupon = R.Coupon.fromJSON(data);
+      coupon.code = couponCode;
+      if(data.valid) {
+        successCallback(coupon);
+      }
+      else {
+        errorCallback();
+      }
+    },
+    error: function() {
+      errorCallback();
+    }
+  });
+};
+
+
+
+
+
+//////////////////////////////////////////////////
+// Compiled from js/recurly.transaction.js
+//////////////////////////////////////////////////
+
+
+R.Transaction = {
+  toJSON: function() {    
+    return {
+      currency: this.currency
+    , amount_in_cents: this.cost.cents()
+    };
+  }
+, create: createObject
+, save: function(options) { 
+    var json = {
+      transaction: this.toJSON() 
+    , account: this.account ? this.account.toJSON() : undefined 
+    , billing_info: this.billingInfo.toJSON() 
+    , signature: options.signature
+    };
+
+    $.ajax({
+      url: R.settings.baseURL+'transactions/create'
+    , data: json
+    , dataType: 'jsonp'
+    , jsonp: 'callback'
+    , timeout: 60000
+    , success: function(data) {
+        if(data.success && options.success) {
+          options.success(data.success);
+        }
+        else if(data.errors && options.error) {
+          options.error( R.flattenErrors(data.errors) );
+        }
+      }
+    , error: function() {
+        if(options.error) {
+          options.error(['Unknown error processing transaction. Please try again later.']);
+        }
+      }
+    , complete: options.complete || $.noop
+    });
+  }
+};
+
+
+
+
+
+
+//////////////////////////////////////////////////
+// Compiled from js/recurly.ui.js
+//////////////////////////////////////////////////
+
+R.UserError = {};
+
+function raiseUserError(validation, elem) {
+  var e = createObject(R.UserError);
+  e.validation = validation;
+  e.element = elem;
+  throw e;
+}
+
+function handleUserErrors(block) {
+  try {
+    block();
+  }
+  catch(e) {
+    if(!e.validation)
+      throw e;
+
+    var $input = e.element;
+    var message = R.locale.errors[e.validation.errorKey];
+    var validator = e.validation.validator;
+
+    var $e = $('<div class="error">');
+    $e.text(message);
+    $e.appendTo($input.parent());
+    // $e.insertAfter($input);
+
+    $input.addClass('invalid');
+    $input.bind('change keyup', function() { 
+
+      if(validator($input)) {
+        $input.removeClass('invalid');
+        $e.remove();
+        $input.unbind();
+      }
+    });
+
+    $input.focus();
+  }
+}
+
+function getField($form, fieldSel, validation) {
+  // Try text input
+  var $input = $form.find(fieldSel + ' input');
+
+  // Try as select
+  if($input.length == 0) {
+    $input = $form.find(fieldSel + ' select');
+  }
+
+  // Treat nonexistence as removed deliberately
+  if($input.length == 0) return undefined;
+
+  var val = $input.val();
+
+  for(var i=2,v; v=arguments[i]; ++i) {
+
+    if(!v.validator($input)) {
+      raiseUserError(v, $input);
+    }
+  }
+
+  return val;
+}
+
+// Make a 'validation' from validator / errorKey
+function V(v,k) {
+  return {
+    validator: v,
+    errorKey: k || v.defaultErrorKey
+  };
+}
+
+
+// == SERVER ERROR UI METHODS
+
+function clearServerErrors($form) {  
+  var $serverErrors = $form.find('.server_errors');
+  $serverErrors.removeClass('any').addClass('none');
+  $serverErrors.empty();
+}
+
+function displayServerErrors($form, errors) {
+  var $serverErrors = $form.find('.server_errors');
+  clearServerErrors($form);
+
+  var l = errors.length;
+  if(l) {
+    $serverErrors.removeClass('none').addClass('any');
+    for(var i=0; i < l; ++i) {
+      var $e = $('<div class="error">');
+      $e.text(errors[i]);
+      $serverErrors.append($e);
+    }
+  }
+}
+
+
+function initCommonForm($form, options) {
+
+  $form.delegate('.placeholder', 'click', function() {
+    var $label = $(this);
+    var $li = $(this).parent();
+    $li.find('input').focus();
+  });
+
+  $form.delegate('input', 'change keyup', function() {
+    var $input = $(this);
+    var $li = $(this).parent(); 
+
+    if($input.val().length > 0) {
+      $li.find('.placeholder').hide();
+    }
+    else {
+      $li.find('.placeholder').show();
+    }
+  });
+
+
+  $form.delegate('input', 'focus', function() {
+    $(this).parent().addClass('focus');
+  });
+
+  $form.delegate('input', 'blur', function() {
+    $(this).parent().removeClass('focus');
+  });
+
+  // Touch of perfection
+  $form.delegate('input', 'keydown', function(e) {
+    if(e.keyCode >= 48 && e.keyCode <= 90) {
+      $(this).parent().find('.placeholder').hide();
+    }
+  });
+  
+}
+
+function initBillingInfoForm($form, options) {
+  // == DEFAULT BUYER TO SELLER COUNTRY
+  if(R.settings.country) {
+    var $countryOpt = $form.find('.country option[value='+R.settings.country+']');
+    if($countryOpt.length) {
+      $countryOpt.attr('selected', true).change();
+    }
+  }
+
+  // == FIRSTNAME / LASTNAME REDUNDANCY
+  if(options.distinguishContactFromBillingInfo) { 
+    var $contactFirstName = $form.find('.contact_info .first_name input');
+    var $contactLastName = $form.find('.contact_info .last_name input');
+    var prevFirstName = $contactFirstName.val(); 
+    var prevLastName = $contactLastName.val(); 
+    $form.find('.contact_info .first_name input').change(function() {
+      var $billingFirstName = $form.find('.billing_info .first_name input'); 
+      if($billingFirstName.val() == prevFirstName) {
+        $billingFirstName.val( $(this).val() ).change();
+      }
+      prevFirstName = $contactFirstName.val();
+    });
+    $form.find('.contact_info .last_name input').change(function() {
+      var $billingLastName = $form.find('.billing_info .last_name input'); 
+      if($billingLastName.val() == prevLastName) {
+        $billingLastName.val( $(this).val() ).change();
+      }
+      prevLastName = $contactLastName.val();
+    });
+
+  }
+  else {
+    $form.find('.billing_info .first_name, .billing_info .last_name').remove();
+  }
+
+  var now = new Date();
+  var year = now.getFullYear();
+  var month = now.getMonth();
+  var $yearSelect = $form.find('.year select');
+  var $monthSelect = $form.find('.month select');
+
+  // == GENERATE YEAR SELECT OPTIONS
+  for(var i=year; i <= year+10; ++i) {
+    var $yearOpt = $('<option name="'+i+'">'+i+'</option>');
+    $yearOpt.appendTo($yearSelect);
+  }
+
+  // == DISABLE INVALID MONTHS, SELECT CURRENT
+  function updateMonths() {
+    if($yearSelect.val() == year) {
+      $monthSelect.find('option[value="'+month+'"]')
+      var foundSelected = false;
+      $monthSelect.find('option').each(function(){
+        if($(this).val() <= month) {
+          $(this).attr('disabled', true);
+        }
+        else {
+          $(this).removeAttr('disabled');
+          if(!foundSelected) {
+            foundSelected = true;
+            $(this).attr('selected', true);
+          }
+        }
+      });
+    }
+    else {
+      $monthSelect.find('option').removeAttr('disabled');
+    }
+  };
+  updateMonths();
+  $yearSelect.change(updateMonths);
+
+
+  // == HIDE UNNECESSARY ADDRESS FIELDS
+
+  if(options.addressRequirement == 'none') {
+    $form.find('.address').remove();
+  }
+  else if(options.addressRequirement == 'zip') {
+    $form.find('.address').addClass('only_zip');
+    $form.find('.address1, .address2, .city, .state').remove();   
+    
+    // Only remove country if no VAT support
+    if(!R.settings.VATPercent) {
+      $form.find('.country').remove();
+    }
+  }
+  else if(options.addressRequirement == 'zipstreet') {
+    $form.find('.address').addClass('only_zipstreet');
+    $form.find('.city, .state').remove(); 
+
+    // Only remove country if no VAT support
+    if(!R.settings.VATPercent) {
+      $form.find('.country').remove();
+    }
+  }
+  else if(options.addressRequirement == 'full') {
+    $form.find('.address').addClass('full');
+  }
+
+  // == SHOW/HIDE CARD TYPES
+  var $acceptedCards = $form.find('.accepted_cards');
+  $form.find('.card_number input').bind('change keyup', function() {
+    var type = R.detectCardType( $(this).val() );
+    if(type) {
+      $acceptedCards.find('.card').each(function(){
+        $(this).toggleClass('match', $(this).hasClass(type));
+        $(this).toggleClass('no_match', !$(this).hasClass(type));
+      });
+    }
+    else {
+      $acceptedCards.find('.card').removeClass('match no_match'); 
+    }
+  }); 
+
+}
+
+
+function pullAccountFields($form, account, accountCode) {
+  account.firstName = getField($form, '.contact_info .first_name', V(R.isNotEmpty)); 
+  account.lastName = getField($form, '.contact_info .last_name', V(R.isNotEmpty)); 
+  account.email = getField($form, '.email', V(R.isNotEmpty), V(R.isValidEmail)); 
+  account.code = accountCode;
+}
+
+
+function pullBillingInfoFields($form, billingInfo) {
+  billingInfo.firstName = getField($form, '.billing_info .first_name', V(R.isNotEmpty)); 
+  billingInfo.lastName = getField($form, '.billing_info .last_name', V(R.isNotEmpty)); 
+  billingInfo.number = getField($form, '.card_number', V(R.isNotEmpty), V(R.isValidCC)); 
+  billingInfo.cvv = getField($form, '.cvv', V(R.isNotEmpty), V(R.isValidCVV)); 
+
+  var exp = new Date(0); 
+  exp.setMonth( getField($form, '.month') - 1 );
+  exp.setFullYear( getField($form, '.year') );
+  billingInfo.expires = exp;
+
+  billingInfo.address1 = getField($form, '.address1', V(R.isNotEmpty)); 
+  billingInfo.address2 = getField($form, '.address2'); 
+  billingInfo.city = getField($form, '.city', V(R.isNotEmpty)); 
+  billingInfo.state = getField($form, '.state', V(R.isNotEmpty)); 
+  billingInfo.zip = getField($form, '.zip', V(R.isNotEmpty)); 
+  billingInfo.country = getField($form, '.country',
+      V(function(v) {return v.val() != '-';}, 'emptyField')); 
+}
+
+
+function verifyTOSChecked($form) {
+  getField($form, '.accept_tos', V(R.isChecked)); 
+}
+
+
+R.buildBillingInfoUpdateForm = function(options) {
+  var defaults = {
+    addressRequirement: 'full'
+  };
+
+  options = $.extend({}, defaults, options);
+
+  options.distinguishContactFromBillingInfo = true;
+
+
+  if(!options.accountCode) R.raiseError('accountCode missing');
+  if(!options.signature) R.raiseError('signature missing');
+
+  var billingInfo = R.BillingInfo.create();
+
+  var $form = $(R.updateBillingInfoFormHTML);
+  $form.find('.billing_info').html(R.billingInfoFieldsHTML);
+
+
+  initCommonForm($form, options);
+  initBillingInfoForm($form, options);
+
+
+  $form.submit(function(e) {
+    e.preventDefault(); 
+
+    clearServerErrors($form);
+
+    $form.find('.error').remove();
+    $form.find('.invalid').removeClass('invalid');
+
+    handleUserErrors(function() {
+      pullBillingInfoFields($form, billingInfo);
+
+      $form.addClass('submitting');
+      $form.find('button.submit').attr('disabled', true).text('Please Wait');
+
+      billingInfo.save({
+        signature: options.signature
+      , accountCode: options.accountCode
+      , success: function(response) {
+          if(options.afterUpdate)
+            options.afterUpdate(response);
+
+          if(options.successURL) {
+            var url = options.successURL;
+            // url = R.replaceVars(url, response);
+            R.post(url, response, true);
+          }
+        }
+      , error: function(errors) {
+          if(!options.onError || !options.onError(errors)) {
+            displayServerErrors($form, errors);
+          }
+        }
+      , complete: function() {
+          $form.removeClass('submitting');
+          $form.find('button.submit').removeAttr('disabled').text('Update');
+        }
+      });
+    });
+  });
+
+  if(options.beforeInject) {
+    options.beforeInject($form.get(0));
+  }
+
+  $(function() {
+    var $container = $(options.target);
+    $container.html($form);
+
+    if(options.afterInject) {
+      options.afterInject($form.get(0));
+    }
+  });
+
+};
+
+
+R.buildTransactionForm = function(options) {
+  var defaults = {
+    addressRequirement: 'full'
+  , distinguishContactFromBillingInfo: true
+  , collectContactInfo: true
+  };
+
+  options = $.extend(createObject(R.settings), defaults, options);
+  
+
+  if(!options.collectContactInfo && !options.accountCode) {
+    R.raiseError('collectContactInfo is false, but no accountCode provided');
+  }
+
+
+  // if(!options.accountCode) R.raiseError('accountCode missing');
+  if(!options.signature) R.raiseError('signature missing');
+
+
+  var billingInfo = R.BillingInfo.create()
+  ,   account = R.Account.create()
+  ,   transaction = R.Transaction.create();
+
+
+  transaction.account = account;
+  transaction.billingInfo = billingInfo;
+  transaction.currency = options.currency;
+  transaction.cost = new R.Cost(options.amountInCents);
+
+  var $form = $(R.oneTimeTransactionFormHTML);
+  $form.find('.billing_info').html(R.billingInfoFieldsHTML);
+
+  if(options.collectContactInfo) {
+    $form.find('.contact_info').html(R.contactInfoFieldsHTML);
+  }
+  else {
+    $form.find('.contact_info').remove();
+  }
+
+  if(options.termsOfServiceURL) {
+    var $tos = $form.find('.accept_tos').html(R.termsOfServiceHTML);
+    $tos.find('a').attr('href', options.termsOfServiceURL);
+  }
+  else {
+    $form.find('.accept_tos').remove();
+  }
+
+  initCommonForm($form, options);
+  initBillingInfoForm($form, options);
+
+  $form.submit(function(e) {
+    e.preventDefault(); 
+
+    clearServerErrors($form);
+
+    $form.find('.error').remove();
+    $form.find('.invalid').removeClass('invalid');
+
+    handleUserErrors(function() {
+      pullAccountFields($form, account, options.accountCode);
+      pullBillingInfoFields($form, billingInfo);
+      verifyTOSChecked($form);
+
+      $form.addClass('submitting');
+      $form.find('button.submit').attr('disabled', true).text('Please Wait');
+
+      transaction.save({
+        signature: options.signature
+      , accountCode: options.accountCode
+      , success: function(response) {
+          if(options.afterPay)
+            options.afterPay(response);
+
+          if(options.successURL) {
+            var url = options.successURL;
+            // url = R.replaceVars(url, response);
+            R.post(url, response, true);
+          }
+        }
+      , error: function(errors) {
+          if(!options.onError || !options.onError(errors)) {
+            displayServerErrors($form, errors);
+          }
+        }
+      , complete: function() {
+          $form.removeClass('submitting');
+          $form.find('button.submit').removeAttr('disabled').text('Pay');
+        }
+      });
+    });
+  });
+
+  if(options.beforeInject) {
+    options.beforeInject($form.get(0));
+  }
+
+  $(function() {
+    var $container = $(options.target);
+    $container.html($form);
+
+    if(options.afterInject) {
+      options.afterInject($form.get(0));
+    }
+  });
+
+};
+
+
+R.buildSubscriptionForm = function(options) {
+  var defaults = {
+    enableAddOns: true
+  , enableCoupons: true
+  , addressRequirement: 'full'
+  , distinguishContactFromBillingInfo: false
+  };
+
+  options = $.extend(createObject(R.settings), defaults, options);
+
+  var $form = $(R.subscribeFormHTML);
+  $form.find('.contact_info').html(R.contactInfoFieldsHTML);
+  $form.find('.billing_info').html(R.billingInfoFieldsHTML);
+
+
+  if(options.termsOfServiceURL) {
+    var $tos = $form.find('.accept_tos').html(R.termsOfServiceHTML);
+    $tos.find('a').attr('href', options.termsOfServiceURL);
+  }
+  else {
+    $form.find('.accept_tos').remove();
+  }
+ 
+
+  initCommonForm($form, options);
+
+  if(options.planCode)
+    R.Plan.get(options.planCode, gotPlan);
+  else if(options.plan)
+    gotPlan(options.plan);
+
+  function gotPlan(plan) {
+
+    if(options.filterPlan)
+      plan = options.filterPlan(plan) || plan; 
+
+
+    var subscription = plan.createSubscription(),
+        account = R.Account.create(),
+        billingInfo = R.BillingInfo.create();
+
+    subscription.account = account;
+    subscription.billingInfo = billingInfo;
+
+    if(options.filterSubscription)
+      subscription = options.filterSubscription(subscription) || subscription; 
+
+    initBillingInfoForm($form, options, billingInfo);
+
+    // == EDITABLE PLAN QUANTITY
+    if(!plan.displayQuantity) {
+      $form.find('.plan .quantity').remove();
+    }
+
+    // == SETUP FEE
+    if(plan.setupFee) {
+      $form.find('.subscription').addClass('with_setup_fee');
+      $form.find('.plan .setup_fee .cost').text('' + plan.setupFee);
+    }
+    else {
+      $form.find('.plan .setup_fee').remove();
+    }
+    
+    // == FREE TRIAL
+    if(plan.trial) {
+      $form.find('.subscription').addClass('with_trial');
+
+      $form.find('.plan .free_trial').text('First ' + plan.trial + ' free');
+    }
+    else {
+      $form.find('.plan .free_trial').remove();
+    }
+ 
+
+    // == UPDATE ALL UI TOTALS via subscription.calculateTotals() results
+    function updateTotals() {
+      var totals = subscription.calculateTotals();
+
+      $form.find('.plan .recurring_cost .cost').text('' + totals.plan);
+      $form.find('.due_now .cost').text('' + totals.stages.now);
+      $form.find('.coupon .discount').text('' + (totals.coupon || ''));
+      $form.find('.vat .cost').text('' + (totals.vat || ''));
+
+      $form.find('.add_ons .add_on').each(function() {
+        var addOn = $(this).data('add_on');
+        if($(this).hasClass('selected')) {
+          var cost = totals.addOns[addOn.code];
+          $(this).find('.cost').text('+ '+cost);
+        }
+        else {
+          $(this).find('.cost').text('+ '+addOn.cost);
+        }
+      });
+    }
+
+    $form.find('.plan .quantity input').bind('change keyup', function() {
+      subscription.plan.quantity = parseInt($(this).val(), 10) || 1;
+      updateTotals();
+    });
+
+    // == SUBSCRIPTION PLAN GENERAL
+    $form.find('.plan .name').text(plan.name);
+    $form.find('.plan .recurring_cost .cost').text(''+plan.cost);
+    $form.find('.plan .recurring_cost .interval').text('every '+plan.interval);
+
+
+    // == GENERATE ADD-ONS
+    var $addOnsList = $form.find('.add_ons');
+    if(options.enableAddOns) {
+      var l = plan.addOns.length;
+      if(l) {
+        $addOnsList.removeClass('none').addClass('any');
+        for(var i=0; i < l; ++i) {
+          var addOn = plan.addOns[i];
+
+          var classAttr = 'add_on add_on_'+ addOn.code + (i % 2 ? ' even' : ' odd');
+          if(i == 0) classAttr += ' first';
+          if(i == l-1) classAttr += ' last';
+
+          var $addOn = $('<div class="'+classAttr+'">' +
+          '<div class="name">'+addOn.name+'</div>' +
+          '<div class="field quantity">' +
+            '<div class="placeholder">Qty</div>' +
+            '<input type="text">' +
+          '</div>' +
+          '<div class="cost"/>' +
+          '</div>');
+          if(!addOn.displayQuantity) {
+            $addOn.find('.quantity').remove();
+          }
+          $addOn.data('add_on', addOn);
+          $addOn.appendTo($addOnsList);
+        }
+
+        // Quantity Change
+        $addOnsList.delegate('.add_ons .quantity input', 'change keyup', function(e) { 
+          var $addOn = $(this).closest('.add_on');
+          var addOn = $addOn.data('add_on');
+          var newQty = parseInt($(this).val(),10) || 1;
+          subscription.findAddOnByCode(addOn.code).quantity = newQty;
+          updateTotals();
+        });
+
+        $addOnsList.bind('selectstart', function(e) {
+          if($(e.target).is('.add_on')) {
+            e.preventDefault();
+          }
+        });
+
+        // Add-on click
+        $addOnsList.delegate('.add_ons .add_on', 'click', function(e) {
+          if($(e.target).closest('.quantity').length) return;
+
+          var selected = !$(this).hasClass('selected');
+          $(this).toggleClass('selected', selected);
+
+          var addOn = $(this).data('add_on');
+
+          if(selected) {
+            // add
+            var sa = subscription.redeemAddOn(addOn);
+            var $qty = $(this).find('.quantity input');
+            sa.quantity = parseInt($qty.val(),10) || 1;
+            $qty.focus();
+          }
+          else {
+            // remove
+            subscription.removeAddOn(addOn.code);
+          }
+
+          updateTotals();
+        });
+      }
+    }
+    else {
+      $addOnsList.remove();
+    }
+    
+    // == COUPON REDEEMER
+    var $coupon = $form.find('.coupon'); 
+    var lastCode = null;
+
+    function updateCoupon() {
+
+      var code = $coupon.find('input').val();
+      if(code == lastCode) {
+        return;
+      }
+
+      lastCode = code;
+
+      if(!code) {
+        $coupon.removeClass('invalid').removeClass('valid');
+        $coupon.find('.description').text('');
+        subscription.coupon = undefined;
+        updateTotals();
+        return;
+      }
+
+      $coupon.addClass('checking');
+      subscription.getCoupon(code, function(coupon) {
+
+        $coupon.removeClass('checking');
+
+        subscription.coupon = coupon;
+        $coupon.removeClass('invalid').addClass('valid');
+        $coupon.find('.description').text(coupon.description);
+
+        updateTotals();
+      }, function() {
+
+        subscription.coupon = undefined;
+
+        $coupon.removeClass('checking');
+        $coupon.removeClass('valid').addClass('invalid');
+        $coupon.find('.description').text('Not Found');
+
+        updateTotals();
+      });
+    }
+
+    if(options.enableCoupons) {
+      $coupon.find('input').bind('keyup change', function(e) {
+      });
+
+      $coupon.find('input').keypress(function(e) {
+        if(e.charCode == 13) {
+          e.preventDefault();
+          updateCoupon();
+        }
+      });
+
+
+      $coupon.find('.check').click(function() {
+        updateCoupon();
+      });
+
+      $coupon.find('input').blur(function() { $coupon.find('.check').click(); });
+    }
+    else {
+      $coupon.remove();
+    }
+
+
+    // == VAT
+    var $vat = $form.find('.vat'); 
+    var $vatNumber = $form.find('.vat_number');
+    var $vatNumberInput = $vatNumber.find('input');
+
+    $vat.find('.title').text('VAT at ' + R.settings.VATPercent + '%');
+    function showHideVAT() { 
+      var buyerCountry = $form.find('.country select').val();
+      var vatNumberApplicable = R.isVATNumberApplicable(buyerCountry);
+
+      // VAT Number is applicable to collection in any EU country
+      $vatNumber.toggleClass('applicable', vatNumberApplicable);
+      $vatNumber.toggleClass('inapplicable', !vatNumberApplicable);
+
+      var vatNumber = $vatNumberInput.val();
+
+      // Only applicable to charge if isVATApplicable()
+      var chargeApplicable = R.isVATChargeApplicable(buyerCountry, vatNumber);
+      $vat.toggleClass('applicable', chargeApplicable);
+      $vat.toggleClass('inapplicable', !chargeApplicable);
+    }
+    // showHideVAT();
+    $form.find('.country select').change(function() {
+      billingInfo.country = $(this).val();
+      updateTotals();
+      showHideVAT();
+    }).change();
+    $vatNumberInput.bind('keyup change', function() {
+      billingInfo.vatNumber = $(this).val();
+      updateTotals();
+      showHideVAT();
+    });
+ 
+    // SUBMIT HANDLER
+    $form.submit(function(e) {
+      e.preventDefault(); 
+
+      clearServerErrors($form);
+
+      
+      $form.find('.error').remove();
+      $form.find('.invalid').removeClass('invalid');
+
+      handleUserErrors(function() {
+        pullAccountFields($form, account, options.accountCode);
+        pullBillingInfoFields($form, billingInfo);
+        verifyTOSChecked($form);
+
+        $form.addClass('submitting');
+        $form.find('button.submit').attr('disabled', true).text('Please Wait');
+
+        subscription.save({
+          success: function(response) {
+            if(options.afterSubscribe)
+              options.afterSubscribe(response);
+
+            if(options.successURL) {
+              var url = options.successURL;
+              // url = R.replaceVars(url, response);
+              R.post(url, response, true);
+            }
+          }
+        , error: function(errors) {
+            if(!options.onError || !options.onError(errors)) {
+              displayServerErrors($form, errors);
+            }
+          }
+        , complete: function() {
+            $form.removeClass('submitting');
+            $form.find('button.submit').removeAttr('disabled').text('Subscribe');
+          }
+        });
+      });
+
+    });
+
+    // FINALLY - UPDATE INITIAL TOTALS AND INJECT INTO DOM
+    updateTotals();
+
+    if(options.beforeInject) {
+      options.beforeInject($form.get(0));
+    }
+
+    $(function() {
+      var $container = $(options.target);
+      $container.html($form);
+
+      if(options.afterInject) {
+        options.afterInject($form.get(0));
+      }
+    });
+
+  }
+
+};
+
+
+
+
+
+//////////////////////////////////////////////////
+// Compiled from dom/contact_info_fields.jade
+//////////////////////////////////////////////////
+
+R.contactInfoFieldsHTML = '<div class="title">Contact Info</div><div class="full_name"><div class="field first_name"><div class="placeholder">First Name </div><input type="text"/></div><div class="field last_name"><div class="placeholder">Last Name </div><input type="text"/></div></div><div class="field email"><div class="placeholder">Email </div><input type="text"/></div>';
+
+
+
+//////////////////////////////////////////////////
+// Compiled from dom/billing_info_fields.jade
+//////////////////////////////////////////////////
+
+R.billingInfoFieldsHTML = '<div class="title">Billing Info</div><div class="accepted_cards"><div class="card american_express">American Express</div><div class="card discover">Discover</div><div class="card mastercard">MasterCard </div><div class="card visa">Visa</div></div><div class="credit_card"><div class="field first_name"><div class="placeholder">First Name </div><input type="text"/></div><div class="field last_name"><div class="placeholder">Last Name </div><input type="text"/></div><div class="card_cvv"><div class="field card_number"><div class="placeholder">Credit Card Number  </div><input type="text"/></div><div class="field cvv"><div class="placeholder">CVV </div><input type="text"/></div><!-- :number, :maxlength => 22, :class => \'required creditcard\', :placeholder => \'Credit Card Number\'--></div><div class="field expires"><div class="title">Expires </div><div class="month"><select><option value="1">01 - January</option><option value="2">02 - February</option><option value="3">03 - March</option><option value="4">04 - April</option><option value="5">05 - May</option><option value="6">06 - June</option><option value="7">07 - July</option><option value="8">08 - August</option><option value="9">09 - September</option><option value="10">10 - October</option><option value="11">11 - November</option><option value="12">12 - December</option><!-- = render :partial => \'months\' --></select></div><div class="year"><select></select></div></div></div><div class="address"><div class="field address1"><div class="placeholder">Address</div><input type="text"/></div><div class="field address2"><div class="placeholder">Apt/Suite</div><input type="text"/></div><div class="field city"><div class="placeholder">City</div><input type="text"/></div><div class="state_zip"><div class="field state"><div class="placeholder">State/Province</div><input type="text"/></div><div class="field zip"><div class="placeholder">Zip/Postal</div><input type="text"/></div></div><div class="field country"><!-- label Country --><select><option value="-">Select Country</option><option value="-">-------------- </option><option value="AF">Afghanistan</option><option value="AL">Albania</option><option value="DZ">Algeria</option><option value="AS">American Samoa</option><option value="AD">Andorra</option><option value="AO">Angola</option><option value="AI">Anguilla</option><option value="AQ">Antarctica</option><option value="AG">Antigua and Barbuda</option><option value="AR">Argentina</option><option value="AM">Armenia</option><option value="AW">Aruba</option><option value="AC">Ascension(Island</option><option value="AU">Australia</option><option value="AT">Austria</option><option value="AZ">Azerbaijan</option><option value="BS">Bahamas</option><option value="BH">Bahrain</option><option value="BD">Bangladesh</option><option value="BB">Barbados</option><option value="BY">Belarus</option><option value="BE">Belgium</option><option value="BZ">Belize</option><option value="BJ">Benin</option><option value="BM">Bermuda</option><option value="BT">Bhutan</option><option value="BO">Bolivia</option><option value="BA">Bosnia and Herzegovina</option><option value="BW">Botswana</option><option value="BV">Bouvet Island</option><option value="BR">Brazil</option><option value="BQ">British Antarctic Territory</option><option value="IO">British Indian Ocean Territory</option><option value="VG">British Virgin Islands</option><option value="BN">Brunei</option><option value="BG">Bulgaria</option><option value="BF">Burkina Faso</option><option value="BI">Burundi</option><option value="KH">Cambodia</option><option value="CM">Cameroon</option><option value="CA">Canada</option><option value="IC">Canary Islands</option><option value="CT">Canton and Enderbury Islands</option><option value="CV">Cape Verde</option><option value="KY">Cayman Islands</option><option value="CF">Central African Republic</option><option value="EA">Ceuta and Melilla</option><option value="TD">Chad</option><option value="CL">Chile</option><option value="CN">China</option><option value="CX">Christmas Island</option><option value="CP">Clipperton Island</option><option value="CC">Cocos [Keeling] Islands</option><option value="CO">Colombia</option><option value="KM">Comoros</option><option value="CD">Congo [DRC]</option><option value="CG">Congo [Republic]</option><option value="CK">Cook Islands</option><option value="CR">Costa Rica</option><option value="HR">Croatia</option><option value="CU">Cuba</option><option value="CY">Cyprus</option><option value="CZ">Czech Republic</option><option value="DK">Denmark</option><option value="DG">Diego Garcia</option><option value="DJ">Djibouti</option><option value="DM">Dominica</option><option value="DO">Dominican Republic</option><option value="NQ">Dronning Maud Land</option><option value="DD">East Germany</option><option value="TL">East Timor</option><option value="EC">Ecuador</option><option value="EG">Egypt</option><option value="SV">El Salvador</option><option value="GQ">Equatorial Guinea</option><option value="ER">Eritrea</option><option value="EE">Estonia</option><option value="ET">Ethiopia</option><option value="EU">European Union</option><option value="FK">Falkland Islands [Islas Malvinas]</option><option value="FO">Faroe Islands</option><option value="FJ">Fiji</option><option value="FI">Finland</option><option value="FR">France</option><option value="GF">French Guiana</option><option value="PF">French Polynesia</option><option value="TF">French Southern Territories</option><option value="FQ">French Southern and Antarctic Territories</option><option value="GA">Gabon</option><option value="GM">Gambia</option><option value="GE">Georgia</option><option value="DE">Germany</option><option value="GH">Ghana</option><option value="GI">Gibraltar</option><option value="GR">Greece</option><option value="GL">Greenland</option><option value="GD">Grenada</option><option value="GP">Guadeloupe</option><option value="GU">Guam</option><option value="GT">Guatemala</option><option value="GG">Guernsey</option><option value="GN">Guinea</option><option value="GW">Guinea-Bissau</option><option value="GY">Guyana</option><option value="HT">Haiti</option><option value="HM">Heard Island and McDonald Islands</option><option value="HN">Honduras</option><option value="HK">Hong Kong</option><option value="HU">Hungary</option><option value="IS">Iceland</option><option value="IN">India</option><option value="ID">Indonesia</option><option value="IR">Iran</option><option value="IQ">Iraq</option><option value="IE">Ireland</option><option value="IM">Isle of Man</option><option value="IL">Israel</option><option value="IT">Italy</option><option value="CI">Ivory Coast</option><option value="JM">Jamaica</option><option value="JP">Japan</option><option value="JE">Jersey</option><option value="JT">Johnston Island</option><option value="JO">Jordan</option><option value="KZ">Kazakhstan</option><option value="KE">Kenya</option><option value="KI">Kiribati</option><option value="KW">Kuwait</option><option value="KG">Kyrgyzstan</option><option value="LA">Laos</option><option value="LV">Latvia</option><option value="LB">Lebanon</option><option value="LS">Lesotho</option><option value="LR">Liberia</option><option value="LY">Libya</option><option value="LI">Liechtenstein</option><option value="LT">Lithuania</option><option value="LU">Luxembourg</option><option value="MO">Macau</option><option value="MK">Macedonia [FYROM]</option><option value="MG">Madagascar</option><option value="MW">Malawi</option><option value="MY">Malaysia</option><option value="MV">Maldives</option><option value="ML">Mali</option><option value="MT">Malta</option><option value="MH">Marshall Islands</option><option value="MQ">Martinique</option><option value="MR">Mauritania</option><option value="MU">Mauritius</option><option value="YT">Mayotte</option><option value="FX">Metropolitan France</option><option value="MX">Mexico</option><option value="FM">Micronesia</option><option value="MI">Midway Islands</option><option value="MD">Moldova</option><option value="MC">Monaco</option><option value="MN">Mongolia</option><option value="ME">Montenegro</option><option value="MS">Montserrat</option><option value="MA">Morocco</option><option value="MZ">Mozambique</option><option value="MM">Myanmar [Burma]</option><option value="NA">Namibia</option><option value="NR">Nauru</option><option value="NP">Nepal</option><option value="NL">Netherlands</option><option value="AN">Netherlands Antilles</option><option value="NT">Neutral Zone</option><option value="NC">New Caledonia</option><option value="NZ">New Zealand</option><option value="NI">Nicaragua</option><option value="NE">Niger</option><option value="NG">Nigeria</option><option value="NU">Niue</option><option value="NF">Norfolk Island</option><option value="KP">North Korea</option><option value="VD">North Vietnam</option><option value="MP">Northern Mariana Islands</option><option value="NO">Norway</option><option value="OM">Oman</option><option value="QO">Outlying Oceania</option><option value="PC">Pacific Islands Trust Territory</option><option value="PK">Pakistan</option><option value="PW">Palau</option><option value="PS">Palestinian Territories</option><option value="PA">Panama</option><option value="PZ">Panama Canal Zone</option><option value="PG">Papua New Guinea</option><option value="PY">Paraguay</option><option value="YD">People\'s Democratic Republic of Yemen</option><option value="PE">Peru</option><option value="PH">Philippines</option><option value="PN">Pitcairn Islands</option><option value="PL">Poland</option><option value="PT">Portugal</option><option value="PR">Puerto Rico</option><option value="QA">Qatar</option><option value="RO">Romania</option><option value="RU">Russia</option><option value="RW">Rwanda</option><option value="RE">R\u00e9union</option><option value="BL">Saint Barth\u00e9lemy</option><option value="SH">Saint Helena</option><option value="KN">Saint Kitts and Nevis</option><option value="LC">Saint Lucia</option><option value="MF">Saint Martin</option><option value="PM">Saint Pierre and Miquelon</option><option value="VC">Saint Vincent and the Grenadines</option><option value="WS">Samoa</option><option value="SM">San Marino</option><option value="SA">Saudi Arabia</option><option value="SN">Senegal</option><option value="RS">Serbia</option><option value="CS">Serbia and Montenegro</option><option value="SC">Seychelles</option><option value="SL">Sierra Leone</option><option value="SG">Singapore</option><option value="SK">Slovakia</option><option value="SI">Slovenia</option><option value="SB">Solomon Islands</option><option value="SO">Somalia</option><option value="ZA">South Africa</option><option value="GS">South Georgia and the South Sandwich Islands</option><option value="KR">South Korea</option><option value="ES">Spain</option><option value="LK">Sri Lanka</option><option value="SD">Sudan</option><option value="SR">Suriname</option><option value="SJ">Svalbard and Jan Mayen</option><option value="SZ">Swaziland</option><option value="SE">Sweden</option><option value="CH">Switzerland</option><option value="SY">Syria</option><option value="ST">S\u00e3o Tom\u00e9 and Pr\u00edncipe</option><option value="TW">Taiwan</option><option value="TJ">Tajikistan</option><option value="TZ">Tanzania</option><option value="TH">Thailand</option><option value="TG">Togo</option><option value="TK">Tokelau</option><option value="TO">Tonga</option><option value="TT">Trinidad and Tobago</option><option value="TA">Tristan da Cunha</option><option value="TN">Tunisia</option><option value="TR">Turkey</option><option value="TM">Turkmenistan</option><option value="TC">Turks and Caicos Islands</option><option value="TV">Tuvalu</option><option value="UM">U.S. Minor Outlying Islands</option><option value="PU">U.S. Miscellaneous Pacific Islands</option><option value="VI">U.S. Virgin Islands</option><option value="UG">Uganda</option><option value="UA">Ukraine</option><option value="SU">Union(of Soviet Socialist Republics</option><option value="AE">United Arab Emirates</option><option value="GB">United Kingdom</option><option value="US">United States</option><option value="UY">Uruguay</option><option value="UZ">Uzbekistan</option><option value="VU">Vanuatu</option><option value="VA">Vatican City</option><option value="VE">Venezuela</option><option value="VN">Vietnam</option><option value="WK">Wake Island</option><option value="WF">Wallis and Futuna</option><option value="EH">Western Sahara</option><option value="YE">Yemen</option><option value="ZM">Zambia</option><option value="ZW">Zimbabwe</option><option value="AX">\u00c5land Islands</option></select></div></div><div class="field vat_number"><div class="placeholder">VAT Number</div><input type="text"/></div>';
+
+
+
+//////////////////////////////////////////////////
+// Compiled from dom/subscribe_form.jade
+//////////////////////////////////////////////////
+
+R.subscribeFormHTML = '<form class="recurly subscribe"><div class="subscription"><div class="plan"><div class="name"></div><div class="field quantity"><div class="placeholder">Qty</div><input type="text"/></div><div class="recurring_cost"><div class="cost"></div><div class="interval"></div></div><div class="free_trial"></div><div class="setup_fee"><div class="title">Setup Fee</div><div class="cost"></div></div></div><div class="add_ons none"></div><div class="coupon"><div class="coupon_code field"><div class="placeholder">Coupon Code</div><input type="text" class="coupon_code"/></div><div class="check"></div><div class="description"></div><div class="discount"></div></div><div class="vat"><div class="title">VAT</div><div class="cost"></div></div></div><div class="due_now"><div class="title">Order Total</div><div class="cost"></div></div><div class="server_errors none"></div><div class="contact_info"></div><div class="billing_info"></div><div class="accept_tos"></div><div class="footer"><button type="submit" class="submit">Subscribe</button></div></form>';
+
+
+
+//////////////////////////////////////////////////
+// Compiled from dom/update_billing_info_form.jade
+//////////////////////////////////////////////////
+
+R.updateBillingInfoFormHTML = '<form class="recurly update_billing_info"><div class="server_errors none"></div><div class="billing_info"></div><div class="footer"><button type="submit" class="submit">Update</button></div></form>';
+
+
+
+//////////////////////////////////////////////////
+// Compiled from dom/one_time_transaction_form.jade
+//////////////////////////////////////////////////
+
+R.oneTimeTransactionFormHTML = '<form class="recurly update_billing_info"><div class="server_errors none"></div><div class="contact_info"></div><div class="billing_info"></div><div class="accept_tos"></div><div class="footer"><button type="submit" class="submit">Pay</button></div></form>';
+
+
+
+//////////////////////////////////////////////////
+// Compiled from dom/terms_of_service.jade
+//////////////////////////////////////////////////
+
+R.termsOfServiceHTML = '<input id="tos_check" type="checkbox"/><label id="accept_tos" for="tos_check">I accept the <a target="_blank" class="tos_link">Terms of Service</a></label>';
+
+window.Recurly = R;
+
+}(jQuery));
+

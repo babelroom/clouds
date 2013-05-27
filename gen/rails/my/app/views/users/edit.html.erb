@@ -1,0 +1,71 @@
+<% content_for :subtitle do %>Profile<% end %>
+<% id=@user.id.to_s %>
+
+<% form_for :user, @user, :url => { :action => "edit" } do |f| %>
+<center>
+    <%= f.error_messages :header_message => "Please correct the following errors:",
+        :message => nil %>
+</center>
+<% end %>
+
+<% content_for :content_header do %>
+    <h1><img src="/images/icon_edit_m.png" width="35" height="35" alt="Edit" class="icon_header">Personal Settings</h1>
+<% end %>
+    
+<center>
+        <form action="/plugin/0/users/<%=id%>" ation="/users/<%=id%>" name="form" method="post">
+            <input name="<%= request_forgery_protection_token %>" type="hidden" value="<%= escape_javascript(form_authenticity_token) %>" />
+            <input name="after_submit" type="hidden" value="<%= request.request_uri %>" />
+            <input name="page_path" type="hidden" value="<%= request.request_uri %>" />
+            <input name="_method" type="hidden" value="put" />
+        <table border="0" cellpadding="10" id="table_form">
+            <tr><td colspan="2"></td></tr>
+            <% rownum=0 %>
+            <tr <%= (((rownum+=1)%2)==1)?'class="odd"':'' %>>
+                <th width="20%"></th>
+                <th width="50%"></th>
+            </tr>
+            <tr <%= (((rownum+=1)%2)==1)?'class="odd"':'' %>>
+                <td><label>Email</label></td>
+                <td><span class="ro_field"><%= @user.email_address %></span><!--input name="ignore[ignore]" type="text" class="input_text" value="<%=@user.email_address%>" disabled readonly /--></td>
+            </tr>
+            <tr <%= (((rownum+=1)%2)==1)?'class="odd"':'' %>>
+                <td><label>First Name</label></td>
+                <td><input name="user[name]" type="text" class="input_text" value="<%=@user.name%>" /></td>
+            </tr>
+            <tr <%= (((rownum+=1)%2)==1)?'class="odd"':'' %>>
+                <td><label>Last Name</label></td>
+                <td><input name="user[last_name]" type="text" class="input_text" value="<%=@user.last_name%>" /></td>
+            </tr>
+            <tr <%= (((rownum+=1)%2)==1)?'class="odd"':'' %>>
+                <td><label>Time Zone</label></td>
+                <td><%= time_zone_select( 'user', 'timezone', nil, { :default => "Pacific Time (US & Canada)" }, { :class => "input_text" } ) %></td>
+            </tr>
+<!--
+            <tr <%= (((rownum+=1)%2)==1)?'class="odd"':'' %>>
+                <td><label>Company</label></td>
+                <td><input name="user[company]" type="text" class="input_text" value="<%=@user.company%>" /></td>
+            </tr>
+-->
+            <tr><td colspan="2"></td></tr>
+            <tr <%= (((rownum+=1)%2)==1)?'class="odd"':'' %>>
+<% if true %>
+                <td colspan="2" align="center">
+                    <button>Save</button>
+                </td>
+<% else %>
+                <td colspan="2" align="center"><table><tr>
+                    <td><span style="display:none;" id="save_button">
+                        <a href="javascript:document.form.submit(); return false;" class="button singleline black tab"><span class="icon6 greyblack">+</span><span class="tagline1">&nbsp;&nbsp;&nbsp;Save&nbsp;&nbsp;&nbsp;</span><span class="tagline2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;As Draft</span></a>
+                        </span><%= render :partial=>"shared/js_button", :locals=>{ :id=>'save_button', :value=>'Save' } %>
+                    </td>
+                    <td>
+                        <a href="/users/<%=id%>" class="button singleline black tab"><span class="icon6 greyblack"><</span><span class="tagline1">Cancel</span><span class="tagline2"></span></a>
+                    </td>
+                </tr></table></td>
+<% end %>
+            </tr>
+        </table>
+        </form>
+</center>
+

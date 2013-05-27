@@ -1,0 +1,36 @@
+<!-- AUTOMATICALLY GENERATED FILE - DO NOT EDIT -->
+
+<def tag="form" for="Conference">
+  <form merge param="default">
+    <error-messages param/>
+    <field-list fields="name, start, config, deployed_at, is_deleted, schedule, pin, actual_start, actual_end, participant_emails, uri, introduction, access_config, origin_data, account, owner, skin" param/>
+    <div param="actions">
+      <submit label="#{ht 'conferences.actions.save', :default=>['Save']}" param/><or-cancel param="cancel"/>
+    </div>
+  </form>
+</def>
+
+
+
+<def tag="form" for="User">
+  <form merge param="default">
+    <error-messages param/>
+    <field-list fields="name, email_address, administrator, phone, photo_file_name, photo_content_type, photo_file_size, photo_updated_at, deployed_at, last_name, timezone, company, pin, api_key, avatar_small, avatar_medium, avatar_large, email, origin_data, state" param/>
+    <div param="actions">
+      <submit label="#{ht 'users.actions.save', :default=>['Save']}" param/><or-cancel param="cancel"/>
+    </div>
+  </form>
+</def>
+
+<def tag="signup-form" polymorphic/>
+<def tag="signup-form" for="User">
+  <form lifecycle="signup" merge param="default">
+    <error-messages param/>
+    <field-list fields="name, last_name, email_address, timezone, company, password, password_confirmation" param/>
+    <div param="actions">
+      <submit label="#{ht 'users.actions.signup', :default=>['Signup']}" param/><or-cancel param="cancel"/>
+    </div>
+  </form>
+</def>
+
+
