@@ -37,6 +37,7 @@ ActionController::Routing::Routes.draw do |map|
     map.guest '/guest', :controller => 'conferences', :action => 'guest', :conditions => { :method => :get }
 
     map.upload '/upload.:format', :controller => 'media_files', :action => 'upload', :conditions => { :method => :post }
+    map.upload '/upload.:format', :controller => 'media_files', :action => 'options', :conditions => { :method => :options }
 
     Hobo.add_routes(map)
   end
