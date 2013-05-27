@@ -19,6 +19,7 @@ class MediaFilesController < ApplicationController
     #headers['Access-Control-Max-Age'] = '1000'
     #headers['Access-Control-Allow-Headers'] = '*,x-requested-with'
     headers['Access-Control-Allow-Headers'] = request.env['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']
+    headers['Access-Control-Allow-Credentials'] = 'true'
     head :ok
   end
 
