@@ -2,7 +2,7 @@ my $LOGDIR='/var/log/br/mysql';
 my $f = '/etc/my.cnf';
 open F, ">$f" or die;
 print F <<__EOT__
-# BR mysql configuration from primer
+# -- automatically created by BR primer MODIFICATIONS MAY BE LOST
 [mysqld]
 bind-address=127.0.0.1
 datadir=/var/lib/mysql

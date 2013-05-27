@@ -7,8 +7,8 @@ ActionController::Routing::Routes.draw do |map|
     #map.users_self_register '/users/self_register.:format', :controller => 'users', :action => 'self_register', :conditions => { :method => :post }
     map.users_self_register '/users/self_register.:format', :controller => 'users', :action => 'self_register'
     map.go '/users/:id/go/:key', :controller => 'users', :action => 'go'
-    map.admin '/admin2548', :controller => 'users', :action => 'admin'
-    map.admin_set_current_user '/admin_set_current_user2548', :controller => 'users', :action => 'admin_set_current_user'
+#    map.admin '/admin2548', :controller => 'users', :action => 'admin'
+#    map.admin_set_current_user '/admin_set_current_user2548', :controller => 'users', :action => 'admin_set_current_user'
     map.invitation_add_guest '/invitations/add_guest.:format', :controller => 'invitations', :action => 'add_guest', :conditions => { :method => :post }
   end
 
@@ -121,10 +121,6 @@ ActionController::Routing::Routes.draw do |map|
 #    Hobo.add_routes(map) # -- had this out, then had to add again, then out again ...
 
   end
-
-
-
-
 
 
     map.with_options :path_prefix => 'plugin/:style_key', :plugin => true do |rte|

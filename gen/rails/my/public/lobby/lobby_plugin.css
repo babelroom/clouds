@@ -1,0 +1,154 @@
+
+.msg {
+  border: 1px solid;
+  border-left-width: 0;
+  border-right-width: 0;
+  margin: 0;
+  padding: 8px 40px;
+  font-size: 12px;
+  line-height: 20px;
+  box-shadow: rgba(255, 255, 255, 0.75) 0px 1px 0px inset, rgba(0, 0, 0, 0.1) 0px 2px 3px;
+  -webkit-box-shadow: rgba(255, 255, 255, 0.75) 0px 1px 0px inset, rgba(0, 0, 0, 0.1) 0px 2px 3px;
+  -moz-box-shadow: rgba(255, 255, 255, 0.75) 0px 1px 0px inset, rgba(0, 0, 0, 0.1) 0px 2px 3px;
+  text-shadow: #FFF 0px 1px 0px;
+  font-weight: bold;
+  /*
+  &:first-child {
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+      -webkit-border-top-left-radius: 9px;
+      -webkit-border-top-right-radius: 9px;
+      -moz-border-radius-topleft: 9px;
+      -moz-border-radius-topright: 9px;
+  }*/
+}
+.msg.msg_info {
+  border-color: #9FD1F5;
+  background: #c3e6ff url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA3klEQVQ4jaXToU4DQRAG4G8JDYKUYHAEUFUVqDreoRIJCBIeAoWFoDCVNViChheoRVeSJghIeIHBXMPesSV36SSTTGb+/eef2UyKCOvYZjORUmqmtnGNBaYR8VWrRkTNC3aHqPymid9oofIgiz/+VFso2MUVRkhdFBzhAS8YYlaN0UrBCR7x7nf+vSK+QHCKJ/TwWT1erGxYINjHVkW07H7bhWBps4xg0JVgkD1++29nq37hMovvcYzzIrKg4BDzTMEZXtFvO8II3xnBM3a67KCHC0wwRu26mvi07jn/AJPCHtt2XXBYAAAAAElFTkSuQmCC") no-repeat 20px 9px;
+  color: #005898;
+}
+.msg.msg_warn {
+  border-color: #E6DB55;
+  background: #fffbcc url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAv0lEQVQ4jcXTO05CQRQA0DMGErSxtNYVwC60k01o7ImUtjSwFkJvxQKQRUBioo0N5bVgSF4mD3hI4STT3M+Zm8lMigjnrIuzuuHIBPd4ONh7AGhhgSXafwGeEXm/nArcYIU3jPCZY42B8TYfu3xg0hToYlMDbNBrAkxzQwkEZseAx0pxHRDo7wMu8VEUv2NexJa4qgMGReG+CQKvJXCLrxOAb9xFhFY+/QkdrKt3lFL6yQ0rpEru2vahDdO//8ZfSc2pR9a5KFoAAAAASUVORK5CYII=") no-repeat 20px 9px;
+  color: #69610A;
+}
+.msg.msg_error {
+  border-color: #F3ABAB;
+  background: #f9c9c9 url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAv0lEQVQ4jcXTO05CQRQA0DMGErSxtNYVwC60k01o7ImUtjSwFkJvxQKQRUBioo0N5bVgSF4mD3hI4STT3M+Zm8lMigjnrIuzuuHIBPd4ONh7AGhhgSXafwGeEXm/nArcYIU3jPCZY42B8TYfu3xg0hToYlMDbNBrAkxzQwkEZseAx0pxHRDo7wMu8VEUv2NexJa4qgMGReG+CQKvJXCLrxOAb9xFhFY+/QkdrKt3lFL6yQ0rpEru2vahDdO//8ZfSc2pR9a5KFoAAAAASUVORK5CYII=") no-repeat 20px 9px;
+  color: #8D0D0D;
+}
+.msg.msg_ok {
+  border-color: #A6D877;
+  background: #d2ecba url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABFUlEQVQ4jcXTvS5EQRjG8R9rKRRWJaFDI7gCpVaCjkQibkAUEi7CJSi3U0nWx0rQSXTrK3sFFCQ28ZGwJKMwuzk5jqxkC9NM5nny/N/3nTmnI4SgndXZVhr+0EEeW3hADTsYaGZbALqwh1vMYxpnuEKhFSCHQ1TRn9B7cIfNEMKvd5BDCYMhhDEUsRy9d1QwoTnHz/A+KtF7xXbcJ9GNe6xnjdBo+yLq9Tj7MN4whROcozcNyOEgUbmO2Rh+itoxrlFodh+NPHZRjecPzGEUz1E7SobTgA08og9rWMRIonIZl9GXBSjiNOGNJyqXxXdP33YSMINPrGIBL1Ev4SYrnAbAku8PpBZCaOgrGMoKNwAd//43fgEIk6Bja4ebbQAAAABJRU5ErkJggg==") no-repeat 20px 9px;
+  color: #336801;
+}
+/* line 42, ../../../app/stylesheets/alerts.scss */
+.msg em {
+  text-decoration: underline;
+}
+
+/* from ../css/plugin.css */
+body {
+    /* font-family: 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif; */
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    background-color: white;
+}
+label {
+    text-align: right;
+    display: block;
+    font-weight: bold;
+}
+input, span.ro_field, select {
+    font-size: 16px;
+    font-weight: bold;
+    padding: 3px;
+    /*width: 200px;*/
+}
+button {
+    /*font-size: 18px;*/
+    font-size: 20px;
+    font-family: inherit;
+    font-weight: bold;
+    /*text-shadow: rgba(0, 0, 0, 0.3) 0 1px 0;*/
+    text-shadow: rgba(0, 0, 0, 0.3) 0 2px 0;
+    cursor: pointer; height: 52px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    -o-border-radius: 4px;
+    -ms-border-radius: 4px;
+    -khtml-border-radius: 4px;
+    border-radius: 4px;
+    border:1px solid #ac3e65;
+    background: #dc5381;
+    background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #e26994), color-stop(100%, #dc5381));
+    background: -webkit-linear-gradient(#e26994,#dc5381);
+    background: -moz-linear-gradient(#e26994,#dc5381);
+    background: -o-linear-gradient(#e26994,#dc5381);
+    background: linear-gradient(#e26994,#dc5381);color:#fff;
+    -moz-box-shadow: rgba(255, 255, 255, 0.4) 0 1px 0, rgba(255, 255, 255, 0.2) 0 1px 0 0 inset;
+    -webkit-box-shadow: rgba(255, 255, 255, 0.4) 0 1px 0, rgba(255, 255, 255, 0.2) 0 1px 0 0 inset;
+    -o-box-shadow: rgba(255, 255, 255, 0.4) 0 1px 0, rgba(255, 255, 255, 0.2) 0 1px 0 0 inset;
+    box-shadow: rgba(255, 255, 255, 0.4) 0 1px 0, rgba(255, 255, 255, 0.2) 0 1px 0 0 inset;
+    line-height: 50px;
+    padding: 0 20px;
+}
+tr.tall_row {
+    height: 70px;
+}
+td {
+    vertical-align: text-top;
+}
+td.col1 { width: 110px; }
+td.col2 { width: 210px; }
+td.col3 { width: 265px; }
+/* td.col1 { width: 33%; }
+td.col2 { width: 33%; }
+td.col3 { width: 33%; } */
+label.fieldWithErrors {
+    color: red;
+    font-weight: bold;
+}
+input.fieldWithErrors {
+    border-color: red;
+    border-style: solid;
+}
+input:focus {
+    background-color: #FFA;
+}
+.hint {
+    color: #999;
+    font-size: 11px;
+}
+#room_url_prefix {
+    font-size: 16px;
+    font-weight: bold;
+}
+#room_url_prefix:before{
+    content: 'http://my.babelroom.com/';
+}
+#room_url_echo {
+    color: #999;
+}
+#room_url_hint:after {
+    content: 'Choose a URL for your room. You can always change this later';
+}
+#room_url_hint { height: 30px; }
+#user_password_confirmation_hint { height: 20px; }
+
+
+
+/* for room door */
+fieldset {
+/*    border: 1px solid #CCC; */
+    border: none;
+    text-align: center;
+    margin: 20px;
+}
+legend {
+    display: none;
+}
+input[value="Enter as a new participant in this conference"] {
+    width: 375px;
+}
+

@@ -23,13 +23,13 @@ $dummy_cert = "/home/br/gits/clouds/clouds/misc/dummy_certificate.pem";
 # ---
 %services = (
     rooms => {installed=>sub{`which node`;}, running=>sub{_ps_grep('-c /tmp/br/app_config.js');}, value=>sub{$hostnames{rooms}}, required=>1},
-    accounts => {installed=>sub{`which node` && -d '/home/br/gits/clouds/gen/rails/my';}, running=>sub{_ps_grep('mongrel_my');}, value=>sub{$hostnames{accounts}}},
+    my => {installed=>sub{`which node` && -d '/home/br/gits/clouds/gen/rails/my';}, running=>sub{_ps_grep('mongrel_my');}, value=>sub{$hostnames{my}}},
     freeswitch => {installed=>sub{-x '/usr/local/freeswitch/bin/freeswitch';}, running=>sub{_ps_grep('-m /usr/local/freeswitch -db');}},
     red5 => {installed=>sub{-d '/home/br/gits/red5';}, running=>sub{_ps_grep('-Dred5.root=/home/br/gits/red5/');}},
     mysqld => {installed=>sub{-d '/var/log/br/mysql';}, running=>sub{_ps_grep('/usr/libexec/mysqld');}, required=>1},
     netops => {installed=>sub{1;}, running=>sub{_ps_grep('/bin/su br -c ./init.pl');}, required=>1},
 );
-%onoff = (autoprime=>1, startup=>1,    'rooms'=>1, 'freeswitch'=>1, 'red5'=>0, 'accounts'=>0, 'netops'=>1, 'mysqld'=>1);  # defaults
+%onoff = (autoprime=>1, startup=>1,    'rooms'=>1, 'freeswitch'=>1, 'red5'=>0, 'my'=>0, 'netops'=>1, 'mysqld'=>1);  # defaults
 %list_functions = (
     services => list_services,
     flags => list_flags,
@@ -151,12 +151,12 @@ node_config_app: {script: "config_js", iface: "eth0", secret: "$misc{secret}", k
 prime_node_app: {script: "node_rc", file: "/etc/init.d/node_app", path: "/home/br/gits/clouds/gen/node", config_file: "/tmp/br/app_config.js", label: "app", deps: ['node_config_app']}
 __EOT__
 );
-    add(accounts,mongrel_my,<<__EOT__
-my_rails_session_store: {script: "rails_session_store", domain: "", secret: "$misc{secret}", file: "/home/br/gits/clouds/gen/my/config/initializers/session_store.rb"}
-my_rails_cookie_verification_secret: {script: "rails_cookie_verification_secret", secret: "$misc{cookie_verification_secret}", file: "/home/br/gits/clouds/gen/my/config/initializers/cookie_verification_secret.rb"}
-my_rails_s3: {script: "rails_s3_key", key_id: "$misc{s3_key_id}", key: "$misc{s3_key}", file: "/home/br/gits/clouds/gen/my/config/initializers/s3.yml"}
-my_rails_environment: {script: "my_rails_environment", host: "", cookie_key: "$misc{cookie_key}", file: "/home/br/gits/clouds/gen/my/config/environments/production.rb"}
-mongrel_my: {script: "mongrel_rc", file: "/etc/init.d/mongrel_my", path: "/home/br/gits/clouds/gen/rails/my", port: 3001, label: "my", rails_env: "production"}, deps: ['my_rails_session_store','my_rails_cookie_verification_secret','my_rails_s3','my_rails_environment']}
+    add('my',mongrel_my,<<__EOT__
+my_rails_session_store: {script: "rails_session_store", domain: "", secret: "$misc{secret}", file: "/home/br/gits/clouds/gen/rails/my/config/initializers/session_store.rb"}
+my_rails_cookie_verification_secret: {script: "rails_cookie_verification_secret", secret: "$misc{cookie_verification_secret}", file: "/home/br/gits/clouds/gen/rails/my/config/initializers/cookie_verification_secret.rb"}
+my_rails_s3: {script: "rails_s3", key_id: "$misc{s3_key_id}", key: "$misc{s3_key}", file: "/home/br/gits/clouds/gen/rails/my/config/s3.yml"}
+my_rails_environment: {script: "my_rails_environment", host: "", cookie_key: "$misc{cookie_key}", file: "/home/br/gits/clouds/gen/rails/my/config/environments/production.rb"}
+prime_my: {script: "mongrel_rc", file: "/etc/init.d/mongrel_my", path: "/home/br/gits/clouds/gen/rails/my", port: 3001, label: "my", rails_env: "production", deps: ['my_rails_session_store','my_rails_cookie_verification_secret','my_rails_s3','my_rails_environment']}
 __EOT__
 );
     $startup .= "estream ";

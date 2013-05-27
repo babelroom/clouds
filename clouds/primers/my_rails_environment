@@ -1,5 +1,7 @@
 open F, ">$R->{file}" or die;
 print F <<__EOT__
+# -- automatically created by BR primer MODIFICATIONS MAY BE LOST
+
 # Settings specified here will take precedence over those in config/environment.rb
 
 # The production environment is meant for finished, "live" apps.
@@ -29,22 +31,21 @@ config.action_view.cache_template_loading            = true
 # Enable threaded mode
 # config.threadsafe!
 
-# added for babelroom
-$babelroom_environment = ''     # DEPRECIATE
-
-$babelroom = {}
-$babelroom[:environment] = ''
-$babelroom[:new_account_prefix] = 'P1-'    # confirm this ...
-$babelroom[:subscribe_url] = 'https://babelroom.recurly.com/subscribe'
-$babelroom[:media_server_url] = 'rtmp://no.babelroom.net:1936/oflaDemo'
-$babelroom[:hosted_billing_url] = 'https://babelroom.recurly.com'
-$babelroom[:marcom_url] = '$R->{host}'      # 'http://babelroom.com'
-$babelroom[:page_url] = '$R->{host}'        # 'https://bblr.co'
-$babelroom[:api_url] = '$R->{host}'         # 'https://api.babelroom.com'
-$babelroom[:easter] = false
-$babelroom[:cookie_key] = '$R->{cookie_key}'
+\$babelroom = {}
+\$babelroom[:environment] = ''
+\$babelroom[:new_account_prefix] = 'P1-'    # confirm this ...
+\$babelroom[:subscribe_url] = 'https://babelroom.recurly.com/subscribe'
+\$babelroom[:media_server_url] = 'rtmp://no.babelroom.net:1936/oflaDemo'
+\$babelroom[:hosted_billing_url] = 'https://babelroom.recurly.com'
+\$babelroom[:marcom_url] = '$R->{host}'      # 'http://babelroom.com'
+\$babelroom[:page_url] = '$R->{host}'        # 'https://bblr.co'
+\$babelroom[:api_url] = '$R->{host}'         # 'https://api.babelroom.com'
+\$babelroom[:easter] = false
+\$babelroom[:cookie_key] = '$R->{cookie_key}'
 
 __EOT__
 ;
 close F;
+`chown br:br $R->{file}`;
 1
+

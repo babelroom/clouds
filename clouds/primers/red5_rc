@@ -1,4 +1,6 @@
+# -- automatically created by BR primer MODIFICATIONS MAY BE LOST
 # red5
+
 # chkconfig: 2345 95 55
 # description: red5  server startup script
 

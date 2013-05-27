@@ -1,5 +1,6 @@
 open F, ">$R->{file}" or die;
 print F <<__EOT__
+-- automatically created by BR primer MODIFICATIONS MAY BE LOST
 
 DELETE FROM `interconnects`;
 ALTER TABLE `interconnects` AUTO_INCREMENT=1;

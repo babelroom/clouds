@@ -1,9 +1,16 @@
 open F, ">$R->{file}" or die;
+# wouldn't you know it, the ruby plugin "paperclip" barfs on empty keys, it's happy with dummy keys though
+$key_id = $R->{key_id};
+$key = $R->{key};
+$key_id = "in defense of half-" if not length($key_id);
+$key = "baked RoR code" if not length($key);
 print F <<__EOT__
-access_key_id: <%= ENV['AWS_ACCESS_KEY_ID'] || '$R->{key_id}' %>
-secret_access_key: <%= ENV['AWS_SECRET_ACCESS_KEY'] || '$R->{key}' %>
+# -- automatically created by BR primer MODIFICATIONS MAY BE LOST
+
+access_key_id: <%= ENV['AWS_ACCESS_KEY_ID'] || '$key_id' %>
+secret_access_key: <%= ENV['AWS_SECRET_ACCESS_KEY'] || '$key' %>
 __EOT__
 ;
 close F;
+`chown br:br $R->{file}`;
 1
-

@@ -1,5 +1,7 @@
 open F, ">$R->{file}" or die;
 print F <<__EOT__
+# -- automatically created by BR primer MODIFICATIONS MAY BE LOST
+
 # Be sure to restart your server when you modify this file.
 
 # Your secret key for verifying cookie session data integrity.
@@ -7,7 +9,7 @@ print F <<__EOT__
 # Make sure the secret is at least 30 characters and all random, 
 # no regular words or you'll be exposed to dictionary attacks.
 ActionController::Base.session = {
-  :key         => $babelroom[:cookie_key],  # by environment
+  :key         => \$babelroom[:cookie_key],  # by environment
   :secret      => '$R->{secret}',
   :domain      => '$R->{domain}',
   :httponly    => false,
@@ -21,4 +23,5 @@ ActionController::Base.session = {
 __EOT__
 ;
 close F;
+`chown br:br $R->{file}`;
 1

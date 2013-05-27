@@ -2,6 +2,7 @@ my ($file, $label, $path) = ($R->{file}, $R->{label}, $R->{path});
 open F, ">$file" or die;
 print F <<__EOT__
 #!/bin/sh
+# -- automatically created by BR primer MODIFICATIONS MAY BE LOST
  
 #
 # chkconfig: 35 90 10
