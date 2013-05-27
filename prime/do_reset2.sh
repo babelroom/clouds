@@ -4,7 +4,8 @@ br --offline;
 
 sudo service mysqld start
 
-echo "drop database my; drop database netops; quit;" | /usr/bin/mysql -uroot
+echo "drop database my" | /usr/bin/mysql -uroot
+echo "drop database netops" | /usr/bin/mysql -uroot
 
 sudo service mysqld stop
 
