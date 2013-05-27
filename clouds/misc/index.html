@@ -1,18 +1,15 @@
 <!doctype html>
 <html>
 <body>
-You made it!
+<h3>You made it!</h3>
+
+<br>
 
 Your room ---> <a href="/demo">Here</a>
 
-Accounts ---> <a href="#" onclick="return acc();">Accounts</a>
+<br>
 
-<script>
-function acc()
-{
-console.log(location);
-    return false;
-}
-</script>
+Accounts ---> <a href="#" onclick="javascript: location.href=(location.protocol+'//'+location.hostname+':3001/home'); return false;">Accounts</a>
+
 </body>
 </html>
