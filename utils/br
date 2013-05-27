@@ -13,7 +13,7 @@ $dummy_key = "/home/br/gits/clouds/clouds/misc/dummy_privatekey.pem";
 $dummy_cert = "/home/br/gits/clouds/clouds/misc/dummy_certificate.pem";
 
 # ---
-%hostnames = ('rooms' => 'http://please.ignore.test');
+%hosts = ('rooms' => 'http://please.ignore.test');
 @on = ();
 @off = ();
 @list = ();
@@ -22,8 +22,8 @@ $dummy_cert = "/home/br/gits/clouds/clouds/misc/dummy_certificate.pem";
 
 # ---
 %services = (
-    rooms => {installed=>sub{`which node`;}, running=>sub{_ps_grep('-c /tmp/br/app_config.js');}, value=>sub{$hostnames{rooms}}, required=>1},
-    my => {installed=>sub{`which node` && -d '/home/br/gits/clouds/gen/rails/my';}, running=>sub{_ps_grep('mongrel_my');}, value=>sub{$hostnames{my}}},
+    rooms => {installed=>sub{`which node`;}, running=>sub{_ps_grep('-c /tmp/br/app_config.js');}, value=>sub{$hosts{rooms}}, required=>1},
+    my => {installed=>sub{`which node` && -d '/home/br/gits/clouds/gen/rails/my';}, running=>sub{_ps_grep('mongrel_my');}, value=>sub{$hosts{my}}},
     freeswitch => {installed=>sub{-x '/usr/local/freeswitch/bin/freeswitch';}, running=>sub{_ps_grep('-m /usr/local/freeswitch -db');}},
     red5 => {installed=>sub{-d '/home/br/gits/red5';}, running=>sub{_ps_grep('-Dred5.root=/home/br/gits/red5/');}},
     mysqld => {installed=>sub{-d '/var/log/br/mysql';}, running=>sub{_ps_grep('/usr/libexec/mysqld');}, required=>1},
@@ -49,7 +49,7 @@ $dummy_cert = "/home/br/gits/clouds/clouds/misc/dummy_certificate.pem";
 
 # ---
 $result = GetOptions (
-    "hostname=s" => \%hostnames,
+    "host=s" => \%hosts,
     "on=s" => \@on,
     "off=s" => \@off,
     "list=s" => \@list,
@@ -155,7 +155,7 @@ __EOT__
 my_rails_session_store: {script: "rails_session_store", domain: "", secret: "$misc{secret}", file: "/home/br/gits/clouds/gen/rails/my/config/initializers/session_store.rb"}
 my_rails_cookie_verification_secret: {script: "rails_cookie_verification_secret", secret: "$misc{cookie_verification_secret}", file: "/home/br/gits/clouds/gen/rails/my/config/initializers/cookie_verification_secret.rb"}
 my_rails_s3: {script: "rails_s3", key_id: "$misc{s3_key_id}", key: "$misc{s3_key}", file: "/home/br/gits/clouds/gen/rails/my/config/s3.yml"}
-my_rails_environment: {script: "my_rails_environment", host: "", cookie_key: "$misc{cookie_key}", file: "/home/br/gits/clouds/gen/rails/my/config/environments/production.rb"}
+my_rails_environment: {script: "my_rails_environment", default: "$hosts{default}", landing: "$hosts{landing}", rooms: "$hosts{rooms}", api: "$hosts{api}", cookie_key: "$misc{cookie_key}", file: "/home/br/gits/clouds/gen/rails/my/config/environments/production.rb"}
 prime_my: {script: "mongrel_rc", file: "/etc/init.d/mongrel_my", path: "/home/br/gits/clouds/gen/rails/my", addr: "0.0.0.0", port: 3001, label: "my", rails_env: "production", deps: ['my_rails_session_store','my_rails_cookie_verification_secret','my_rails_s3','my_rails_environment']}
 __EOT__
 );
@@ -179,7 +179,7 @@ __EOT__
         }
     print $fh "# -------------- CUT HERE --------------- If you are copying this data to the user-data field of Amazon ec2 you only need copy up to this line\n";
     print $fh "# --- All values from this point are used to preserve configuration for 'br' and not used directing in priming\n";
-    outvar(hostnames);
+    outvar(host);
     outvar(onoff);
     outvar(privatekeys);
     outvar(certificates);

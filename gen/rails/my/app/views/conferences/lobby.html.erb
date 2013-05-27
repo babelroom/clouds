@@ -149,6 +149,7 @@ article > p {
 
 <script type="text/javascript"> 
     
+if ('<%= $babelroom[:new_account_prefix] %>'.length) {
   Recurly.config({
 <% if $babelroom[:environment].blank? or $babelroom[:environment].eql? 'PRODUCTION' %>
     environment: 'production'
@@ -197,6 +198,7 @@ article > p {
             load: true
             });
         }
+}
 
 </script>
 
@@ -444,10 +446,6 @@ CODE
 <!-- accounts-list --> 
 <div class="table with_advanced_filters full_page "> 
  
-  <!-- div class="header">
-    <h4>Accounts</h4>
-  </div --> 
-    
   <div class="filters"> 
     <h4><!--Filter--></h4> 
 
@@ -612,10 +610,6 @@ Babelroom retains 90 days of call activity data
 <!-- accounts-list --> 
 <div class="table with_advanced_filters full_page "> 
  
-  <!-- div class="header">
-    <h4>Accounts</h4>
-  </div --> 
-    
   <div class="filters"> 
     <h4>Filter</h4> 
     <ul> 
@@ -896,6 +890,7 @@ allowtransparency="true"
     </ul>
   </li>
 
+<% if $babelroom[:new_account_prefix].eql? '' %>
   <li id="account_group" class="account group">
     <h3>Account</h3>
     <ul>
@@ -907,6 +902,7 @@ allowtransparency="true"
         <%= nav_link('call_log','Call Activity') %>
     </ul>
   </li>
+<% end %>
 
   <li id="files_group" class="files group">
     <h3>Files</h3>

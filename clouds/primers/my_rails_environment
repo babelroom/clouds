@@ -1,4 +1,8 @@
 open F, ">$R->{file}" or die;
+my $default = $R->{default};
+my $landing = length($R->{landing}) ? $R->{landing} : $default;
+my $rooms = length($R->{rooms}) ? $R->{rooms} : $default;
+my $api = length($R->{api}) ? $R->{api} : $default;
 print F <<__EOT__
 # -- automatically created by BR primer MODIFICATIONS MAY BE LOST
 
@@ -33,13 +37,18 @@ config.action_view.cache_template_loading            = true
 
 \$babelroom = {}
 \$babelroom[:environment] = ''
+__EOT__
+;
+if (length($R->{recurly})) { print F <<__EOT__
 \$babelroom[:new_account_prefix] = 'P1-'    # confirm this ...
-\$babelroom[:subscribe_url] = 'https://babelroom.recurly.com/subscribe'
-\$babelroom[:media_server_url] = 'rtmp://no.babelroom.net:1936/oflaDemo'
-\$babelroom[:hosted_billing_url] = 'https://babelroom.recurly.com'
-\$babelroom[:marcom_url] = '$R->{host}'      # 'http://babelroom.com'
-\$babelroom[:page_url] = '$R->{host}'        # 'https://bblr.co'
-\$babelroom[:api_url] = '$R->{host}'         # 'https://api.babelroom.com'
+\$babelroom[:subscribe_url] = 'https://$R->{recurly}.recurly.com/subscribe'
+\$babelroom[:hosted_billing_url] = 'https://$R->{recurly}.recurly.com'
+__EOT__
+; }
+print F <<__EOT__
+\$babelroom[:marcom_url] = '$landing'
+\$babelroom[:page_url] = '$rooms'
+\$babelroom[:api_url] = '$api'
 \$babelroom[:easter] = false
 \$babelroom[:cookie_key] = '$R->{cookie_key}'
 
