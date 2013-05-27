@@ -9,6 +9,7 @@ $|++;   # don't buffer stdout
 # ---
 $config_file = "/home/br/config";
 $prefx = "_br_";
+# private key / certificate stuff hidden for the present -- leave it out
 $dummy_key = "/home/br/gits/clouds/clouds/misc/dummy_privatekey.pem";
 $dummy_cert = "/home/br/gits/clouds/clouds/misc/dummy_certificate.pem";
 
@@ -58,6 +59,7 @@ $result = GetOptions (
     "resetdb" => \$commands{offline},
     "check" => \$commands{check},
     "status" => \$commands{status},
+    "cyclekeys" => \$commands{cyclekeys},
     "help" => \$commands{help},
     "write" => \$commands{write},
     
@@ -101,9 +103,7 @@ sub read_config
         }
     if ($no_content) {
         print "Warning: could not read configuration file '$config_file', using defaults\n";
-        $misc{cookie_key} = 'brv1_' . join "", map { unpack "H*", chr(rand(256)) } 1..4;
-        $misc{secret} = join "", map { unpack "H*", chr(rand(256)) } 1..64;
-        $misc{cookie_verification_secret} = join "", map { unpack "H*", chr(rand(256)) } 1..64;
+        cyclekeys();
         return 0;
         }
     return 1;
@@ -181,8 +181,8 @@ __EOT__
     print $fh "# --- All values from this point are used to preserve configuration for 'br' and not used directing in priming\n";
     outvar(host);
     outvar(onoff);
-    outvar(privatekeys);
-    outvar(certificates);
+#    outvar(privatekeys);
+#    outvar(certificates);
     outvar(misc);
     print "Configuration written\n";
 }
@@ -300,6 +300,12 @@ sub resetdb($) {
     print "$cmd\n";
     print `$cmd`;
 }
+sub cyclekeys() {
+    $misc{cookie_key} = 'brv1_' . join "", map { unpack "H*", chr(rand(256)) } 1..4;
+    $misc{secret} = join "", map { unpack "H*", chr(rand(256)) } 1..64;
+    $misc{cookie_verification_secret} = join "", map { unpack "H*", chr(rand(256)) } 1..64;
+    return 1;   # modified
+}
 sub check() {}
 sub status()
 {
@@ -335,6 +341,7 @@ sub logic
     status() if defined($commands{status});
     help(0) if defined($commands{help});
     $mod = 1 if defined($commands{write});
+    if (defined($commands{cyclekeys})) { if (cyclekeys()) { $mod=1 }; }
     online($mod) if defined($commands{online});
     offline($mod) if defined($commands{offline});
     resetdb($mod) if defined($commands{resetdb});
