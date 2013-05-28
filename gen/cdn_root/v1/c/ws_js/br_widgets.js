@@ -1438,7 +1438,7 @@ can't operate on individual connections as the last one will always overwrite...
                     }
                 $j('#'+id+'_delete').button("disable");
                 jQuery.ajax({
-                    url: '//myapi.babelroom.com/plugin/0/media_files/' + rowid + ".js",
+                    url: BR.api.v1.get_host('myapi')+'/plugin/0/media_files/' + rowid + ".js",
                     type: "DELETE",
 // BRInvitees.aj("/invitations/add_guest.js", {invitation:{conference_id:BR.room.context.conference_id}, user:{}, auth: BR.room.context.authen}, function(data, textStatus, jqXHR){
                     //data: un,
