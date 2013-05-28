@@ -18,7 +18,7 @@ $listen
     access_log  /var/log/br/$R->{fqhn}.log;
     error_log  /var/log/br/$R->{fqhn}.err debug;
 
-    root /home/br/gits/gen/cdn_root;
+    root /home/br/gits/clouds/gen/cdn_root;
     location  = / {
         rewrite ^ \$scheme://$R->{redirect_root}/ permanent;
         }
