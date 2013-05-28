@@ -24,8 +24,8 @@ $listen
     include         /etc/nginx/br_conf.d/${fqhn}.cert.inc;
 
     #charset koi8-r;
-    access_log  /var/log/br/$label.log;
-    error_log  /var/log/br/$label.err debug;
+    access_log  /var/log/br/$R->{fqhn}.log;
+    error_log  /var/log/br/$R->{fqhn}.err debug;
 
     #error_page  404              /404.html;
 

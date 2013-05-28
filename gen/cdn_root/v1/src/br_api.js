@@ -155,6 +155,19 @@
                 video:  '//video.babelroom.com:1936'
                 }
             },
+        staging: {
+            hosts: {
+                api:    '//api-staging.babelroom.com',
+                my:     '//my-staging.babelroom.com',
+                myapi:  '//myapi-staging.babelroom.com', // TODO -- will depreciate
+                live:   '//live-staging.babelroom.com',
+                page:   '//rooms-staging.babelroom.com',
+                cdn:    '//cdn-staging.babelroom.com',
+                home:   '//staging.babelroom.com',
+                //video:  '//video-dev.babelroom.com:1936'
+                video:  '//video.babelroom.com:1936'
+                }
+            },
         prod: {
             hosts: {
                 api:    '//api.babelroom.com',

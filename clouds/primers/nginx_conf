@@ -3,7 +3,8 @@ open F, ">$f" or die;
 print F <<__EOT__
 # -- top level nginx config for BR
 # -- automatically created by BR primer MODIFICATIONS MAY BE LOST
-user  nginx;
+#user  nginx;
+user  br;
 worker_processes  1;
 
 error_log  /var/log/br/error.log warn;

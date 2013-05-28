@@ -29,7 +29,7 @@ $listen
     #location / {
     location /cdn/ {
         #root   /home/br/gits/clouds/gen/cdn_root;
-        alias   /home/br/gits/clouds/gen/cdn_root;
+        alias   /home/br/gits/clouds/gen/cdn_root/;
         #index  index.html index.htm; -- why were we doing this?
         autoindex off;
     }
