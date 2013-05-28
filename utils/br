@@ -54,6 +54,7 @@ $dummy_cert = "/home/br/gits/clouds/clouds/misc/dummy_certificate.pem";
 # ---
 $result = GetOptions (
     "host=s" => \$commands{host},
+    "ip=s" => \$commands{ip},
     "on=s" => \@on,
     "off=s" => \@off,
     "list=s" => \@list,
@@ -162,7 +163,7 @@ __EOT__
     print $fh "autoprime:\n" if ($oo{autoprime});
     sub add($$$) {my ($s,$p,$l)=@_; if ($oo{$s}) { print $fh "$l\n"; $startup .= "$p "; } }
     add(mysqld, mysqld, 'prime_mysqld: {script: "my_cnf", server_id: 37}');
-    add(freeswitch, freeswitch, "prime_freeswitch: {script: \"vars_xml\", eip: \"$hosts{default}\"}");
+    add(freeswitch, freeswitch, "prime_freeswitch: {script: \"vars_xml\", eip: \"$misc{ip}\"}");
     # netops last
     add(rooms,node_app,<<__EOT__
 node_config_app: {script: "config_js", iface: "eth0", secret: "$misc{secret}", key: "$privatekeys{api}", cert: "$certificates{api}", cookie_key: "$misc{cookie_key}", domain: "$misc{domain}", file: "/tmp/br/app_config.js"}
@@ -331,12 +332,17 @@ sub status()
     list_services();
     list_flags();
 }
-
 sub host($)
 {
     my $host = shift;
     $hosts{default} = $hosts{landing} = $hosts{rooms} = $hosts{api} = $host;
     $hosts{my} = $host{myapi} = "$host:3001";
+    return 1;   # modified
+}
+sub ip($)
+{
+    my $ip = shift;
+    $misc{ip} = $ip;
     return 1;   # modified
 }
 
@@ -383,6 +389,7 @@ sub logic
     status() if defined($commands{status});
     help(0) if defined($commands{help});
     $mod = 1 if defined($commands{write});
+    if (defined($commands{ip})) { if (ip($commands{ip})) { $mod=1 }; }
     if (defined($commands{host})) { if (host($commands{host})) { $mod=1 }; }
     if (defined($commands{cyclekeys})) { if (cyclekeys()) { $mod=1 }; }
     online($mod) if defined($commands{online});
