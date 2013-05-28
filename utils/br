@@ -165,12 +165,12 @@ __EOT__
     add(freeswitch, freeswitch, "prime_freeswitch: {script: \"vars_xml\", eip: \"$hosts{default}\"}");
     # netops last
     add(rooms,node_app,<<__EOT__
-node_config_app: {script: "config_js", iface: "eth0", secret: "$misc{secret}", key: "$privatekeys{api}", cert: "$certificates{api}", cookie_key: "$misc{cookie_key}", domain: "", file: "/tmp/br/app_config.js"}
+node_config_app: {script: "config_js", iface: "eth0", secret: "$misc{secret}", key: "$privatekeys{api}", cert: "$certificates{api}", cookie_key: "$misc{cookie_key}", domain: "$misc{domain}", file: "/tmp/br/app_config.js"}
 prime_node_app: {script: "node_rc", file: "/etc/init.d/node_app", path: "/home/br/gits/clouds/gen/node", config_file: "/tmp/br/app_config.js", label: "app", deps: ['node_config_app']}
 __EOT__
 );
     add('my',mongrel_my,<<__EOT__
-my_rails_session_store: {script: "rails_session_store", domain: "", secret: "$misc{secret}", file: "/home/br/gits/clouds/gen/rails/my/config/initializers/session_store.rb"}
+my_rails_session_store: {script: "rails_session_store", domain: "$misc{domain}", secret: "$misc{secret}", file: "/home/br/gits/clouds/gen/rails/my/config/initializers/session_store.rb"}
 my_rails_cookie_verification_secret: {script: "rails_cookie_verification_secret", secret: "$misc{cookie_verification_secret}", file: "/home/br/gits/clouds/gen/rails/my/config/initializers/cookie_verification_secret.rb"}
 my_rails_s3: {script: "rails_s3", key_id: "$misc{s3_key_id}", key: "$misc{s3_key}", file: "/home/br/gits/clouds/gen/rails/my/config/s3.yml"}
 my_rails_environment: {script: "my_rails_environment", default: "$hosts{default}", landing: "$hosts{landing}", rooms: "$hosts{rooms}", api: "$hosts{api}", cookie_key: "$misc{cookie_key}", file: "/home/br/gits/clouds/gen/rails/my/config/environments/production.rb"}
