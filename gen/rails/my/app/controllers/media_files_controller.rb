@@ -34,7 +34,7 @@ class MediaFilesController < ApplicationController
   # for blueimp uploader
   def upload
     upload = MediaFile.new(params[:media_file]);
-p upload.inspect
+#p upload.inspect
     if upload.save();
         aca()
         render :json => [{
@@ -50,10 +50,12 @@ p upload.inspect
         render :json => [{:error => "error"}], :status => 500
     end
   end
+
   # overriding this for all methods, as hobo_destroy gives (empty?) response
   # that doesn't work for blue imp
   # note verified this correctly gives an error where it should
   def destroy_response(options={}, &b)
+    aca()
     response_block(&b) or
     respond_to do |wants|
       wants.html { redirect_after_submit(this, true, options) }
@@ -63,4 +65,3 @@ p upload.inspect
   end
 
 end
-
