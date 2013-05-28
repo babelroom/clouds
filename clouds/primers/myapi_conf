@@ -47,8 +47,10 @@ $listen
     location / {
         proxy_pass http://localhost:$R->{port};
         include br_conf.d/proxy_common.inc;
-        add_header Access-Control-Allow-Origin \$http_origin;
-        add_header Access-Control-Allow-Credentials true;
+# we're going to leave the mongrel (rails) media_file controller send these 
+# since that server has to send them anyway in the mini (nginx-less) configuration
+#        add_header Access-Control-Allow-Origin \$http_origin;
+#        add_header Access-Control-Allow-Credentials true;
     }
 }
 
