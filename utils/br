@@ -29,7 +29,7 @@ $dummy_cert = "/home/br/gits/clouds/clouds/misc/dummy_certificate.pem";
 %services = (
     rooms => {installed=>sub{`which node`;}, running=>sub{_ps_grep('-c /tmp/br/app_config.js');}, value=>sub{$hosts{rooms}}, required=>1},
     my => {installed=>sub{`which rails` && -d '/home/br/gits/clouds/gen/rails/my';}, running=>sub{_ps_grep('-p 3001');}, value=>sub{$hosts{my}}},
-    freeswitch => {installed=>sub{-x '/usr/local/freeswitch/bin/freeswitch';}, running=>sub{_ps_grep('-m /usr/local/freeswitch -db');}},
+    freeswitch => {installed=>sub{-x '/usr/local/freeswitch/bin/freeswitch';}, running=>sub{_ps_grep('-m /usr/local/freeswitch/bin/freeswitch -db');}},
     red5 => {installed=>sub{-d '/home/br/gits/red5';}, running=>sub{_ps_grep('-Dred5.root=/home/br/gits/red5/');}},
     mysqld => {installed=>sub{-d '/var/log/br/mysql';}, running=>sub{_ps_grep('/usr/libexec/mysqld');}, required=>1},
     netops => {installed=>sub{1;}, running=>sub{_ps_grep('/bin/su br -c ./init.pl');}, required=>1},
