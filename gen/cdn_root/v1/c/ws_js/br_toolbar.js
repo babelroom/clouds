@@ -156,6 +156,9 @@ var BRToolbar = {
             case 'f':
                 BR.api.v1.logout();
                 break;
+            case 'g':
+                window.open(BR.api.v1.get_host('home'), '_blank');
+                break;
             }
         return false;
     },
