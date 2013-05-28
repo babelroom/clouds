@@ -28,7 +28,8 @@ mysql -uroot my <$HOME/gits/clouds/gen/rails/my/db/pin.sql
 
 # 6. reset master so binlog isn't sucking thru all this setup
 echo "Ignore reset master failure (if any)"
-echo "reset master;" | /usr/bin/mysql -uroot 
+echo "reset master;" | /usr/bin/mysql -uroot
+rm -f /home/br/gits/clouds/netops/replicate_db/provisioning_1.binlog_pos
 
 # 7. stop DB
 sudo service mysqld stop

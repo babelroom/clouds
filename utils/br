@@ -162,6 +162,7 @@ __EOT__
     print $fh "autoprime:\n" if ($oo{autoprime});
     sub add($$$) {my ($s,$p,$l)=@_; if ($oo{$s}) { print $fh "$l\n"; $startup .= "$p "; } }
     add(mysqld, mysqld, 'prime_mysqld: {script: "my_cnf", server_id: 37}');
+    add(freeswitch, freeswitch, "prime_freeswitch: {script: "vars_xml", eip: \"$hosts{default}\"}");
     # netops last
     add(rooms,node_app,<<__EOT__
 node_config_app: {script: "config_js", iface: "eth0", secret: "$misc{secret}", key: "$privatekeys{api}", cert: "$certificates{api}", cookie_key: "$misc{cookie_key}", domain: "", file: "/tmp/br/app_config.js"}
