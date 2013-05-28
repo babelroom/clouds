@@ -1,0 +1,58 @@
+# --- this entire configuration is temporary
+my $file = "/etc/nginx/br_conf.d/$R->{fqhn}.conf";
+open F, ">$file" or die;
+if ($R->{iface}) {
+    $listen =<<__EOT__
+    listen $M{$R->{iface}}:80;
+    listen $M{$R->{iface}}:443 ssl;
+__EOT__
+;
+}
+print F <<__EOT__
+# -- automatically created by BR primer MODIFICATIONS MAY BE LOST
+# -- this facility is TEMPORARY
+server {
+$listen
+
+    server_name  $R->{fqhn};
+
+# don't make a cert file -- this conf is temporary 
+#    include         /etc/nginx/br_conf.d/$R->{fqhn}.cert.inc;
+
+    #charset koi8-r;
+    access_log  /var/log/br/myapi.log;
+    error_log  /var/log/br/myapi.err debug;
+
+    #error_page  404              /404.html;
+
+    # redirect server error pages to the static page /50x.html
+    #
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+
+    if (\$request_method = OPTIONS) {
+        rewrite ^ /___OPTIONS_REQ;
+    }
+
+    location =/___OPTIONS_REQ {
+        add_header Access-Control-Allow-Origin \$http_origin;
+        add_header Access-Control-Allow-Methods \$http_access_control_request_method;
+        add_header Access-Control-Allow-Headers \$http_access_control_request_headers;
+        add_header Access-Control-Allow-Credentials true;
+        return 200;
+    }
+
+    location / {
+        proxy_pass http://localhost:$R->{port};
+        include br_conf.d/proxy_common.inc;
+        add_header Access-Control-Allow-Origin \$http_origin;
+        add_header Access-Control-Allow-Credentials true;
+    }
+}
+
+__EOT__
+;
+close F;
+1

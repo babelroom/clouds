@@ -1,0 +1,9 @@
+open F, ">$R->{file}" or die;
+print F <<__EOT__
+# -- automatically created by BR primer MODIFICATIONS MAY BE LOST
+ssl_certificate         $R->{cert};
+ssl_certificate_key     $R->{key};
+__EOT__
+;
+close F;
+1

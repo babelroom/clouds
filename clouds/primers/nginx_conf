@@ -1,0 +1,51 @@
+my $f = '/etc/nginx/nginx.conf';
+open F, ">$f" or die;
+print F <<__EOT__
+# -- top level nginx config for BR
+# -- automatically created by BR primer MODIFICATIONS MAY BE LOST
+user  nginx;
+worker_processes  1;
+
+error_log  /var/log/br/error.log warn;
+pid        /var/run/nginx.pid;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    log_format  main  '\$remote_addr - \$remote_user [\$time_local] "\$request" '
+                      '\$status \$body_bytes_sent "\$http_referer" '
+                      '"\$http_user_agent" "\$http_x_forwarded_for"';
+
+    access_log  /var/log/br/access.log  main;
+
+    sendfile        on;
+    #tcp_nopush     on;
+
+    keepalive_timeout  65;
+
+    #gzip  on;
+
+    # default SSL stuff
+    include                     /etc/nginx/br_conf.d/$R->{cert_inc};
+    ssl_session_timeout         5m;
+    ssl_protocols               SSLv2 SSLv3 TLSv1;
+    ssl_ciphers                 HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers   on;
+
+    # pull out some headers
+    server_tokens off;  # suppress nginx version number (best we can do for now...)
+    proxy_hide_header "X-Runtime";
+    proxy_hide_header "ETag";
+
+    include /etc/nginx/br_conf.d/*.conf;
+}
+
+__EOT__
+;
+close F;
+1

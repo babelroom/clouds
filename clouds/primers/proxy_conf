@@ -1,0 +1,55 @@
+my $fqhn = $R->{fqhn};
+my $file = "/etc/nginx/br_conf.d/${fqhn}.conf";
+open F, ">$file" or die;
+if ($R->{iface}) {
+    $listen =<<__EOT__
+    listen $M{$R->{iface}}:80;
+    listen $M{$R->{iface}}:443 ssl;
+__EOT__
+;
+}
+if ($R->{auth_file}) {
+    $auth =<<__EOT__
+    auth_basic "Restricted";
+    auth_basic_user_file "/etc/nginx/$R->{auth_file}";
+__EOT__
+;
+}
+print F <<__EOT__
+# -- automatically created by BR primer MODIFICATIONS MAY BE LOST
+server {
+$listen
+    server_name  ${fqhn};
+
+    include         /etc/nginx/br_conf.d/${fqhn}.cert.inc;
+
+    #charset koi8-r;
+    access_log  /var/log/br/$label.log;
+    error_log  /var/log/br/$label.err debug;
+
+    #error_page  404              /404.html;
+
+    # redirect server error pages to the static page /50x.html
+    #
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+
+$auth
+    location / {
+        proxy_pass http://localhost:$R->{port};
+        include br_conf.d/proxy_common.inc;
+    }
+    location ~ ^/(jquery|images|css|img|ws_js|themes|js|stylesheets|hobothemes|javascripts|callbox|flash|lobby|recurly-js)/.*\$ {
+        root $R->{root};
+    }
+    location ~ ^/(robots\.txt|favicon\.ico)\$ {
+        root $R->{root};
+    }
+}
+
+__EOT__
+;
+close F;
+1

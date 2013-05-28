@@ -174,7 +174,8 @@ my_rails_session_store: {script: "rails_session_store", domain: "", secret: "$mi
 my_rails_cookie_verification_secret: {script: "rails_cookie_verification_secret", secret: "$misc{cookie_verification_secret}", file: "/home/br/gits/clouds/gen/rails/my/config/initializers/cookie_verification_secret.rb"}
 my_rails_s3: {script: "rails_s3", key_id: "$misc{s3_key_id}", key: "$misc{s3_key}", file: "/home/br/gits/clouds/gen/rails/my/config/s3.yml"}
 my_rails_environment: {script: "my_rails_environment", default: "$hosts{default}", landing: "$hosts{landing}", rooms: "$hosts{rooms}", api: "$hosts{api}", cookie_key: "$misc{cookie_key}", file: "/home/br/gits/clouds/gen/rails/my/config/environments/production.rb"}
-prime_my: {script: "mongrel_rc", file: "/etc/init.d/mongrel_my", path: "/home/br/gits/clouds/gen/rails/my", addr: "0.0.0.0", port: 3001, label: "my", rails_env: "production", deps: ['my_rails_session_store','my_rails_cookie_verification_secret','my_rails_s3','my_rails_environment']}
+mongrel_my: {script: "mongrel_rc", file: "/etc/init.d/mongrel_my", path: "/home/br/gits/clouds/gen/rails/my", addr: "0.0.0.0", port: 3001, label: "my", rails_env: "production", deps: ['my_rails_session_store','my_rails_cookie_verification_secret','my_rails_s3','my_rails_environment']}
+prime_my: {script: "noop", deps: ['mongrel_my','my_rails_session_store','my_rails_cookie_verification_secret','my_rails_s3','my_rails_environment']}
 __EOT__
 );
     $startup .= "estream ";

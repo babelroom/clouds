@@ -1,0 +1,36 @@
+open F, ">/etc/nginx/br_conf.d/$R->{fqhn}.conf" or die;
+if ($R->{iface}) {
+    $listen =<<__EOT__
+    listen $M{$R->{iface}}:80;
+    listen $M{$R->{iface}}:443 ssl;
+__EOT__
+;
+}
+print F <<__EOT__
+# -- automatically created by BR primer MODIFICATIONS MAY BE LOST
+server {
+$listen
+    server_name  $R->{fqhn};
+
+    include         /etc/nginx/br_conf.d/$R->{cert_inc};
+
+    #charset koi8-r;
+    access_log  /var/log/br/$R->{fqhn}.log;
+    error_log  /var/log/br/$R->{fqhn}.err debug;
+
+    root /home/br/gits/gen/cdn_root;
+    location  = / {
+        rewrite ^ \$scheme://$R->{redirect_root}/ permanent;
+        }
+    location  / {
+        rewrite_log off;
+        rewrite ^ /v1/c/index.html break;
+        }
+    location ~ ^/(cdn)/.*\$ {
+        }
+}
+
+__EOT__
+;
+close F;
+1
