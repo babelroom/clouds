@@ -24,7 +24,7 @@ $listen
         }
     location  / {
         rewrite_log off;
-        rewrite ^ /v1/c/index.html break;
+        rewrite ^ /v1/c/$R->{index_html} break;
         }
     location ~ ^/(cdn)/.*\$ {
         }
