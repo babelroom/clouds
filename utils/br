@@ -13,9 +13,6 @@ $|++;   # don't buffer stdout
 # ---
 $config_file = "/home/br/config";
 $prefx = "_br_";
-# private key / certificate stuff hidden for the present -- leave it out
-$dummy_key = "/home/br/gits/clouds/clouds/misc/dummy_privatekey.pem";
-$dummy_cert = "/home/br/gits/clouds/clouds/misc/dummy_certificate.pem";
 
 # ---
 %hosts = ();
@@ -40,14 +37,6 @@ $dummy_cert = "/home/br/gits/clouds/clouds/misc/dummy_certificate.pem";
     flags => list_flags,
     keycerts =>  list_keycerts,
     all => list_all,
-);
-%privatekeys = (
-    live => $dummy_key,
-    api => $dummy_key,
-);
-%certificates = (
-    live => $dummy_cert,
-    api => $dummy_cert,
 );
 %misc = ();
 
@@ -107,6 +96,8 @@ sub read_config
         }
     if ($no_content) {
         print "Warning: could not read configuration file '$config_file', using defaults\n";
+        $misc{privatekey} = "/home/br/gits/clouds/clouds/misc/dummy_privatekey.pem";
+        $misc{certificate} = "/home/br/gits/clouds/clouds/misc/dummy_certificate.pem";
         cyclekeys();
         return 0;
         }
@@ -166,7 +157,7 @@ __EOT__
     add(freeswitch, freeswitch, "prime_freeswitch: {script: \"vars_xml\", eip: \"$misc{ip}\"}");
     # netops last
     add(rooms,node_app,<<__EOT__
-node_config_app: {script: "config_js", iface: "eth0", secret: "$misc{secret}", key: "$privatekeys{api}", cert: "$certificates{api}", cookie_key: "$misc{cookie_key}", domain: "$misc{domain}", file: "/tmp/br/app_config.js"}
+node_config_app: {script: "config_js", iface: "eth0", secret: "$misc{secret}", key: "$misc{privatekey}", cert: "$misc{certificate}", cookie_key: "$misc{cookie_key}", domain: "$misc{domain}", file: "/tmp/br/app_config.js"}
 prime_node_app: {script: "node_rc", file: "/etc/init.d/node_app", path: "/home/br/gits/clouds/gen/node", config_file: "/tmp/br/app_config.js", label: "app", deps: ['node_config_app']}
 __EOT__
 );
@@ -201,8 +192,6 @@ __EOT__
     print $fh "# --- All values from this point are used to preserve configuration for 'br' and not used directing in priming\n";
     outvar(hosts);
     outvar(onoff);
-#    outvar(privatekeys);
-#    outvar(certificates);
     outvar(misc);
     print "Configuration written\n";
 }
@@ -249,27 +238,10 @@ sub list_flags()
     wflag(autoprime);
     wflag(startup);
 }
-sub list_keycerts()
-{
-    sub outl { my($k,$v)=@_; format KC =
-@<<<<<<<<< @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-$k $v
-.
-#123456789.123456789.223456789.323456789.423456789.523456789.623456789.723456789.823456789
-        $~ = "KC";
-        write;}
-    outl('Service','Private Key');
-    outl('-------','-----------');
-    foreach my $k (keys %privatekeys) { outl($k,$privatekeys{$k}); }
-    outl('Service','Certificate');
-    outl('-------','-----------');
-    foreach my $k (keys %certificates) { outl($k,$certificates{$k}); }
-}
 sub list_all()
 {
     list_services();
     list_flags();
-#    list_keycerts();
 }
 
 # ---
@@ -339,11 +311,13 @@ sub host($)
     $hosts{my} = $host{myapi} = "$host:3001";
     return 1;   # modified
 }
-sub ip($)
+sub update_misc($$)
 {
-    my $ip = shift;
-    $misc{ip} = $ip;
-    return 1;   # modified
+    my ($k,$v) = @_;
+    my $mod = 0;
+    $mod = 1 if $misc{$k} ne $v;
+    $misc{$k} = $v;
+    return $mod;  # modified
 }
 
 # ---
@@ -389,7 +363,9 @@ sub logic
     status() if defined($commands{status});
     help(0) if defined($commands{help});
     $mod = 1 if defined($commands{write});
-    if (defined($commands{ip})) { if (ip($commands{ip})) { $mod=1 }; }
+    if (defined($commands{ip})) { if (update_misc(ip,$commands{ip})) { $mod=1 }; }
+    if (defined($commands{privatekey})) { if (update_misc(privatekey,$commands{privatekey})) { $mod=1 }; }
+    if (defined($commands{certificate})) { if (update_misc(certificate,$commands{certificate})) { $mod=1 }; }
     if (defined($commands{host})) { if (host($commands{host})) { $mod=1 }; }
     if (defined($commands{cyclekeys})) { if (cyclekeys()) { $mod=1 }; }
     online($mod) if defined($commands{online});
