@@ -68,9 +68,9 @@ INSERT INTO `scripts` (id,name,description,created_at,updated_at,startup) VALUES
 INSERT INTO `scripts` (id,name,description,created_at,updated_at,startup) VALUES (29,'freeswitch_undeploy.pl','Undeploy a conference from a server',NOW(),NOW(),'running=always');
 INSERT INTO `scripts` (id,name,description,created_at,updated_at,startup) VALUES (30,'prep_conference.pl','Create estream queue on server', NOW(), NOW(), 'running=always');
 INSERT INTO `scripts` (id,name,description,created_at,updated_at,startup) VALUES (31,'clean.pl','Clean',NOW(),NOW(),'foreach_provisioning=22 23 * * *');
-INSERT INTO `scripts` (id,name,description,created_at,updated_at,startup) VALUES (34,'recurly.pl','Synchronize account/billing data between provisioning and recurly',NOW(),NOW(),'foreach_provisioning=always');
+-- INSERT INTO `scripts` (id,name,description,created_at,updated_at,startup) VALUES (34,'recurly.pl','Synchronize account/billing data between provisioning and recurly',NOW(),NOW(),'foreach_provisioning=always');
 INSERT INTO `scripts` (id,name,description,created_at,updated_at,startup) VALUES (35,'media_move.pl','Program to migrate media from a FS server once conference has completed',NOW(),NOW(),'running=always');
--- INSERT INTO `scripts` (id,name,description,created_at,updated_at,startup) VALUES (36,'cheddargetter.rb','2011-11-25 18:31:30',NULL,'Synchronize account/billing data between provisioning and cheddargetter','2012-04-19 15:43:56','2012-04-19 15:43:56','disabled____foreach_provisioning=always',NULL);
+-- INSERT INTO `scripts` (id,name,description,created_at,updated_at,startup) VALUES (36,'cheddargetter.rb','Synchronize account/billing data between provisioning and cheddargetter',NOW(),NOW(),'disabled____foreach_provisioning=always');
 /*!40000 ALTER TABLE `scripts` ENABLE KEYS */;
 INSERT INTO `scripts` (id,name,description,created_at,updated_at,startup) VALUES (37,'invitations_sync.pl','Synchronize invitations with people',NOW(),NOW(),'foreach_provisioning=always');
 UNLOCK TABLES;
