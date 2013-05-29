@@ -25,7 +25,8 @@ class FrontController < ApplicationController
     end
   end
 
-  def aq_depreciated
+#  def aq_depreciated -- still used by signup
+  def aq
     klass = nil
     cmd = nil
     sql = nil

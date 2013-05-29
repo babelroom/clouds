@@ -2,7 +2,7 @@ ActionController::Routing::Routes.draw do |map|
 
   # routes in all applications, not used by plugins
   def add_common_routes(map)
-#    map.aq '/aq.:format', :controller => 'front', :action => 'aq'
+    map.aq '/aq.:format', :controller => 'front', :action => 'aq'
     # special link for email activation
     #map.users_self_register '/users/self_register.:format', :controller => 'users', :action => 'self_register', :conditions => { :method => :post }
     map.users_self_register '/users/self_register.:format', :controller => 'users', :action => 'self_register'
