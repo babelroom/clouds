@@ -30,7 +30,7 @@ startup: mysqld freeswitch node_app mongrel_my estream red5 netops
 #_br_onoff-netops:1
 #_br_onoff-accounts:1
 #_br_misc-cookie_verification_secret:61a64eb372b76b362651e343405ae8fd0c8c14c81f3a74c4c6cd891a2d196836a46edb0a419bb38950e512ead74991f793e92d5a400118b182306800ee76efab
-#_br_misc-cookie_key:brv1_d30485d8
+#_br_misc-cookie_key:brv1_private
 #_br_misc-secret:418fa04bcaa238dea7fb46d3b522a6f75b8df48664f3b3cc39c234960b5c40bdce32a4f0c909589a5211bdb1c8308e1747ff33d6074c62d501dd6b38fa220bb0
 #_br_misc-s3_key_id:AKIAIXSVMO3QOE72AN5Q
 #_br_misc-s3_key:COAwh/xparR7SR5HhKSbIWywW95YBDY1ZoafAAX7

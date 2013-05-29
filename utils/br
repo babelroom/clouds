@@ -294,7 +294,7 @@ sub resetdb($) {
     print `$cmd`;
 }
 sub cyclekeys() {
-    $misc{cookie_key} = 'brv1_' . join "", map { unpack "H*", chr(rand(256)) } 1..4;
+#    $misc{cookie_key} = 'brv1_' . join "", map { unpack "H*", chr(rand(256)) } 1..4; -- don't need this
     $misc{secret} = join "", map { unpack "H*", chr(rand(256)) } 1..64;
     $misc{cookie_verification_secret} = join "", map { unpack "H*", chr(rand(256)) } 1..64;
     return 1;   # modified
