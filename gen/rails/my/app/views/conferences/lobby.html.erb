@@ -890,19 +890,19 @@ allowtransparency="true"
     </ul>
   </li>
 
-<% if $babelroom[:new_account_prefix].eql? '' %>
   <li id="account_group" class="account group">
     <h3>Account</h3>
     <ul>
+<% if $babelroom[:new_account_prefix].present? %>
         <li class="invoices"><a href="#" onClick="do_account(); return false;">Account</a></li>
 <!--
         <%= nav_link('plan','Plan') %>
         < ! - -li class="subscribe_solo"><a href="?nav=subscribe&plan=solo_plan">Subscribe (Example) - Solo</a></li- - >
 -->
+<% end %>
         <%= nav_link('call_log','Call Activity') %>
     </ul>
   </li>
-<% end %>
 
   <li id="files_group" class="files group">
     <h3>Files</h3>
