@@ -174,7 +174,7 @@ __EOT__
     $startup .= "estream ";
     add(red5, red5, 'prime_red5: {src: "red5_rc", file: "/etc/init.d/red5", mode: "0755"}');
     add(netops, netops,<<__EOT__
-netops_db_syscfg: {script: "netops_db_syscfg", file: "/tmp/br/netops_db_syscfg", my_host: "", mode: "0600", s3_key_id: "$misc{s3_key_id}", s3_key: "$misc{s3_key}", gmail_user: "$misc{gmail_user}", gmail_password: "$misc{gmail_password}", recurly_user: "$misc{recurly_user}", recurly_password: "$misc{recurly_password}"}
+netops_db_syscfg: {script: "netops_db_syscfg", file: "/tmp/br/netops_db_syscfg", my_host: "", mode: "0600", s3_key_id: "$misc{s3_key_id}", s3_key: "$misc{s3_key}", gmail_user: "$misc{gmail_user}", gmail_password: "$misc{gmail_password}", recurly_config: "$misc{recurly_config}"}
 prime_netops: {src: "netops_rc", file: "/etc/init.d/netops", mode: "0755", deps: ['netops_db_syscfg']}
 __EOT__
 );

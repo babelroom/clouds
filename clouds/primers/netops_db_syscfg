@@ -30,8 +30,8 @@ __EOT__
 ; }
 
 
-; if ($R->{recurly_user}) { print F <<__EOT__
-INSERT INTO `systems` VALUES (8,'Recurly (sandbox)',NOW(),NOW(),'not_disabled,url=https://api-sandbox.recurly.com/,auth_user=$R->{recurly_user},auth_pass=$R->{recurly_password},account_prefix=P','','recurly',NULL);
+; if ($R->{recurly_config}) { print F <<__EOT__
+INSERT INTO `systems` VALUES (8,'Recurly (sandbox)',NOW(),NOW(),'not_disabled,$R->{recurly_config}','','recurly',NULL);
 __EOT__
 ; }
 
