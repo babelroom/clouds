@@ -34,6 +34,13 @@ sudo service babelroom-prime start
 sudo install -o root -m 755 ./babelroom-run /etc/init.d
 sudo /sbin/chkconfig --add babelroom-run
 
+# set vm hostname
+echo "NETWORKING=yes" >/tmp/network
+echo -n "HOSTNAME=" >>/tmp/network
+cat $HOME/gits/clouds/clouds/misc/version/vm >>/tmp/network
+sudo install -o root -m 644 /tmp/network /etc/sysconfig/network
+rm -f /tmp/network
+
 # copy initial files
 cd misc
 sudo install -o root -m 644 issue.std /etc/issue
