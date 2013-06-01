@@ -54,7 +54,7 @@ DELETE FROM `phones`; ALTER TABLE `phones` AUTO_INCREMENT=1;
 DELETE FROM `skins`;
 ALTER TABLE `skins` AUTO_INCREMENT=1;
 LOCK TABLES `skins` WRITE;
-INSERT INTO `skins` (id,body,created_at,updated_at,name,immutable,preview_url) VALUES (1,NULL,NOW(),NOW(),'Classic (default)',0,'/v1/c/img/classic_preview.png');
+INSERT INTO `skins` (id,body,created_at,updated_at,name,immutable,preview_url) VALUES (1,NULL,NOW(),NOW(),'Classic (default)',0,'/cdn/v1/c/img/classic_preview.png');
 ALTER TABLE `skins` AUTO_INCREMENT=2;
 UNLOCK TABLES;
 
