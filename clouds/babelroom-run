@@ -22,6 +22,24 @@ case "$CM" in
             done < $ST
         fi
         ;;
+  stop)
+        if [[ -f $ST ]]
+        then
+            while read line || [ "$line" ]; do
+                for word in $line
+                do
+                    if [[ "$word"  -ne "mysqld" ]]
+                    then
+                        echo "Stopping $word"
+                        service $word $CM 2>>/tmp/br/babelroom-run.err
+                    fi
+                done
+            done < $ST
+            sleep 5
+            echo "Stopping mysqld"
+            service mysqld stop 2>>/tmp/br/babelroom-run.err
+        fi
+        ;;
   *)
         echo "Usage: babelroom-run {start|stop|status|restart|reload|force-reload|condrestart|try-restart}"
         exit 2
