@@ -11,7 +11,7 @@ CM=$1
 
 # See how we were called.
 case "$CM" in
-  start|stop|status|restart|reload|force-reload|condrestart|try-restart)
+  start|status|restart|reload|force-reload|condrestart|try-restart)
         if [[ -f $ST ]]
         then
             while read line || [ "$line" ]; do
@@ -28,7 +28,7 @@ case "$CM" in
             while read line || [ "$line" ]; do
                 for word in $line
                 do
-                    if [[ "$word"  -ne "mysqld" ]]
+                    if [ "$word" != "mysqld" ]
                     then
                         echo "Stopping $word"
                         service $word $CM 2>>/tmp/br/babelroom-run.err
