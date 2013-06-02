@@ -30,13 +30,13 @@ case "$CM" in
                 do
                     if [ "$word" != "mysqld" ]
                     then
-                        echo "Stopping $word"
+#                        echo "Stopping $word"
                         service $word $CM 2>>/tmp/br/babelroom-run.err
                     fi
                 done
             done < $ST
             sleep 5
-            echo "Stopping mysqld"
+#            echo "Stopping mysqld"
             service mysqld stop 2>>/tmp/br/babelroom-run.err
         fi
         ;;

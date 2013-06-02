@@ -41,11 +41,12 @@ pkill FS_in.pl    # TODO: tmp!!
     sleep 5
 pkill -9 estream    # TODO: tmp!!
 
-    if [ -n "`pidfileofproc $ESTREAM`" ] ; then
-        killproc $ESTREAM
-    else
-        failure $"Stopping $prog"
-    fi
+#    if [ -n "`pidfileofproc $ESTREAM`" ] ; then
+#        killproc $ESTREAM
+#    else
+#        failure $"Stopping $prog"
+#    fi
+    success
     RETVAL=$?
     [ "$RETVAL" = 0 ] && rm -f /var/lock/subsys/estream
     echo
