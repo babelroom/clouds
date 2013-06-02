@@ -38,8 +38,8 @@ start()
         echo -n $"Setting system configuration (DB): "
         /usr/bin/mysql -uroot netops </tmp/br/netops_db_syscfg;
         echo -n $"Starting $prog: "
-#        ( cd $NETOPS_DIR/br_scripts && /bin/su br -c ./init.pl >../log/init.pl.log 2>../log/init.pl.err) & -- problem as respawn in init.pl check -t STDOUT
-        ( cd $NETOPS_DIR/br_scripts && /bin/su br -c ./init.pl 2>../log/init.pl.log.err) &
+        ( cd $NETOPS_DIR/br_scripts && /bin/su br -c ./init.pl >../log/init.pl.log 2>../log/init.pl.err) & # -- problem as respawn in init.pl check -t STDOUT
+#        ( cd $NETOPS_DIR/br_scripts && /bin/su br -c ./init.pl 2>../log/init.pl.log.err) &
         RETVAL=$?
         echo
     fi

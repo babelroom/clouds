@@ -72,13 +72,15 @@ $dbpass = $ENV{BR_DBPASS};
 %job_pid_id_map = ();
 
 # --- just refreshing scripts in db? exec sync.pl
-if ($ARGV[0] eq '-u') {
+if ($ARGV[0] eq '-u') { # -- this is somewhat depreciated at this point
     exec('sync.pl') or die "Could not exec sync.pl: $!\n";
     die "why am I still here?\n";
     }
 
 # ---
 if (-t STDOUT) {
+    # redirect STDOUT to /dev/null
+    open(STDOUT, '>', '/dev/null') or die $!;
     # -- interactive mode, need to respawn ourself, then monitor and restart init.pl as needed
     # --- write pid file
     `echo $$ >/var/tmp/netops.pid`;
