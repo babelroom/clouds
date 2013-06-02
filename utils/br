@@ -276,7 +276,8 @@ sub online($) {
     print `$cmd`;
     $cmd = "sudo service babelroom-run start";
     print "$cmd\n";
-    print `$cmd`;
+#    print `$cmd`;
+    system($cmd);
 }
 sub offline($) {
     my $mod = shift;
@@ -284,14 +285,16 @@ sub offline($) {
     print "Bring offline...\n";
     $cmd = "sudo service babelroom-run stop";
     print "$cmd\n";
-    print `$cmd`;
+#    print `$cmd`;
+    system($cmd);
 }
 sub resetdb($) {
     my $mod = shift;
     offline($mod);
     $cmd = "(cd /home/br/gits/clouds/clouds && ./setup_db.sh)";
     print "$cmd\n";
-    print `$cmd`;
+#    print `$cmd`;
+    system($cmd);
 }
 sub cyclekeys() {
 #    $misc{cookie_key} = 'brv1_' . join "", map { unpack "H*", chr(rand(256)) } 1..4; -- don't need this
