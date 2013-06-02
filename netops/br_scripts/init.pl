@@ -357,6 +357,7 @@ sub added_jobs
     db_select("SELECT id,name,ended FROM jobs WHERE ended IS NULL AND name IN ($job_names)",'running',$dbh) or return 0;
     my %running_hash = ();
     foreach my $r (@{$running}) {
+        print "Add running [$r->{name}, $r->{id}]\n";
         $running_hash{$r->{name}} = $r->{id};
         }
     foreach my $r (@{$always}) {
