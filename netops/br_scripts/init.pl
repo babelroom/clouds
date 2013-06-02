@@ -86,6 +86,7 @@ if (-t STDOUT) {
     `echo $$ >/var/tmp/netops.pid`;
     do {
         db_do_connect();
+        clear_old_jobs();
         insert_init_job();
         get_init_job();
         do_a_job() or die "$!\n";
@@ -312,6 +313,14 @@ sub insert_init_job
     local $id = shift;
     local $pid = $$;
     db_do_exec("INSERT INTO jobs (name,script_name,pid,parameters,started) VALUES ('$0', '$0', '$$', '', NOW());");
+}
+
+# ---
+sub clear_old_jobs
+{
+    local $id = shift;
+    local $pid = $$;
+    db_do_exec("UPDATE jobs SET status='cleared',ended=NOW(),updated_at=NOW() WHERE ended IS NULL");
 }
 
 # ---
