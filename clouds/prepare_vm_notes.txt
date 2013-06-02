@@ -1,0 +1,13 @@
+
+bare install
+setups
+restart
+cleanup disk
+stop services
+fill disk
+delete fill file
+halt
+manually edit /etc/udev/rules.d/70-persist*net* as somehow script is not getting adjusted properly
+move over
+shrink using -k
+

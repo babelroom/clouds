@@ -37,7 +37,19 @@ case "$1" in
     stop)
         # Stop daemons.
         echo -n "Shutting down red5: "
-        cd ${RED5_DIR}; sh red5-shutdown.sh 2 >/dev/null
+
+        #cd ${RED5_DIR}; sh red5-shutdown.sh 2 >/dev/null # this doesn't work
+        # this does --JR
+        #PID=`ps ax | grep '\-Dred5.root=/home/br/gits/red5/' | grep -v grep | awk '/\s*(\d+)\s/ {print "$1"}'`;
+        PID=`ps ax | grep '\-Dred5.root=/home/br/gits/red5/' | grep -v grep | perl -e 'print (<>+0)'`;
+        if [ -n "$PID" ] ; then
+            echo
+            echo "Terminating..."
+#            echo "$PID";
+            kill $PID;
+        fi
+        # end of -- this does ...
+
         echo_success
         echo
         rm -f /var/lock/subsys/red5
