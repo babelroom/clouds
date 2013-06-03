@@ -37,7 +37,7 @@ sudo /sbin/chkconfig --add babelroom-run
 # set vm hostname
 echo "NETWORKING=yes" >/tmp/network
 echo -n "HOSTNAME=" >>/tmp/network
-cat $HOME/gits/clouds/clouds/misc/version/vm >>/tmp/network
+cat $HOME/gits/clouds/clouds/misc/version/stamp >>/tmp/network
 sudo install -o root -m 644 /tmp/network /etc/sysconfig/network
 rm -f /tmp/network
 

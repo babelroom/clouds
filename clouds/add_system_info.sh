@@ -19,6 +19,11 @@ $DEVICE: $IP
 EOT
 }
 
+# --- version
+BUILD=$(runuser -l br -c "cd /home/br/gits/clouds && git rev-list HEAD | wc -l")
+echo "Version...."
+`cat /home/br/gits/clouds/clouds/misc/version/stamp`$BUILD
+
 MAC_ADDR=$(ifconfig eth0 | sed -n 's/.*HWaddr \([a-fA-F0-9:]*\).*/\L\1/p')
 echo "   === Add Virtual Interfaces ===";
 echo "mac: [$MAC_ADDR]";
