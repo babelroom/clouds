@@ -310,7 +310,7 @@ sub update_misc($$)
     elsif ($k eq 'hostname') {
         $newhost = $v;
         }
-    if ($new_host) {
+    if ($newhost) {
         $hosts{default} = $hosts{landing} = $hosts{rooms} = $hosts{api} = $host;
         $hosts{my} = $host{myapi} = "$host:3001";
         }
