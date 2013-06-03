@@ -26,7 +26,7 @@ EOT
 # --- version
 BUILD=$(runuser -l br -c "cd /home/br/gits/clouds && git rev-list HEAD | wc -l")
 VERSION=$(</home/br/gits/clouds/clouds/misc/version/stamp)
-write_kv "version" $VERSION$BUILD
+write_kv "version" $VERSION.$BUILD
 
 # ---
 MAC_ADDR=$(ifconfig eth0 | sed -n 's/.*HWaddr \([a-fA-F0-9:]*\).*/\L\1/p')
