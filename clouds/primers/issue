@@ -2,8 +2,8 @@ open F, ">$R->{file}" or die;
 my $local_addr = $M{$R->{iface}};
 my $host = $R->{host};
 $host = $local_addr if (!length($host));
-$host_part = sprintf("%41s", "http://$host");
-$version_line = sprintf("%-53s", "1.2.3");
+$host_part = sprintf("%-41s", "http://$host");
+$version_line = sprintf("%53s", "1.2.3");
 #12345678901234567890123456789012345678901234567890123456789
 print F <<__EOT__
   ____        _          _ ____ 
