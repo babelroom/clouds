@@ -33,17 +33,18 @@ $prefx = "_br_";
 );
 %onoff = (autoprime=>1, startup=>1,    'rooms'=>1, 'freeswitch'=>1, 'red5'=>1, 'my'=>1, 'netops'=>1, 'mysqld'=>1);  # defaults
 %list_functions = (
+    misc => list_misc,
     services => list_services,
     flags => list_flags,
-    keycerts =>  list_keycerts,
+#    keycerts =>  list_keycerts,
     all => list_all,
 );
 %misc = ();
 
 # ---
 $result = GetOptions (
-    "host=s" => \$commands{host},
-    "ip=s" => \$commands{ip},
+    "setip=s" => \$commands{external_ip},
+    "sethost=s" => \$commands{hostname},
     "on=s" => \@on,
     "off=s" => \@off,
     "list=s" => \@list,
@@ -94,6 +95,7 @@ sub read_config
             }
         close(IF);
         }
+    $misc{local_ip} = `cat /home/br/ikeys/eth0`;    # never use $misc{local_ip} to prime as it will be out of date!
     if ($no_content) {
         print "Warning: could not read configuration file '$config_file', using defaults\n";
         $misc{privatekey} = "/home/br/gits/clouds/clouds/misc/dummy_privatekey.pem";
@@ -123,39 +125,15 @@ sub write_config
         $oo{startup} = undef;
         }
 
-    my $dummy =<<__EOT__
-autoprime:
-ngx_cln:     {script: "mk_clean_dir", dir: "/etc/nginx/br_conf.d"}
-ngx_wd_cert: {script: "nginx_cert", file: "/etc/nginx/br_conf.d/babelroom.com.cert.inc", cert: "/home/br/gits/clouds/netops/certs/wd_bundle.crt", key: "/home/br/gits/clouds/netops/certs/wd.key", deps: ['ngx_cln']}
-ngx_my_cert: {script: "empty_file", file: "/etc/nginx/br_conf.d/my.babelroom.com.cert.inc", cert: "/home/br/gits/clouds/netops/certs/my.crt", key: "/home/br/gits/clouds/netops/certs/my.key", deps: ['ngx_cln']}
-ngx_cdn_cert: {script: "empty_file", file: "/etc/nginx/br_conf.d/cdn.babelroom.com.cert.inc", cert: "/home/br/gits/clouds/netops/certs/cdn.crt", key: "/home/br/gits/clouds/netops/certs/cdn.key", deps: ['ngx_cln']}
-ngx_no_cert: {script: "empty_file", file: "/etc/nginx/br_conf.d/no.babelroom.com.cert.inc", cert: "/home/br/gits/clouds/netops/certs/no.crt", key: "/home/br/gits/clouds/netops/certs/no.key", deps: ['ngx_cln']}
-ngx_www_bblr_co_cert: {script: "nginx_cert", file: "/etc/nginx/br_conf.d/www.bblr.co.cert.inc", cert: "/home/br/gits/clouds/netops/certs/bblr_bundle.crt", key: "/home/br/gits/clouds/netops/certs/www.bblr.co.key", deps: ['ngx_cln']}
-ngx_proxy_common_inc: {src: "proxy_common_inc", file: "/etc/nginx/br_conf.d/proxy_common.inc"}
-mongrel_my: {script: "mongrel_rc", file: "/etc/init.d/mongrel_my", path: "/home/br/gits/clouds/gen/rails/my", port: 3001, label: "my", rails_env: "production"}
-mongrel_no: {script: "mongrel_rc", file: "/etc/init.d/mongrel_no", path: "/home/br/gits/clouds/gen/rails/netops", port: 3002, label: "no", rails_env: "production"}
-ngx_my: {script: "proxy_conf", label: "my", root: "/home/br/gits/clouds/gen/rails/my/public", iface: "eth0:1", port: 3001, deps: ['ngx_my_cert','ngx_proxy_common_inc','mongrel_my']}
-ngx_no: {script: "proxy_conf", label: "no", root: "/home/br/gits/clouds/gen/rails/netops/public", auth_file: "no_htpasswd", iface: "eth0:1", port: 3002, deps: ['ngx_no_cert','ngx_proxy_common_inc','mongrel_no']}
-ngx_myapi: {script: "myapi_conf", iface: "eth0:1", port: 3001, deps: ['ngx_proxy_common_inc','mongrel_my']}
-ngx_bblr_co: {script: "bblr_co_conf", iface: "eth0:1", deps: ['ngx_www_bblr_co_cert']}
-ngx_cdn: {script: "cdn_conf", iface: "eth0:1", deps: ['ngx_cdn_cert']}
-prime_nginx: {script: "nginx_conf", deps: ['ngx_wd_cert','ngx_my','ngx_no','ngx_cdn','ngx_bblr_co','ngx_myapi']}
-node_config_app: {script: "config_js", iface: "eth0", file: "/tmp/br/app_config.js"}
-prime_node_app: {script: "node_rc", file: "/etc/init.d/node_app", path: "/home/br/gits/clouds/gen/node", config_file: "/tmp/br/app_config.js", label: "app", deps: ['node_config_app']}
-prime_netops: {src: "netops_rc", file: "/etc/init.d/netops", mode: "0755"}
-prime_red5: {src: "red5_rc", file: "/etc/init.d/red5", mode: "0755"}
-prime_mysqld: {script: "my_cnf", server_id: 37}
-prime_freeswitch: {script: "vars_xml", eip: "54.241.140.39"}
-
-# startup -- in order
-startup:    mysqld freeswitch fail2ban nginx   node_app mongrel_my mongrel_no estream red5   netops
-__EOT__
-;
     my $startup = '';
     print $fh "autoprime:\n" if ($oo{autoprime});
+    print $fh <<__EOT__
+prime_issue: {script: "issue", iface: "eth0", host: "$hosts{default}", file: "/etc/issue"}
+__EOT__
+;
     sub add($$$) {my ($s,$p,$l)=@_; if ($oo{$s}) { print $fh "$l\n"; $startup .= "$p "; } }
     add(mysqld, mysqld, 'prime_mysqld: {script: "my_cnf", server_id: 37}');
-    add(freeswitch, freeswitch, "prime_freeswitch: {script: \"vars_xml\", eip: \"$misc{ip}\"}");
+    add(freeswitch, freeswitch, "prime_freeswitch: {script: \"vars_xml\", eip: \"$misc{external_ip}\"}");
     # netops last
     add(rooms,node_app,<<__EOT__
 node_config_app: {script: "config_js", iface: "eth0", secret: "$misc{secret}", key: "$misc{privatekey}", cert: "$misc{certificate}", cookie_key: "$misc{cookie_key}", domain: "$misc{domain}", file: "/tmp/br/app_config.js"}
@@ -232,6 +210,14 @@ $key $status $oo $value
         write;
         }
 }
+sub list_misc()
+{
+    sub wmisc { my $n=shift; print "$n: $misc{$n}\n"; }
+    print "---\n";
+    wmisc(local_ip);
+    wmisc(external_ip);
+    wmisc(hostname_ip);
+}
 sub list_flags()
 {
     sub wflag { my $fn=shift; print "$fn: " . ($onoff{$fn} ? 'on' : 'off') . "\n"; }
@@ -241,6 +227,7 @@ sub list_flags()
 }
 sub list_all()
 {
+    list_misc();
     list_services();
     list_flags();
 }
@@ -308,19 +295,25 @@ sub status()
     list_services();
     list_flags();
 }
-sub host($)
-{
-    my $host = shift;
-    $hosts{default} = $hosts{landing} = $hosts{rooms} = $hosts{api} = $host;
-    $hosts{my} = $host{myapi} = "$host:3001";
-    return 1;   # modified
-}
 sub update_misc($$)
 {
     my ($k,$v) = @_;
     my $mod = 0;
     $mod = 1 if $misc{$k} ne $v;
     $misc{$k} = $v;
+    my $newhost = undef;
+    if ($k eq 'external_ip') {
+        if (length($misc{hostname})==0) {
+            $newhost = $v;
+            }
+        }
+    elsif ($k eq 'hostname') {
+        $newhost = $v;
+        }
+    if ($new_host) {
+        $hosts{default} = $hosts{landing} = $hosts{rooms} = $hosts{api} = $host;
+        $hosts{my} = $host{myapi} = "$host:3001";
+        }
     return $mod;  # modified
 }
 
@@ -331,7 +324,8 @@ sub help($)
 #[ rooms | freeswitch | red5 | my | netops | mysqld ]
     print <<__EOT__
 # this feature is under development and not yet documented
---host
+--sethost
+--setip
 --on
 --off
 --list
@@ -367,10 +361,10 @@ sub logic
     status() if defined($commands{status});
     help(0) if defined($commands{help});
     $mod = 1 if defined($commands{write});
-    if (defined($commands{ip})) { if (update_misc(ip,$commands{ip})) { $mod=1 }; }
+    if (defined($commands{external_ip})) { if (update_misc(external_ip,$commands{external_ip})) { $mod=1 }; }
+    if (defined($commands{hostname})) { if (update_misc(hostname,$commands{hostname})) { $mod=1 }; }
     if (defined($commands{privatekey})) { if (update_misc(privatekey,$commands{privatekey})) { $mod=1 }; }
     if (defined($commands{certificate})) { if (update_misc(certificate,$commands{certificate})) { $mod=1 }; }
-    if (defined($commands{host})) { if (host($commands{host})) { $mod=1 }; }
     if (defined($commands{cyclekeys})) { if (cyclekeys()) { $mod=1 }; }
     online($mod) if defined($commands{online});
     offline($mod) if defined($commands{offline});

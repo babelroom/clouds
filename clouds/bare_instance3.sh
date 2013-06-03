@@ -43,7 +43,6 @@ rm -f /tmp/network
 
 # copy initial files
 cd misc
-sudo install -o root -m 644 issue.std /etc/issue
 cp config.default ~/config
 cp index.html ~/.
 
