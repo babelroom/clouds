@@ -7,6 +7,7 @@ NETMASK=255.255.255.0
 
 # ---
 runuser -l br -c "mkdir -p $IK"
+>$BR/ikeys.txt
 
 # ---
 function create_dir {
@@ -14,7 +15,7 @@ function create_dir {
 }
 function write_kv {
     KEY=$1
-    VALUE=$1
+    VALUE=$2
     echo -n "$VALUE" > "/tmp/br/avi.$KEY"
     runuser -l br -c "cp /tmp/br/avi.$KEY $IK/$KEY"
     cat << EOT >> "$BR/ikeys.txt"
