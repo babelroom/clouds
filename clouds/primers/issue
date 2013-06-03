@@ -1,0 +1,18 @@
+open F, ">$R->{file}" or die;
+my $local_addr = $M{$R->{iface}};
+my $host = $R->{host};
+$host = $local_addr if (!length($host));
+print F <<__EOT__
+  ____        _          _ ____ 
+ | __ )  __ _| |__   ___| |  _ \\ ___   ___  _ __ ___ 
+ |  _ \\ / _` | '_ \\ / _ \\ | |_) / _ \\ / _ \\| '_ ` _ \\
+ | |_) | (_| | |_) |  __/ |  _ < (_) | (_) | | | | | |
+ |____/ \\__,_|_.__/ \\___|_|_| \\_\\___/ \\___/|_| |_| |_|
+                                          Cloud Server
+
+CentOS release 6.3 (Final)
+Kernel \r on an \m
+__EOT__
+;
+close F;
+1
