@@ -302,7 +302,7 @@ sub assign_hosts($$)
 {
     my ($newhost, $ssl) = @_;
     $hosts{default} = $hosts{landing} = $hosts{rooms} = "//$newhost";
-    $hosts{api} = ($ssl ? 'https' : 'http') + "://$newhost";
+    $hosts{api} = ($ssl ? 'https' : 'http') . "://$newhost";
     $hosts{my} = $host{myapi} = "//$newhost:3001";
 }
 sub update_misc($$)
