@@ -96,9 +96,9 @@ sub read_config
         close(IF);
         }
     $misc{local_ip} = `cat /home/br/ikeys/eth0`;    # never use $misc{local_ip} to prime as it will be out of date!
-    if (!length($hosts{default})) {
-        assign_hosts($misc{local_ip}, 0);
-        }
+#    if (!length($hosts{default})) { -- not sure this is a good idea (and won't run automatically anyhow with changing babelroom-prime
+#        assign_hosts($misc{local_ip}, 0);
+#        }
     if ($no_content) {
         print "Warning: could not read configuration file '$config_file', using defaults\n";
         $misc{privatekey} = "/home/br/gits/clouds/clouds/misc/dummy_privatekey.pem";
