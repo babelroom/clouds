@@ -65,7 +65,7 @@ UNLOCK TABLES;
 DELETE FROM `users`;
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` (id,crypted_password,salt,name,email_address,administrator,created_at,updated_at,state,last_name,timezone,api_key) VALUES (2,'3713602b0042c26ffa78ec392358c54d52274756','8ef1712c9e05d6427924f012f018b6d16c09e539','Default','default@bademail.bad',0,NOW(),NOW(),'active','Install','Pacific Time (US & Canada)','65dc149155ab4e26d0b207eed9d3c710');
+INSERT INTO `users` (id,crypted_password,salt,name,email_address,administrator,created_at,updated_at,state,last_name,timezone) VALUES (2,'3713602b0042c26ffa78ec392358c54d52274756','8ef1712c9e05d6427924f012f018b6d16c09e539','Default','default@bademail.bad',0,NOW(),NOW(),'active','Install','Pacific Time (US & Canada)');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 ALTER TABLE `users` AUTO_INCREMENT=4;
 UNLOCK TABLES;
