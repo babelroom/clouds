@@ -1,0 +1,23 @@
+
+vm
+==
+bare install
+setups
+restart
+stop services
+delete netops pids from db
+cleanup disk
+fill disk
+delete fill file
+halt
+move over
+shrink using -k
+remove .bios hex code from .vmx file
+create zip
+
+amazon ec2
+===
+boot bash centos image and login as ec2
+sudo bash
+execute the long command at the end of ./from_minimal.sh (but exclude the last sysconfig_as_ec2.sh bit)
+
