@@ -18,7 +18,7 @@ sudo install -o root -m 644 config /etc/selinux
 sudo install -o root -m 600 system-config-firewall /etc/sysconfig
 
 # fixup ifcfg-eth0 -- (1) default to start on boot, and (2) drop the MAC address so udev doesn't rename eth0 to eth2 when a new MAC is assigned
-sed 's/ATTR{address}==.*,\s*//' /etc/udev/rules.d/70-persistent-net.rules >/tmp/7nr
+sed 's/ATTR{address}==[^,]*,\s*//' /etc/udev/rules.d/70-persistent-net.rules >/tmp/7nr
 sudo install -o root -m 644 /tmp/7nr /etc/udev/rules.d/70-persistent-net.rules
 sudo rm -f /tmp/7nr
 cd /etc/sysconfig/network-scripts

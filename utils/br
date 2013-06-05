@@ -96,6 +96,9 @@ sub read_config
         close(IF);
         }
     $misc{local_ip} = `cat /home/br/ikeys/eth0`;    # never use $misc{local_ip} to prime as it will be out of date!
+    if (!length($hosts{default})) {
+        assign_hosts($misc{local_ip}, 0);
+        }
     if ($no_content) {
         print "Warning: could not read configuration file '$config_file', using defaults\n";
         $misc{privatekey} = "/home/br/gits/clouds/clouds/misc/dummy_privatekey.pem";
@@ -295,6 +298,13 @@ sub status()
     list_services();
     list_flags();
 }
+sub assign_hosts($$)
+{
+    my ($newhost, $ssl) = @_;
+    $hosts{default} = $hosts{landing} = $hosts{rooms} = "//$newhost";
+    $hosts{api} = ($ssl ? 'https' : 'http') + "://$newhost";
+    $hosts{my} = $host{myapi} = "//$newhost:3001";
+}
 sub update_misc($$)
 {
     my ($k,$v) = @_;
@@ -311,8 +321,7 @@ sub update_misc($$)
         $newhost = $v;
         }
     if ($newhost) {
-        $hosts{default} = $hosts{landing} = $hosts{rooms} = $hosts{api} = $newhost;
-        $hosts{my} = $host{myapi} = "$newhost:3001";
+        assign_hosts($newhost, 0);
         }
     return $mod;  # modified
 }

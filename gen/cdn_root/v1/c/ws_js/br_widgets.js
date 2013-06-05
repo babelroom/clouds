@@ -95,7 +95,7 @@ var BRWidgets = {
     },
 
     _commonToolbar: function(id) {
-        return '<div id="'+id+'" style="padding: 1px 3px 1px 3px; psition: relative; height: 27px; width: default; display: inline-block; overflow: hidden;" class="ui-widget-header ui-corner-all br-z-index-toolbar"></div>';   /* z-index is not having any effect here ... 'inline-block' ?? */
+        return '<div id="'+id+'" style="padding: 1px 3px 1px 3px; height: 27px; width: default; display: inline-block; overflow: hidden;" class="ui-widget-header ui-corner-all br-z-index-toolbar"></div>';   /* z-index is not having any effect here ... 'inline-block' ?? */
     },
 
     styleSelect: function(sel) {

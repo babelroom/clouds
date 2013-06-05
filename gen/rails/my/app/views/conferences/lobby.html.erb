@@ -113,16 +113,14 @@ article > p {
     <div id="br_top_left_menu">
         <ul>
         <% if @conference.present?
-            room_uri = $babelroom[:page_url] + '/'
+            room_uri = $babelroom[:page_url]
+            room_uri += '/'
             if @conference.uri.nil?
                 room_uri += 'i/' + @conference.id.to_s
             else
                 room_uri += @conference.uri
             end
         %>
-<!--
-            <li class="br_enter_room"><a href="<%= room_uri %>" target="_blank"><%= room_uri %></a></li>
-            <a href="<%= room_uri %>" target="_blank" class="button" style="background-color: #709924; background-image: none;">Go To Room</a> -->
             <a href="<%= room_uri %>" target="_blank" class="button">Go To My Room...</a>
         <% end %>
         </ul>

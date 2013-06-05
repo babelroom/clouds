@@ -55,6 +55,7 @@ if ($ec2) {
 }
 if (length($ud)==0) {
     # either not amazon or amazon without user-data -- get it from last br config write 
+#    `/home/br/gits/clouds/utils/br` if not -f '/home/br/config'; not sure this is a good idea or not
     $ud = `cat /home/br/config`;
 }
 write_kv('user-data',$ud);
