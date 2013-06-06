@@ -1,4 +1,5 @@
 #!/bin/sh
 
 git rev-list HEAD | wc -l
+git rev-list HEAD | head -n 10
 
