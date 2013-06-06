@@ -26,9 +26,8 @@ $listen
     location = /50x.html {
         root   /usr/share/nginx/html;
     }
-    #location / {
+    add_header "Access-Control-Allow-Origin" "*";
     location /cdn/ {
-        #root   /home/br/gits/clouds/gen/cdn_root;
         alias   /home/br/gits/clouds/gen/cdn_root/;
         autoindex off;
     }
