@@ -24,6 +24,7 @@ DELETE FROM `colmodels`; ALTER TABLE `colmodels` AUTO_INCREMENT=1;
 DELETE FROM `conferences`;
 LOCK TABLES `conferences` WRITE;
 /*!40000 ALTER TABLE `conferences` DISABLE KEYS */;
+ALTER TABLE `conferences` ALTER `skin_id` SET DEFAULT 1;
 INSERT INTO `conferences` (id,name,created_at,updated_at,owner_id,schedule,uri,skin_id,introduction) VALUES (1,'Master Conference Template',NOW(),NOW(),NULL,NULL,NULL,1,NULL);
 INSERT INTO `conferences` (id,name,created_at,updated_at,owner_id,schedule,uri,skin_id,introduction) VALUES (2,'Demo',NOW(),NOW(),2,'s','demo',NULL,'Demo Conference');
 /*!40000 ALTER TABLE `conferences` ENABLE KEYS */;
