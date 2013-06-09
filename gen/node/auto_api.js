@@ -153,7 +153,9 @@ function db_create(f)
         sql += cols[i] + ',';
         cols[i] = '?';
         }
-    sql += "`schedule`,`created_at`,`updated_at`) VALUES (";
+    /* obviously this is only going to work for conferences --- adapt when we change to that */
+    sql += "`account_id`,`schedule`,`created_at`,`updated_at`) VALUES (";
+    cols.push("(SELECT `id` FROM `accounts` WHERE `owner_id` = " + f.perm.uid + ")");
     cols.push("'s'");
     cols.push('NOW()');
     cols.push('NOW()');
