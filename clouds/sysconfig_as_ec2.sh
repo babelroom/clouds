@@ -25,5 +25,14 @@ cd /etc/sysconfig/network-scripts
 sudo mv $IFC $IFC.$BBRF
 sed '/HWADDR=.*/d' $IFC.$BBRF | sudo sed 's/^ONBOOT="no"$/ONBOOT="yes"/' > $IFC
 
+# set tz to UTC
+cd /etc/sysconfig
+sudo mv clock clock.$BBRF
+echo 'ZONE="UTC"' >/tmp/clock
+sudo mv /tmp/clock /etc/sysconfig/clock
+cd /etc
+sudo mv localtime localtime.$BBRF
+sudo cp -a /usr/share/zoneinfo/UTC /etc/localtime
+
 exit 0
 
