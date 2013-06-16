@@ -15,26 +15,35 @@ var BRDashboard = {
     notification_dict: {},
     conference_access_config: {},       /* parsed json version */
 
-    list: {
-//        _all: [] -- testing, don't think this is needed ...
-    },
-    subscribe: function (fn, type, priority) {
-        type = type || '_all';
-        if (typeof this.list[type] === "undefined") {
-            this.list[type] = [];
+    /* internal subscription subsystem */
+    list_pre: {},
+    list: {},
+    list_post: {},
+    _subscribe: function (fn, type, priority) {
+        var l;
+        if (priority<0) { l = this.list_post; }
+        else if (priority>0) { l = this.list_pre; }
+        else l = this.list;
+        if (typeof l[type] === "undefined") {
+            l[type] = [];
         }
-        if (priority)
-            this.list[type].unshift(fn);
-        else
-            this.list[type].push(fn);
+        l[type].push(fn);
     },
-    unsubscribe: function (fn) {
-        for(var key in this.list) {
-            var l = this.list[key],
+    subscribe: function (fn, type) {
+        this._subscribe(fn, type, 0);
+    },
+    _unsubscribe: function (ll,fn) {
+        for(var key in ll) {
+            var l = ll[key],
                 i = l.indexOf(fn);
             if (i>-1)
                 l.splice(i,1);
             }
+    },
+    unsubscribe: function (fn) {
+        this._unsubscribe(this.list_pre, fn);
+        this._unsubscribe(this.list, fn);
+        this._unsubscribe(this.list_post, fn);
     },
     _fire: function (l,data) {
         if (!l)
@@ -48,14 +57,9 @@ var BRDashboard = {
     fire: function (data) {
         if (!data)
             return;
-        var type = data.type;
-        if (type) {
-            this._fire(this.list[type],data);
-            this._fire(this.list['_all'],data);
-            }
-        else 
-            for(var key in this.list)
-                this._fire(this.list[key],data);
+        this._fire(this.list_pre[data.type], data);
+        this._fire(this.list[data.type], data);
+        this._fire(this.list_post[data.type], data);
     },
 
     box: function(user_idx, key, attr, value) {
@@ -146,33 +150,28 @@ var BRDashboard = {
 
     load: function() {
         /* pretty important that this loader runs and subscribes first, so the
-        data it tracks is accurate for user notifications
+           data it tracks is accurate for user notifications
         */
-        BRDashboard.subscribe(function(o){
-//console.log(JSON.stringify(o));
-            if (o.attr===undefined && o.value===undefined) {
-                delete BRDashboard.user_map[o.idx];
-                BRDashboard.box(o.idx, undefined, null, undefined);
-                }
-            else {
+        BRDashboard._subscribe(function(o){
+            if (o.attr!==undefined || o.value!==undefined) {
                 if (BRDashboard.user_map[o.idx]===undefined) {
                     BRDashboard.user_map[o.idx] = {};
                     BRDashboard.box(o.idx,'user_idx',null,o.idx);
                     }
                 BRDashboard.user_map[o.idx][o.attr] = o.value;
                 }
-            },'users',true);
-        BRDashboard.subscribe(function(o) {
+            },'users',1);
+        BRDashboard._subscribe(function(o){
+            if (o.attr===undefined && o.value===undefined) {
+                delete BRDashboard.user_map[o.idx];
+                BRDashboard.box(o.idx, undefined, null, undefined);
+                }
+            },'users',-1);
+        BRDashboard._subscribe(function(o) {
             var idx = BRDashboard.listeners.indexOf(o.mid);
             if (o.command=='add' && idx==-1) {
                 BRDashboard.listeners.push(o.mid);
                 BRDashboard.listener_data[o.mid] = {};
-                }
-            else if (o.command=='del' && idx!=-1) {
-                if ('user_id' in BRDashboard.listener_data[o.mid])
-                    BRDashboard.box(BRDashboard.listener_data[o.mid].user_id/*will convert*/,'mid',o.mid,undefined);
-                BRDashboard.listeners.splice(idx,1);
-                delete BRDashboard.listener_data[o.mid];
                 }
             else if (o.command=='attr' && idx!=-1) {
                 /* register listener dtmf to their user in box */
@@ -183,48 +182,57 @@ var BRDashboard = {
                 if ('user_id' in o.attrs)
                     BRDashboard.box(o.attrs['user_id']/*will convert*/,'mid',o.mid,true);
                 }
-            },'listener',true);
-        BRDashboard.subscribe(function(o) {
-            switch(o.command) {
-                case 'mod':
-                    BRDashboard.online_2_user_map[o.connection_id] = o.user_id;
-                    BRDashboard.box(o.user_id/*will convert*/,'connection_id',o.connection_id,true);
-                    break;
-                case 'del':
-                    if (BRDashboard.online_2_user_map[o.connection_id]) {
-                        BRDashboard.box(BRDashboard.online_2_user_map[o.connection_id],'connection_id',o.connection_id,undefined);
-                        delete BRDashboard.online_2_user_map[o.connection_id];
-                        }
-                    break;
+            },'listener',1);
+        BRDashboard._subscribe(function(o) {
+            var idx = BRDashboard.listeners.indexOf(o.mid);
+            if (o.command=='del' && idx!=-1) {
+                if ('user_id' in BRDashboard.listener_data[o.mid])
+                    BRDashboard.box(BRDashboard.listener_data[o.mid].user_id/*will convert*/,'mid',o.mid,undefined);
+                BRDashboard.listeners.splice(idx,1);
+                delete BRDashboard.listener_data[o.mid];
                 }
-            },'online',true);
-        BRDashboard.subscribe(function(o) {
-            switch(o.command) {
-                case 'del':
-                    delete BRDashboard.invitees[o.id];
-                    if (typeof o.user_id != 'undefined')
-                        delete BRDashboard.invitee_id_by_user[o.user_id];
-                    break;
-                case 'mod':
-                    if (!BRDashboard.invitees[o.id])
-                        BRDashboard.invitees[o.id] = o.data;
-                    else
-                        jQuery.extend(BRDashboard.invitees[o.id], o.data);
-                    if (typeof o.user_id != 'undefined') {
-                        BRDashboard.invitee_id_by_user[o.user_id] = o.id;
-                        BRDashboard.box(o.user_id/*will convert*/,'invitee_id',null,o.id);
-                        }
-                    break;
+            },'listener',-1);
+        BRDashboard._subscribe(function(o) {
+            if (o.command==='mod') {
+                BRDashboard.online_2_user_map[o.connection_id] = o.user_id;
+                BRDashboard.box(o.user_id/*will convert*/,'connection_id',o.connection_id,true);
                 }
-            },'invitee',true);
-        BRDashboard.subscribe(function(o) {
+            },'online',1);
+        BRDashboard._subscribe(function(o) {
+            if (o.command==='del') {
+                if (BRDashboard.online_2_user_map[o.connection_id]) {
+                    BRDashboard.box(BRDashboard.online_2_user_map[o.connection_id],'connection_id',o.connection_id,undefined);
+                    delete BRDashboard.online_2_user_map[o.connection_id];
+                    }
+                }
+            },'online',-1);
+        BRDashboard._subscribe(function(o) {
+            if (o.command==='mod') {
+                if (!BRDashboard.invitees[o.id])
+                    BRDashboard.invitees[o.id] = o.data;
+                else
+                    jQuery.extend(BRDashboard.invitees[o.id], o.data);
+                if (typeof o.user_id != 'undefined') {
+                    BRDashboard.invitee_id_by_user[o.user_id] = o.id;
+                    BRDashboard.box(o.user_id/*will convert*/,'invitee_id',null,o.id);
+                    }
+                }
+            },'invitee',1);
+        BRDashboard._subscribe(function(o) {
+            if (o.command==='del') {
+                delete BRDashboard.invitees[o.id];
+                if (typeof o.user_id != 'undefined')
+                    delete BRDashboard.invitee_id_by_user[o.user_id];
+                }
+            },'invitee',-1);
+        BRDashboard._subscribe(function(o) {
             var idx = BRDashboard.selectedListeners.indexOf(o.id);
             if (o.selected && idx==-1)
                 BRDashboard.selectedListeners.push(o.id);
             if (!o.selected && idx!=-1)
                 BRDashboard.selectedListeners.splice(idx,1);
-            },'select_listener',true);
-        BRDashboard.subscribe(function(o) {
+            },'select_listener',1);
+        BRDashboard._subscribe(function(o) {
             var user_id = undefined;
             if (o.attr=="user_id")
                 user_id = o.value
@@ -234,8 +242,8 @@ var BRDashboard = {
                 BRDashboard.updateRoomContext('is_host', (o.value==="Host"));
                 }
             BRDashboard.fire({type:'invitee',command:'mod',id:o.idx,user_id:user_id,data:h});
-            },'invitations',true);
-        BRDashboard.subscribe(function(o) {
+            },'invitations',1);
+        BRDashboard._subscribe(function(o) {
             switch(o.command) {
                 case 'refresh':
                     if (BR.room.context.is_live)
@@ -243,21 +251,21 @@ var BRDashboard = {
                     break;
                 default:;
                 }
-            },'command',true);
-        BRDashboard.subscribe(function(o) {
+            },'command',1);
+        BRDashboard._subscribe(function(o) {
             if (o.id!=/*intentional*/BR.room.context.conference_id) /* how could it be otherwise? */
                 return;
             if (o.attr==="access_config")
                 BR.room.context.conference_access_config = o.value;
-            }, 'conferences', true);
-        BRDashboard.subscribe(function(o) {
+            }, 'conferences',1);
+        BRDashboard._subscribe(function(o) {
             if (o.attr==="dtmf")
                 BRDashboard.box(o.idx,'dtmf',null,o.value);
-            },'gue',true);
-        BRDashboard.subscribe(function(o) {
+            },'gue',1);
+        BRDashboard._subscribe(function(o) {
             if (o.updated && o.updated.conference_access_config)
                 parseAndSetAccessConfig(BR.room.context.conference_access_config);
-            },'room_context',true);
+            },'room_context',1);
     },
 
     updateRoomContext: function(key, value) {

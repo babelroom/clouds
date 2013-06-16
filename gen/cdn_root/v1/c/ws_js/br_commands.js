@@ -34,18 +34,29 @@ var BRCommands = {
                 default:
                 }
     },
-    _connectionKV: function(id,value) {
-        if (/^([^-]+)-([^-]+)-(\d+)$/.exec(value)) {
-            var el = RegExp.$1
-                , cs = RegExp.$2
-                , uid = RegExp.$3;
-            if (cs==BR.room.context.connection_salt)  {
-                BRDashboard.connection_id = id;
-                BRToolbar.door('loaded');
-                BRDashboard.updateRoomContext('is_live',true);
-//console.log((new Date()).getTime()/1000.0);
+    _connectionKV: function(id,attr,value) {
+        if (typeof(value)!=='undefined' || attr) {
+            if (attr) {
+                if (/^video-(\d+)-(.*)$/.exec(attr)) {
+                    var uid = RegExp.$1
+                        , rest = RegExp.$2;
+                    BRDashboard.fire({type:'video',connection_id:id,user_id:uid,subkey:rest,data:value});
+                    }
                 }
-            BRDashboard.fire({type:'online',command:'mod',connection_id:id,estream_label: el, connection_salt: cs, user_id: uid});
+            else {
+                if (/^([^-]+)-([^-]+)-(\d+)$/.exec(value)) {
+                    var el = RegExp.$1
+                        , cs = RegExp.$2
+                        , uid = RegExp.$3;
+                    if (cs==BR.room.context.connection_salt)  {
+                        BRDashboard.connection_id = id;
+                        BRToolbar.door('loaded');
+                        BRDashboard.updateRoomContext('is_live',true);
+//console.log((new Date()).getTime()/1000.0);
+                        }
+                    BRDashboard.fire({type:'online',command:'mod',connection_id:id,estream_label: el, connection_salt: cs, user_id: uid});
+                    }
+                }
             }
         else {
             BRDashboard.fire({type:'online',command:'del',connection_id:id});
@@ -66,26 +77,45 @@ var BRCommands = {
             value = undefined;
             }
 
+/*
         var sk = key.split(/-/, 3); // subkeys
         //if (sk.length<2) -- changed down to 1 for 'lock' no mid -- conference general
         if (sk.length<1)
             return;
+        sk = null;
+        if (key.exec(/
+*/
+        var verb = id = idx = attr = undefined;
+        if (key.match(/^([^-]*)-(.*)$/)) {
+            verb = RegExp.$1;
+            var tmp = RegExp.$2;
+            if (tmp.match(/^([^-]*)-(.*)$/)) {
+                id = RegExp.$1;
+                attr = RegExp.$2;
+                }
+            else {
+                id = tmp;
+                }
+            var idx = parseInt(id, 10);
+            }
+        else  {
+            verb = key;
+            }
+/*
         var verb = sk[0];
         var id = sk[1];
         var idx = parseInt(id, 10);
         var attr = sk[2];
+*/
         switch(verb) {
             case '_':
-                BRCommands._connectionKV(id,value);
+                BRCommands._connectionKV(id,attr,value);
                 break;
             case 'member':
                 BRCommands._memberKV(idx,value,attr);
                 break;
             case 'talking':
                 BRDashboard.fire({type:'talking',mid:idx,value:value});
-                break;
-            case 'video':
-                BRDashboard.fire({type:'video',user_id:id,stream_id:attr,data:value});
                 break;
             case 'lock':
                 BRDashboard.fire({type:'lock',on_if_defined:value});
@@ -283,12 +313,12 @@ function fsAction(value)
         return BRCommands._doMove(depreciate_id, function(size,index) { return destRoom; });
     },
 
-    videoAction: function(stream_id, start) {
-        var cmd = '-' + BR.room.context.user_id + '-' + stream_id;
-        if (start)
-            cmd += ':';
-//        BRCommands.doPUT('/conference/' + BRCommands.cid, cmd, function() { BRCommands.updateProgress("Done - videoAction: "+cmd); });
-        BRCommands.put('video', cmd, function() { BRCommands.updateProgress("Done - videoAction: "+cmd); });
+    videoAction: function(mechanism, subkey,  value) {
+        var cmd = '-' + mechanism + '-' + subkey;
+        if (typeof(value)!=='undefined')
+            cmd += ':' + value;
+        BRCommands.put('video', {connection_id:BRDashboard.connection_id,uid:BR.room.context.user_id,cmd:cmd}, function()
+            { BRCommands.updateProgress("Done - videoAction: "+cmd); });
     },
 
     gue: function(attr,value) {

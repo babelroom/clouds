@@ -376,7 +376,7 @@ console.log( $j(tab3sel).offset() ); */
             </tr>\
             <tr class="dtmfrow" style="height: 10px;"></tr>\
             <tr class="dtmfrow">\
-                <td class="dtmfcell"><button id="'+id+'_talk" class="dtmfkey" value="T" title="Dial"><i class="icon icon-phone" style="color: lime;"></i></td>\
+                <td class="dtmfcell"><button id="'+id+'_talk" class="dtmfkey" value="T" title="Dial"><i class="icon icon2-phone" style="color: lime;"></i></td>\
                 <td class="dtmfcell"><button class="dtmfkey" value="D" title="Delete"><i class="icon icon2-erase"></i><span class="f6wn">&nbsp;DEL</span></button></td>\
                 <td class="dtmfcell"><button class="dtmfkey" value="C" title="Clear"><span class="f6wn">CLEAR</span></td>\
             </tr>\
@@ -430,7 +430,7 @@ console.log( $j(tab3sel).offset() ); */
         <div style="float: left;"><button id="'+id+'_mute" style="width: 75px;" title="Mute">Mute</button></div>\
         <div style="float: right;"><button id="'+id+'_unmute" style="width: 75px;" title="Unmute">Unmute</button></div>\
         <br />\
-        <div style="float: left;"><button id="'+id+'_pa" style="width: 75px;" title="Enable broadcast to all participants"><i class="icon-bullhorn pull-left"></i> PA on</button></div>\
+        <div style="float: left;"><button id="'+id+'_pa" style="width: 75px;" title="Enable broadcast to all participants"><i class="icon2-megaphone pull-left"></i> PA on</button></div>\
         <div style="float: right;"><button id="'+id+'_unpa" style="width: 75px;" title="Disable broadcast to all participants">PA off</button></div>\
         <br />\
         <div style="float: left;"><button id="'+id+'_drop" style="width: 75px;" title="Drop selected participant(s) from call">Drop</button></div>\

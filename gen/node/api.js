@@ -12,6 +12,19 @@ var API = function(config) {
     this.autoAPI = new AutoAPI(this.sessionManager, this.db);
 }
 
+function get_status(self, req, res, match, opts)
+{
+    /* blunt status -- for use by pingdom et. al. */
+    res.send({status: 'OK'});
+    res.end();
+}
+
+function get_version(self, req, res, match, opts)
+{
+    res.send({major: 2, minor: 37, build: 42});
+    res.end();
+}
+
 function signup(self, req, res, match, opts)
 {
     self.db.query("INSERT INTO my.users (name) VALUES ("+self.e(req.body.name)+")", [], function(err, rows, fields){
@@ -105,23 +118,6 @@ function logout(self, req, res, match, opts)
         return he.ok(req, res, {});
 }
 
-/* on hiatus
-function country(self, req, res, match, opts)
-{
-    res.send({data: [
-        { code: 1,      name: 'United States' },
-        { code: 212,    name: 'Morocco' },
-        { code: 33,     name: 'France' },
-        { code: 34,     name: 'Spain' },
-        { code: 351,    name: 'Portugal' },
-        { code: 353,    name: 'Ireland' },
-        { code: 39,     name: 'Italy' },
-        { code: 44,     name: 'United Kingdom' },
-        { code: 49,     name: 'Germany' },
-        ]});
-    res.end();
-} */
-
 var db_cols = [
     ['u.id', 'user_id'],
     ['u.email_address', 'email_address'],
@@ -210,9 +206,9 @@ user and conference -- question: how could it have created multople invites???
 //        data.push(['media_server_uri', 'rtmp%3A%2F%2Fvideo.babelroom.com%3A1936%2FoflaDemo']);
         var a='', l=10, b = crypto.randomBytes(l);
         for(var i=0; i<l; i++)
-            a += (b[i] & 0xff).toString(16);
+            a += ('0'+((b[i] & 0xff).toString(16))).substr(-2);
         data.push(['connection_salt', a]);
-        //res.send({data: data}); -- don't do this; express "helps" with ETag and other crap
+        //res.send({data: data}); -- don't do this; express "helps" with ETag and other _--_
         obj = {};
         for(var i=0; i<data.length; i++)
             obj[data[i][0]] = data[i][1];
@@ -438,6 +434,8 @@ Not implemented
 }
 
 var routes = [
+[/GET:\/status$/i, get_status],
+[/GET:\/version$/i, get_version],
 [/POST:\/signup\/(.)(.)(.*)$/i, signup],
 // -- [/(?:GET|POST):\/current_user\/?(.*)$/i, current_user], // --- preserve useful regex for reference
 [/GET:\/login$/i, get_current_user],
@@ -532,12 +530,14 @@ express.bodyParser.parse['application/json'] = function(data) {
 
     addHandlers: function(express, app, options) {
         var self = this;
+/*
         // blunt status -- for use by pingdom et. al.
         app.get('/api/v1/status', function (req, res) {
-            /* put more stuff in here later */
+            /* put more stuff in here later *./
             res.send('OK');
             res.end();
             });
+*/
 
         /* re: access-control-allow ...
         We allow *everything* ... no restrictions on the api as we just don't know whose webpage    

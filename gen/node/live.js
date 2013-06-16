@@ -13,7 +13,7 @@ var put_templates = {
 
     /* everybody */
     chat: {q: 'conference', fmt: function(d){return "C"+d.args;}, nonpriv: true},
-    video: {q: 'conference', fmt: function(d){return "Kvideo"+d.args;}, nonpriv: true},
+    video: {q: 'conference', fmt: function(d){return "K_-"+d.args.connection_id+"-video-"+d.args.uid+d.args.cmd;}, nonpriv: true},
     slide: {q: 'conference', fmt: function(d){return "Kslide"+d.args;}, nonpriv: true},
     conferenceIdsAction: {q: 'fs', fmt: function(d){return 'M'+d.args[0]+' bgapi conference '+d.cid+' '+d.args[1];}, nonpriv: true},   /*temporarily allowed by non-admins (mute)*/
     gue: {q: 'conference', fmt: function(d){return "Kgue-"+d.args.idx+d.args.attr+d.args.value;}, nonpriv: true},

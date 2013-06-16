@@ -52,24 +52,24 @@ var BRConference = {
 </ul>\
     <div id="'+id+'_uri">\
         <label>Current URL<div>\
-            <span class="secure-green"><i class="icon-lock"></i> https:</span>'+BR.api.v1.get_host('page')+'/<span style="color: #999;" id="'+id+'_current_uri"></span></div></label>\
+            <span class="secure-green"><i class="icon2-lock"></i> https:</span>'+BR.api.v1.get_host('page')+'/<span style="color: #999;" id="'+id+'_current_uri"></span></div></label>\
         <br>\
         <label>Enter new URL<br><input id="'+id+'_uri_delete_me" name="conference[uri]" type="text" /><span id="'+id+'_uri_msg" class="fieldWithErrors"></span></label>\
         <div>\
-            <span class="secure-green"><i class="icon-lock"></i> https:</span>'+BR.api.v1.get_host('page')+'/<span style="color: #999;" id="'+id+'_uri_echo"></span></div>\
+            <span class="secure-green"><i class="icon2-lock"></i> https:</span>'+BR.api.v1.get_host('page')+'/<span style="color: #999;" id="'+id+'_uri_echo"></span></div>\
         <br>\
-        <center><button id="'+id+'_save_uri"><i class="icon-save pull-left"></i> &nbsp; Save</button></center>\
+        <center><button id="'+id+'_save_uri"><i class="icon2-save pull-left"></i> &nbsp; Save</button></center>\
     </div>\
     <div id="'+id+'_general">\
         <label>Title<br><input name="conference[name]" type="text" style="width: 100%;" /></label><span id="'+id+'_name_msg"></span>\
         <br>\
         <label>Description<br><textarea name="conference[introduction]" style="width: 100%;"></textarea></label>\
         <p>\
-        <center><button><i class="icon-save pull-left"></i> &nbsp; Save</button></center>\
+        <center><button><i class="icon2-save pull-left"></i> &nbsp; Save</button></center>\
     </div>\
     <div id="'+id+'_access">\
         <br>\
-        <center><button><i class="icon-save pull-left"></i> &nbsp; Save</button><button><i class="icon-undo pull-left"></i> &nbsp; Reset</button></center>\
+        <center><button><i class="icon2-save pull-left"></i> &nbsp; Save</button><button><i class="icon2-ccw pull-left"></i> &nbsp; Reset</button></center>\
     </div>\
     <div id="'+id+'_skin">\
         <center><table><tr><td><button class="prev">&lt;</button></td>\
@@ -81,7 +81,7 @@ var BRConference = {
         <td><button class="next">&gt;</button></td></tr></table></center>\
         <br>\
         <center><span id="'+id+'_skin_selected">Loading...</span></center><br>\
-        <center><button id="'+id+'_skin_save"><i class="icon-save pull-left"></i> &nbsp; Save</button></center>\
+        <center><button id="'+id+'_skin_save"><i class="icon2-save pull-left"></i> &nbsp; Save</button></center>\
     </div>\
     <center><table width="80%" height="30"><tr><td width="50%"><div id="'+id+'_status" style=""></div></td><td width="50%"><div id="'+id+'_progress" style="height: 5px; display: none;"></div></td></tr></table><center>\
 </div>';

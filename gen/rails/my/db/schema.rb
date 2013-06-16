@@ -185,8 +185,6 @@ ActiveRecord::Schema.define(:version => 20130427061723) do
     t.datetime "updated_at"
   end
 
-  add_index "options", ["table", "table_id", "name"], :name => "index_options_on_table_and_table_id_and_name", :unique => true
-
   create_table "phones", :force => true do |t|
     t.string   "identifier"
     t.string   "dial_options"

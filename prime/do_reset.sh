@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# THIS IS DEPRECIATED
+
 # --- reset working environment to initial state
 
 echo 'Shutdown everything...'

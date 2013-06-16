@@ -23,5 +23,8 @@ sudo make install
 cd $HOME/gits/clouds/clouds || exit -1
 ./setup_gen.sh || exit -1
 
+# copy index.html (landing page for single IP deploy)
+cp /home/br/gits/clouds/clouds/misc/index.html ~/.
+
 exit 0
 

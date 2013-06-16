@@ -41,10 +41,11 @@ cat $HOME/gits/clouds/clouds/misc/version/stamp | sed 's/\./-/' >>/tmp/network
 sudo install -o root -m 644 /tmp/network /etc/sysconfig/network
 rm -f /tmp/network
 
-# copy initial files
+# copy initial files, maybe some of these things to subsystem specific deploys, i.e. 
 cd misc
 cp config.default ~/config
-cp index.html ~/.
+sudo mkdir /home/ec2-user/db_backups
+sudo chown ec2-user:ec2-user /home/ec2-user/db_backups
 
 cat << EOT 
 ---

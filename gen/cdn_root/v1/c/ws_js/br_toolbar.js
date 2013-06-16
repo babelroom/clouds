@@ -102,7 +102,7 @@ var BRToolbar = {
             updateLabel();
             }
         function updateLabel() {
-            var new_label = '<i class="'+(BR.room.context.is_host?'icon-magic':'icon-user')+' pull-left"></i>';
+            var new_label = '<i class="'+(BR.room.context.is_host?'icon2-magic':'icon2-user')+' pull-left"></i>';
             new_label += (my_user_id && BRWidgets.full_name(my_user_id)) || 'Loading...';
             if (my_label!==new_label) {
                 my_label = new_label;
@@ -183,8 +183,8 @@ var BRToolbar = {
     <span class="br-easter"><input id="'+id+'_cb_oldusers" type="checkbox" /><label for="'+id+'_cb_chat"> Turbo purge. Clear disconnected ephemeral users. This option should be used with great care</label><br></span>\
     <div style="height: 20px;"></div>\
     <div style="text-align: center;">\
-        <button id="'+id+'_btn_close" title="Cancel"><i class="icon icon-remove"></i> &nbsp;Cancel</button>\
-        <button id="'+id+'_btn_reset" title="Refresh"><i class="icon icon-refresh"></i> &nbsp;Reset Room</button>\
+        <button id="'+id+'_btn_close" title="Cancel"><i class="icon icon2-cancel"></i> &nbsp;Cancel</button>\
+        <button id="'+id+'_btn_reset" title="Refresh"><i class="icon icon2-arrows-cw"></i> &nbsp;Reset Room</button>\
     </div>\
 </div>\
 ';
@@ -289,7 +289,7 @@ var BRToolbar = {
 <p>Support information is available from the <a href="'+BR.api.v1.get_host('home')+'/faq/" style="font-weight: bold; color: black;">FAQ</a></p>\
 </div>';
                 $j('#'+id+'_error',pdlg).html(c).show();
-                $j('#'+id+'_content',pdlg).find('i.icon-comments').hide(); /* hide icon if it's still visible (i.e. no content has been added) */
+                $j('#'+id+'_content',pdlg).find('i.icon2-chat').hide(); /* hide icon if it's still visible (i.e. no content has been added) */
                 }
             else
                 $j('#'+id+'_error',pdlg).html('').hide();
@@ -342,8 +342,8 @@ if (qs && qs['e']) {
                 /* this is actually (almost) overkill ... */
                 html += ''
                     +'<p>Signup to reserve it now!</p>'
-                    +'<a class="br-d-button" target="_blank" href="'+BR.api.v1.get_host('home')+'/signup/?room_url='+ruri+'"><i class="icon-ok pull-left"></i> Reserve '
-                    +((proto==='https')?'<span class="secure-bright-green"><i class="icon-lock"></i> https</span>':'http')+'://'+dn+'/<strong>'+ruri+'</strong></a>';
+                    +'<a class="br-d-button" target="_blank" href="'+BR.api.v1.get_host('home')+'/signup/?room_url='+ruri+'"><i class="icon2-ok pull-left"></i> Reserve '
+                    +((proto==='https')?'<span class="secure-bright-green"><i class="icon2-lock"></i> https</span>':'http')+'://'+dn+'/<strong>'+ruri+'</strong></a>';
                 }
             html += '</div>';
             html += '<div id="d_set_unknown"'+hs+'>This is not a known conference</div>';
@@ -510,12 +510,12 @@ if (qs && qs['e']) {
 <div class="ui-widget"><div id="'+id+'_error" class="ui-state-error ui-corner-all" style="display: none; padding 0 .7em; margin: 10px 0 15px 0;"></div></div>\
 <div id="'+id+'_content">\
 <!-- this splash also helps the initial positioning of the dialog -->\
-<div style="text-align: center;"><i class="icon-comments" style="color: #5174a4; font-weight: bold; font-size: 1000%;"></i><br></div>\
+<div style="text-align: center;"><i class="icon2-chat" style="color: #5174a4; font-weight: bold; font-size: 1000%;"></i><br></div>\
 </div>\
 <div style="text-align: center;">\
- &nbsp; <button id="'+id+'_butt_reload"><i class="icon-refresh pull-left"></i> &nbsp; Reload</button>\
- &nbsp; <button id="'+id+'_butt_start" disabled><i class="icon-desktop pull-left"></i> &nbsp; Start</button>\
- &nbsp; <button id="'+id+'_butt_login" style="display: none;" disabled><i class="icon-key pull-left"></i> &nbsp; Login</button>\
+ &nbsp; <button id="'+id+'_butt_reload"><i class="icon2-arrows-cw pull-left"></i> &nbsp; Reload</button>\
+ &nbsp; <button id="'+id+'_butt_start" disabled><i class="icon2-desktop pull-left"></i> &nbsp; Start</button>\
+ &nbsp; <button id="'+id+'_butt_login" style="display: none;" disabled><i class="icon2-key pull-left"></i> &nbsp; Login</button>\
 </div>\
 <div id="'+id+'_footer">\
 <center><table width="80%" height="30"><tr><td width="50%"><div id="'+id+'_status" style=""></div></td><td width="50%"><div id="'+id+'_progress" style="height: 5px; display: none;"></div></td></tr></table>\
