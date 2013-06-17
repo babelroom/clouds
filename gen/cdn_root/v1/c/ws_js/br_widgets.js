@@ -427,48 +427,33 @@ console.log( $j('#tile',sel) );
             }
 */
         function s(user_id,name) { return '#box_'+user_id+'_'+name; }
-        function make_box(user_id) {
-            var deferred_src = {};
-            var box_id = 'box_' + user_id
-                , title_id = box_id + '_title'
-                , dtmf_id = box_id + '_dtmf__not_currently_used'
-                , flash_id = box_id + '_flash'
+
+        /* video flash/webrtc can be complicated so we move the logic (think: controller) into this object to
+        keep it distinct from ui elements (think: view).
+        this is also help future development of API
+        */
+        function makeVideoController(opts) {
+            opts = jQuery.extend(opts, {
+                showBackground: function(){}
+                });
+
+/// all this temp ....
+//                , flash_id = box_id + '_flash'
                 ;
+            /* salt of the connection for the webcam associated with this box.
+            If it's our connection salt then we could broadcast, otherwise we could view.
+            If it's null then we can neither broadcast nor view */
+            var broadcasters_salt = null
+                , on = false                /* actually broadcasting or viewing */
+                ;
+/*
             var my_broadcastable_stream_id = null;  // change to some sort of bool
             var peer_stream_id = null;              // change name to box_source_connection_salt or something ..
             var webrtc_data = null;
-//            var webrtc_idx = 1;
             var broadcasting = false;
             var viewing = false;
-            /* margin here and "10" in sort_boxes() is play */
-            boxes_container.append('\
-<div id="'+box_id+'" class="br-person-box" style="margin: 4px; display: none;">\
-<div class="ui-dialog-titlebar ui-widget-header ui-corner-top ui-helper-clearfix"><div style="float: left; padding-left: 5px;"><span id="'+title_id+'" style="overflow: hidden;">&nbsp;</span></div><div style="float: right; padding-right: 5px;"><!-- this is good, but still working on it ... <i class="icon icon2-resize-full br-mini-button"></i><i id="foof" class="icon icon2-menu br-mini-button"></i>--><span id="'+dtmf_id+'"></span></div><div style="clear: all;"></div></div>\
-<div class="ui-widget-content">\
-<div id="avatar_parent">\
-    <div id="video_parent" style="display: none;">\
-        <video width="100%" height="100%" autoplay="autoplay" />\
-    </div>\
-    <div id="avatar_medium" style="display: none;"><img id="avatar_medium_img"><i class="icon icon2-phone" style="font-size: 8em;"></i></div>\
-    <div id="avatar_large" style="display: none;"><img id="avatar_large_img"><i class="icon icon2-phone" style="font-size: 16em;"></i></div>\
-</div>\
-<span class="u-widget-header u-corner-all" style="padding: 10px 4px;">\
-    <button id="talking" title="Audio Indicator">T</button>\
-    <button id="mute" title="Mute">M</button>\
-    <button title="Unmute">U</button>\
-    <button id="start_webcam" title="Start My Webcam">B</button>\
-    <button id="stop_webcam" title="Stop My Webcam">C</button>\
-    <button id="start_video" title="View Webcam">S</button>\
-    <button id="stop_video" title="Stop Viewing Webcam">H</button>\
-    <button id="small" title="Normal Window">-</button>\
-    <button title="Large Window">+</button>\
-    <button id="select" title_disabled="Select">L</button>\
-</span>\
-</div>\
-</div>'); 
-            var b = box_by_user(user_id);
-            //b.draggable({containment: "parent", scroll: false, stack: ".br-person-box", /*opacity: 0.5, /*helper: "clone",*./ grid: [100,100]*/});
-            b.draggable({containment: "document", scroll: false, stack: ".br-person-box"/*, opacity: 0.5, /*helper: "clone",*./ grid: [100,100]*/});
+// all this temp ....
+*/
 
             function webrtc_open_webcam(stream_id) {
                 /* under dev */
@@ -485,7 +470,7 @@ console.log(obj);
                         BRCommands.videoAction('webrtc', stream_id, ''/*==true*/);
                         broadcasting = true;
                         update_webcam_buttons();
-                        show_avatar(false);
+                        opts.showBackground(false);
                         b.find('#video_parent').show();
                         }
                     });
@@ -506,7 +491,7 @@ console.log(obj);
                         (BRUtils.ass(!webrtc_data));
                         webrtc_data = {pcs:{}};
 b.find('#video_parent').show();
-show_avatar(false);
+opts.showBackground(false);
                         wrapRTC.answer(msg, {
                             element: b.find('#video_parent > video').get(0),
                             setPC: function(pc) { webrtc_data.pcs[peer_salt] = pc; },
@@ -533,9 +518,6 @@ show_avatar(false);
                 webrtc_data = null;
 //return false;
                 return true;
-                }
-            function webrtc_view_webcam() {
-                webrtc_signalOut(peer_stream_id, {type: 'br_callme'});
                 }
             function webrtc_signal_in(peer_salt, data) {
 //                BRUtils.ass(webrtc_data && webrtc_data.localStream);
@@ -574,40 +556,6 @@ show_avatar(false);
                 if (broadcast)
                     BRCommands.videoAction('flash', stream_id, ''/*==true*/);
                 }
-            function update_webcam_buttons() {
-                var flash_elem = b.find('#'+flash_id)
-                    , on = (use_webrtc ? webrtc_data : flash_elem.length)
-                    , mbr = !!my_broadcastable_stream_id
-                    , ops = !!peer_stream_id
-                    ;
-                BRUtils.ass(!(broadcasting && viewing));
-/*
-if (!ops) return;
-console.log(peer_stream_id);
-//b.find('#start_video').show();
-console.log(b.find('.start_video'));
-b.find('.start_video').show();
-setTimeout(function(){ console.log('foobar',b.find('.start_video')); b.find('.start_video').show();}, 10000);
-return;
-*/
-//console.log(broadcasting,viewing,on,mbr,ops);
-                b.find('#start_webcam').hide().next().hide().next().hide().next().hide();
-                if (viewing) {
-                    BRUtils.ass(ops);
-                    b.find('#stop_video').show();
-                    }
-                else if (broadcasting) {
-                    BRUtils.ass(mbr);
-                    b.find('#stop_webcam').show();
-                    }
-                else {
-                    if (mbr && (have_webrtc || have_flash)) b.find('#start_webcam').show();
-                    /*tmp*/else/*hack, read below*/if (ops && have_flash /*later: determine whether webrtc or flash*/) b.find('#start_video').show();
-/* problem is old video K data lingers if the webcam is not closed by sender (i.e they just refresh the window).
-need to change protocol to accomodate, perhaps just use gue or some such, might be easier all around
-*/
-                    }
-                }
             function do_stop() {
                 if (use_webrtc) {
                     if (webrtc_data)
@@ -632,12 +580,12 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                     do_flash(true, my_broadcastable_stream_id);
                     broadcasting = true;
                     update_webcam_buttons();
-                    show_avatar(false);
+                    opts.showBackground(false);
                     }
                 }
             function stop_webcam_broadcast() {
                 if (!do_stop()) return;
-                show_avatar(true);
+                opts.showBackground(true);
                 /* notify we've stopped broadcasting */
                 BRCommands.videoAction(use_webrtc ? 'webrtc' : 'flash', my_broadcastable_stream_id, undefined/*must be undefined for value*/);
                 broadcasting = false;
@@ -645,45 +593,19 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                 }
             function start_webcam_view() {
                 if (use_webrtc)
-                    webrtc_view_webcam();
+                    webrtc_signalOut(broadcasters_salt, {type: 'br_callme'});
                 else  {
-                    do_flash(false, peer_stream_id);
+                    do_flash(false, broadcasters_salt);
                     viewing = true;
                     update_webcam_buttons();
-                    show_avatar(false);
+                    opts.showBackground(false);
                     }
                 }
             function stop_webcam_view() {
                 if (!do_stop()) return;
-                show_avatar(true);
+                opts.showBackground(true);
                 viewing = false;
                 update_webcam_buttons();
-                }
-            function show_avatar(show) {
-                if (show===undefined) /* check if video is on */
-                    show = b.find('#'+flash_id).length ? false : true;  // || (broadcast || viewing) .. TODO tmp
-                if (show) {
-                    var av = $j((b.hasClass("br-person-big-box")?'#avatar_large':'#avatar_medium'),b)
-                        img = $j('img',av);
-                    if (img.prop('src'))
-                        img.show().next().hide();
-                    else
-                        img.hide().next().show();
-                    av.show();
-                    }
-                else
-                    $j('#avatar_medium, #avatar_large',b).hide();
-                }
-            function avatar_icon_online(online) {
-                var icon = 'icon2-phone';
-                if (online) {
-                    icon = 'icon2-user';
-                    var iid = BRDashboard.invitee_id_by_user[user_id]
-                        , i = BRDashboard.invitees[iid];
-                    if (iid && i && i.role==="Host")
-                        icon = 'icon2-magic';
-                    }
-                b.find('#avatar_parent i.icon').removeClass('icon2-user icon2-phone').addClass(icon);
                 }
             function peer_webcam_event(stream_id, data) {
                 if (stream_id) {
@@ -700,6 +622,154 @@ peer_stream_id = stream_id;
                     viewing = false;
                     update_webcam_buttons();
                     }
+                }
+            BRDashboard.subscribe(function(o) {
+                var sk = o.subkey.split(/-/, 3); // subkeys
+                if (sk.length<2)    /* this is an error */
+                    return;
+                var mechanism = sk[0];
+                var event_peer_salt = sk[1];
+                var target_salt = sk[2];
+                BRUtils.ass(event_peer_salt != target_salt);
+                if (target_salt) { /* targeted for a specific peer */
+                    if (target_salt === peer_stream_id) /* handle only if directed specifically at this box */
+                        webrtc_signal_in(event_peer_salt, o.data);
+                    return;
+                    }
+                if (
+                        (event_peer_salt!=BR.room.context.connection_salt)  /* not our own webcam */
+                        && (o.user_id==user_id)) {                          /* webcam for this box (user_id matches) */
+                    if (typeof(o.data)!=='undefined')
+                        peer_webcam_event(event_peer_salt, o.data);
+                    else
+                        peer_webcam_event(null);         /* stop viewing webcam */
+                    }
+                },'video');
+            BRDashboard.subscribe(function(o) {
+                /* user has gone offline, delete any associated video */
+                if (o.command==='del' && BRDashboard.online_2_user_map[o.connection_id]==opts.user_id) {
+                    if (!my_broadcastable_stream_id /* not broadcasting */) {
+                        /* TODO what if a user is logged-in multiple times with different webcams? */
+                        peer_webcam_event(null);         /* stop viewing webcam */
+                        }
+                    }
+                },'online');
+
+            return {
+                isVideoOn: function() { return on; }
+                };
+            }
+        function make_box(user_id) {
+
+// purge any video related stuff
+            var deferred_src = {};
+            var box_id = 'box_' + user_id
+                , title_id = box_id + '_title'
+                , dtmf_id = box_id + '_dtmf__not_currently_used'
+//                , flash_id = box_id + '_flash'
+                ;
+//            var my_broadcastable_stream_id = null;  // change to some sort of bool
+//            var peer_stream_id = null;              // change name to box_source_connection_salt or something ..
+//            var webrtc_data = null;
+//            var webrtc_idx = 1;
+//            var broadcasting = false;
+//            var viewing = false;
+
+            /* margin here and "10" in sort_boxes() is play */
+            boxes_container.append('\
+<div id="'+box_id+'" class="br-person-box" style="margin: 4px; display: none;">\
+<div class="ui-dialog-titlebar ui-widget-header ui-corner-top ui-helper-clearfix"><div style="float: left; padding-left: 5px;"><span id="'+title_id+'" style="overflow: hidden;">&nbsp;</span></div><div style="float: right; padding-right: 5px;"><!-- this is good, but still working on it ... <i class="icon icon2-resize-full br-mini-button"></i><i id="foof" class="icon icon2-menu br-mini-button"></i>--><span id="'+dtmf_id+'"></span></div><div style="clear: all;"></div></div>\
+<div class="ui-widget-content">\
+<div id="avatar_parent">\
+    <div id="video_parent" style="display: none;">\
+        <video width="100%" height="100%" autoplay="autoplay" />\
+    </div>\
+    <div id="avatar_medium" style="display: none;"><img id="avatar_medium_img"><i class="icon icon2-phone" style="font-size: 8em;"></i></div>\
+    <div id="avatar_large" style="display: none;"><img id="avatar_large_img"><i class="icon icon2-phone" style="font-size: 16em;"></i></div>\
+</div>\
+<span class="u-widget-header u-corner-all" style="padding: 10px 4px;">\
+    <button id="talking" title="Audio Indicator">T</button>\
+    <button id="mute" title="Mute">M</button>\
+    <button title="Unmute">U</button>\
+    <button id="start_webcam" title="Start My Webcam">B</button>\
+    <button id="stop_webcam" title="Stop My Webcam">C</button>\
+    <button id="start_video" title="View Webcam">S</button>\
+    <button id="stop_video" title="Stop Viewing Webcam">H</button>\
+    <button id="small" title="Normal Window">-</button>\
+    <button title="Large Window">+</button>\
+    <button id="select" title_disabled="Select">L</button>\
+</span>\
+</div>\
+</div>'); 
+            var b = box_by_user(user_id);
+            //b.draggable({containment: "parent", scroll: false, stack: ".br-person-box", /*opacity: 0.5, /*helper: "clone",*./ grid: [100,100]*/});
+            b.draggable({containment: "document", scroll: false, stack: ".br-person-box"/*, opacity: 0.5, /*helper: "clone",*./ grid: [100,100]*/});
+
+
+/*
+// refactor this to actually update as per instructions 
+            function update_webcam_buttons() {
+                var flash_elem = b.find('#'+flash_id)
+                    , on = (use_webrtc ? webrtc_data : flash_elem.length)
+                    , mbr = !!my_broadcastable_stream_id
+                    , ops = !!peer_stream_id
+                    ;
+                BRUtils.ass(!(broadcasting && viewing));
+                b.find('#start_webcam').hide().next().hide().next().hide().next().hide();
+                if (viewing) {
+                    BRUtils.ass(ops);
+                    b.find('#stop_video').show();
+                    }
+                else if (broadcasting) {
+                    BRUtils.ass(mbr);
+                    b.find('#stop_webcam').show();
+                    }
+                else {
+                    if (mbr && (have_webrtc || have_flash)) b.find('#start_webcam').show();
+                    /*tmp*./else/*hack, read below*./if (ops && have_flash /*later: determine whether webrtc or flash*./) b.find('#start_video').show();
+/* problem is old video K data lingers if the webcam is not closed by sender (i.e they just refresh the window).
+need to change protocol to accomodate, perhaps just use gue or some such, might be easier all around
+*./
+                    }
+                }
+*/
+
+
+
+
+
+            function show_avatar(show) {
+                if (show===undefined) /* check if video is on */
+                    show = vc.isVideoOn();
+                if (show) {
+                    var av = $j((b.hasClass("br-person-big-box")?'#avatar_large':'#avatar_medium'),b)
+                        img = $j('img',av);
+                    if (img.prop('src'))
+                        img.show().next().hide();
+                    else
+                        img.hide().next().show();
+                    av.show();
+                    }
+                else
+                    $j('#avatar_medium, #avatar_large',b).hide();
+                }
+
+            var vc = makeVideoController({
+                user_id: user_id,
+                video_parent: b.find('#avatar_parent'),
+                showBackground: show_avatar
+                });
+
+            function avatar_icon_online(online) {
+                var icon = 'icon2-phone';
+                if (online) {
+                    icon = 'icon2-user';
+                    var iid = BRDashboard.invitee_id_by_user[user_id]
+                        , i = BRDashboard.invitees[iid];
+                    if (iid && i && i.role==="Host")
+                        icon = 'icon2-magic';
+                    }
+                b.find('#avatar_parent i.icon').removeClass('icon2-user icon2-phone').addClass(icon);
                 }
             function audio_action(action) {
                 var d = b.data('data').mids, mids = [];
@@ -752,39 +822,7 @@ peer_stream_id = stream_id;
             //b.find("button:contains('+')").show();
             b.find("#small").next().show();
             show_avatar(true);
-            update_webcam_buttons();
-            BRDashboard.subscribe(function(o) {
-                var sk = o.subkey.split(/-/, 3); // subkeys
-                if (sk.length<2)    /* this is an error */
-                    return;
-                var mechanism = sk[0];
-                var peer_salt = sk[1];
-                var target_salt = sk[2];
-                BRUtils.ass(peer_salt != target_salt);
-                if (target_salt) { /* targetted to a specific peer */
-                    if (target_salt === peer_stream_id) /* handle only if directed specifically at this box */
-                        webrtc_signal_in(peer_salt, o.data);
-                    return;
-                    }
-                if (
-                        (peer_salt!=BR.room.context.connection_salt)    /* not our own webcam */
-                        && (o.user_id==user_id)) {                      /* webcam for this box (user_id matches) */
-                    if (typeof(o.data)!=='undefined')
-                        peer_webcam_event(peer_salt, o.data);
-                    else
-                        peer_webcam_event(null);         /* stop viewing webcam */
-                    }
-                },'video');
-            BRDashboard.subscribe(function(o) {
-                /* user has gone offline, delete any associated video */
-                if (o.command==='del' && BRDashboard.online_2_user_map[o.connection_id]==user_id) {
-                    if (!my_broadcastable_stream_id /* not broadcasting */) {
-                        /* TODO what if a user is logged-in multiple times with different webcams? */
-                        peer_webcam_event(null);         /* stop viewing webcam */
-                        }
-                    }
-                },'online');
-
+//            update_webcam_buttons();
             /* === the somewhat complex interplay of talking / muting etc. etc. */
             var lmut_store = {};
             function lmut(listening,mute,talking,is_host){
@@ -890,6 +928,7 @@ peer_stream_id = stream_id;
                         if (o.data._online !== o.old_data._online) {
                             avatar_icon_online(o.data._online);
                             }
+/*
                         if (BRDashboard.connection_id) {
                             var salt = (BRDashboard.connection_id in o.data.connection_ids) ? BR.room.context.connection_salt : null;
                             if (salt!==my_broadcastable_stream_id) {
@@ -900,6 +939,7 @@ peer_stream_id = salt;
                             if (o.data._online!==o.old_data._online && o.id)
                                 b.find('#'+title_id).html(BRWidgets.user_name(o.data.connection_ids,o.id));
                             }
+*/
                         break;
                     }
                 if (!o.old_data._listeners && o.data._listeners)
@@ -909,29 +949,6 @@ peer_stream_id = salt;
                 });
             return b;
             }
-function _2delete_me(){
-        BRDashboard.subscribe(function(o){
-            var b = [];
-            switch(o.command) {
-                case 'mod':
-/*
-can't operate on individual connections as the last one will always overwrite...
-                    b = box_by_user(o.user_id);
-                    if (b.length && typeof(o.connection_id)!=='undefined') {
-                        b.find(s(o.user_id,'title')).html(BRWidgets.user_name([o.connection_id],o.user_id));
-                        if (BRDashboard.connection_id==o.connection_id) /* little bit of a hack *./
-                            b.find('#mute').next().next().show(); NOW wrong
-                        }
-*/
-                    break;
-                case 'del':
-/* need to add this, but not sure it's right ...
-                    b = box_by_user(o.user_id);
-                    b.remove(); */
-                    break;
-                }
-            },'online');
-}
 /* playing ...
         BRDashboard.subscribe(function(o){
             if (o.updated.is_live && BR.room.context.is_live) { /* we just went live *./
