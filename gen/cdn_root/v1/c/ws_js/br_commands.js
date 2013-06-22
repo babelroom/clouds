@@ -313,8 +313,8 @@ function fsAction(value)
         return BRCommands._doMove(depreciate_id, function(size,index) { return destRoom; });
     },
 
-    videoAction: function(mechanism, subkey,  value) {
-        var cmd = '-' + mechanism + '-' + subkey;
+    videoAction: function(subkey, value) {
+        var cmd = '-' + subkey;
         if (typeof(value)!=='undefined')
             cmd += ':' + value;
         BRCommands.put('video', {connection_id:BRDashboard.connection_id,uid:BR.room.context.user_id,cmd:cmd}, function()

@@ -23,14 +23,17 @@ fields: [
 # --- not so easy    {name:#mute_participants, type: #boolean, default_value: false, desc: "Mute participants on entry", title: {yes:"Non-hosts will be muted automatically on entry", no: "Non-hosts will not be automatically muted on entry"}},
 # --- not so easy    {name:#participants_can_unmute, type: #boolean, default_value: true, desc: "Can participants unmute themselves", title: {yes: "Participants can unmute themselves", no: "Only hosts can unmute participants"}, child_of:{name:#mute_participants}},
 
-
-
     {name:#wait_for_host, type: #boolean, default_value: false, desc: "Participants must wait for host to start", title: {yes: "Participants must wait for host to enter conference", no: "Participants can enter conference without host"}},
 #    {name:#example2, type: #boolean, disabled: true, default_value: false, desc: "She sells sea shells", title: {yes:"Yes", no: "No"}},
 #    {name:#example3, type: #boolean, disabled: false, default_value: true, desc: "Don't enable this", title: {yes:"Ja", no: "Nein"}},
     {name:#_, type: #fieldset_off},
+
     {name:#_, type: #fieldset_on, desc: "Permissions"},
     {name:#participants_can_call, type: #boolean, default_value: false, desc: "All participants can make calls", title: {yes: "All participants can make calls", no: "Only hosts can make calls"}},
+    {name:#_, type: #fieldset_off},
+
+    {name:#_, type: #fieldset_on, desc: "Experimental Features"},
+    {name:#peer_to_peer, type: #boolean, default_value: false, desc: "This is a WebRTC peer-to-peer conference", title: {yes: "WebRTC will be enabled. Centralized media control and Flash will be disabled.", no: "Centralized media control is enabled. Flash is enabled."}},
     {name:#_, type: #fieldset_off},
 ]}
 

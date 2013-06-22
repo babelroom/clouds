@@ -1,6 +1,8 @@
 
 .icon2-erase:before { content: '\232b'; } /* '⌫' */
+.icon2-pause:before { content: '\e824'; } /* '' */
 .icon2-stop:before { content: '\e81d'; } /* '' */
+.icon2-play:before { content: '\e825'; } /* '' */
 .icon2-star:before { content: '\e81a'; } /* '' */
 .icon2-th:before { content: '\e80a'; } /* '' */
 .icon2-cog-alt:before { content: '\e80f'; } /* '' */
@@ -11,6 +13,10 @@
 .icon2-volume-up:before { content: '\e00b'; } /* '' */
 .icon2-volume-off:before { content: '\e00c'; } /* '' */
 .icon2-webcam:before { content: '\e010'; } /* '' */
+.icon2-play-circled:before { content: '\e827'; } /* '' */
+.icon2-pause-circled:before { content: '\e826'; } /* '' */
+.icon2-eye-1:before { content: '\e82a'; } /* '' */
+.icon2-eye-off-1:before { content: '\e82b'; } /* '' */
 .icon2-th-large:before { content: '\e809'; } /* '' */
 .icon2-eye:before { content: '\e812'; } /* '' */
 .icon2-eye-off:before { content: '\e813'; } /* '' */
@@ -20,6 +26,8 @@
 .icon2-arrows-cw:before { content: '\e816'; } /* '' */
 .icon2-list:before { content: '\e81c'; } /* '' */
 .icon2-equalizer:before { content: '\e795'; } /* '' */
+.icon2-mic-off:before { content: '\e829'; } /* '' */
+.icon2-mic:before { content: '\e828'; } /* '' */
 .icon2-phone-squared:before { content: '\e806'; } /* '' */
 .icon2-tasks:before { content: '\e804'; } /* '' */
 .icon2-menu:before { content: '\e81b'; } /* '' */

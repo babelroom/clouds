@@ -7,7 +7,7 @@ DEP_gen_lobby_old_ie=lobby/app.css lobby/br_override.css css/widget.css recurly-
 DEP_gen_workspace=css/br_icons.css css/html5-doctor-reset.css css/babelroom.css jquery/css/ui.jqgrid.css css/widget.css
 #DEP_gen_workspace=jquery/css/ui.jqgrid.css css/widget.css
 #DEP_gen_workspace=jquery/css/ui.jqgrid.css css/babelroom.css css/widget.css
-DEP_gen_preminified=css/jquery-ui-1.10.1.custom.min.css css/font-awesome.min.css
+DEP_gen_preminified=css/jquery-ui-1.10.1.custom.min.css css/br_icons.css icon_foo_adj.css
 
 # in order of inclusion ... but pre-minified are separated out
 DEP_gen_jquery_base_min_js=

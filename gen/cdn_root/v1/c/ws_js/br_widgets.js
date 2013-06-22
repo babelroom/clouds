@@ -329,7 +329,7 @@ var BRWidgets = {
         sel.find('div .ui-jqgrid-bdiv').css('overflow-x','hidden');
 
         /* boxes */
-        var have_webrtc = typeof(wrapRTC)==="undefined" ? false :  wrapRTC.supported;    /* whether or not webrtc is included and supported */
+        var have_webrtc = typeof(wrapRTC)==="undefined" ? false :  !!wrapRTC.supported;    /* whether or not webrtc is included and supported */
 
         var have_flash = false;
         /* ref: http://stackoverflow.com/questions/8576999/how-to-detect-if-the-browser-support-flash */
@@ -343,8 +343,10 @@ var BRWidgets = {
             }
         else
             have_flash = (typeof navigator.plugins != "undefined" && typeof navigator.plugins["Shockwave Flash"] == "object");
-        var use_webrtc = have_webrtc/*tmp*/     /* whether we use webrtc (true) or flash (false) */
+        //var use_webrtc = have_webrtc/*tmp*/     /* whether we use webrtc (true) or flash (false) */
         var boxes_container = sel.find("div#boxes_container");
+        // console.log(BRDashboard.conference_access_config); -- currently too early to read this ...
+
         $j('#people_toolbar').find('#people_view').buttonset().change(function(e){
             var tiled = $j('#tile',sel).button().is(':checked');
             if (tiled) {
@@ -430,112 +432,306 @@ console.log( $j('#tile',sel) );
 
         /* video flash/webrtc can be complicated so we move the logic (think: controller) into this object to
         keep it distinct from ui elements (think: view).
-        this is also help future development of API
+        this also helps future development of API
         */
         function makeVideoController(opts) {
-            opts = jQuery.extend(opts, {
-                showBackground: function(){}
-                });
+            opts = jQuery.extend({
+                showBackground: function(){},
+                showControl: function(){},
+                updateBroadcasterIndicators: function(){},
+                autoStartViewer: true,
+                useWebRTC: false
+                }, opts);
 
 /// all this temp ....
 //                , flash_id = box_id + '_flash'
                 ;
-            /* salt of the connection for the webcam associated with this box.
-            If it's our connection salt then we could broadcast, otherwise we could view.
-            If it's null then we can neither broadcast nor view */
-            var broadcasters_salt = null
-                , on = false                /* actually broadcasting or viewing */
+            /* id of the connection for the (one of the webcams) associated with this box.
+            null - we are neither broadcasting nor viewing
+            our connection id - we are broadcasting
+            other connection id - we are viewing */
+            var peerKeys = {}     /* keys of available peer webcams for this box */
+                , peerMetadata = {}
+                , videoFrame = null
+                , statusElement = null
+                , videoElement = null
+                , webrtc_data = null
+                , callState = 'offline'
+                //, autoStartViewerOnce = opts.autoStartViewer -- actually it's problematic
+                , autoStartViewerOnce = false
+                , indicators = {peerCount: 0, broadcasting: false, md:{}}
                 ;
+            /* non-state related temporary variables */
+            var timer = null
+                , have_video_capability = (opts.useWebRTC ? have_webrtc : have_flash)
+                ;
+            if (opts.rootElement) {
+                opts.rootElement.append('<div id="video_parent"><div></div><video width="100%" height="100%" autoplay="autoplay" /></div>');
+                videoFrame = opts.rootElement.find('div#video_parent').hide();
+                statusElement = videoFrame.find('div:first-child');
+                videoElement = videoFrame.find('video').hide();
+                }
 /*
             var my_broadcastable_stream_id = null;  // change to some sort of bool
             var peer_stream_id = null;              // change name to box_source_connection_salt or something ..
-            var webrtc_data = null;
             var broadcasting = false;
             var viewing = false;
 // all this temp ....
 */
 
-            function webrtc_open_webcam(stream_id) {
-                /* under dev */
-                wrapRTC.openWebcam({
-                    element: b.find('#video_parent > video').get(0),
-                    onSupportFailure: function(msg) { console.log(1,msg); },
-                    onError: function(code) { console.log(2,code); },
-/*                    signalOut: function(obj) { //console.log(3,obj,stream_id);
-console.log(obj);
-                        }, */
-                    setStream: function(stream) {
-                        webrtc_data = {localStream: stream, pcs:{}};
-//                        ... BRCommands.videoAction('webrtc', stream_id + '-' + (webrtc_idx++), JSON.stringify(obj));
-                        BRCommands.videoAction('webrtc', stream_id, ''/*==true*/);
-                        broadcasting = true;
-                        update_webcam_buttons();
+            function ass(bool) {    /* assert */
+                if (!bool && console && console.log) {
+                    console.log('assertion failure');
+                    undefined.throw_trace;
+                    }
+                }
+            function updateStatus(msg) {
+                statusElement && statusElement.html(msg);
+                }
+            function broadcaster() {
+                return (callState==='broadcastable' || callState==='broadcasting');
+                }
+            function openingVideo(progress) {
+                if (broadcaster)
+                    updateStatus('Gathering ICE candidates...' + (progress? (' ['+progress+']') :''));
+                }
+            function showFrame(show) {
+                if (videoFrame) {
+                    if (show || typeof(show)==='undefined') {
                         opts.showBackground(false);
-                        b.find('#video_parent').show();
+                        showVideoElement(false);
+                        videoFrame.show();
+                        }
+                    else {
+                        videoFrame.hide();
+                        opts.showBackground(true);
+                        }
+                    }
+                }
+            function showVideoElement(show) {
+//console.log(show);
+                if (videoElement) {
+                    if (show || typeof(show)==='undefined') {
+                        statusElement && statusElement.hide();
+                        setTimeout(function(){videoElement.show();},250);    /* stops screen flashing to full square.. */
+                        }
+                    else {
+                        videoElement.hide();
+                        statusElement && statusElement.show();
+                        }
+                    }
+                }
+            function showVideoAsMD(md) {
+                if (md.video) {
+                    showVideoElement();
+                    }
+                else {
+                    showVideoElement(false);
+                    updateStatus('Video stream paused');
+                    }
+                }
+            function updateMetadata(peer_key) {
+                /* metadata from broadcaster */
+                var md = peerMetadata[peer_key];
+                if (!md)
+                    return;
+                if (indicators.md.video!==md.video) {
+                    showVideoAsMD(md);
+                    }
+                indicators.md = md;
+                opts.updateBroadcasterIndicators(indicators);
+                }
+            function state(new_state) {
+                switch(new_state) {
+                    case 'offline':
+                        opts.showControl('view',false);
+                        opts.showControl('unview',false);
+                        showFrame(false);
+                        break;
+                    case 'available':
+                        opts.showControl('view', true, have_video_capability);
+                        opts.showControl('unview',false);
+                        showFrame(false);
+                        if (autoStartViewerOnce) {
+                            autoStartViewerOnce = false;
+                            start_webcam_view();
+                            }
+                        break;
+                    case 'br_callme':
+                        showFrame(true);
+                        updateStatus('Contacting peer...');
+                        timer = setTimeout(function(){
+                                timer = null;
+                                if (callState==='br_callme') {
+                                    webrtc_data = null;
+                                    state('available');
+                                    }
+                                }, 10000);
+                        opts.showControl('view',false);
+                        opts.showControl('unview',true);
+                        break;
+                    case 'answering':
+                        if (timer!==null) {
+                            clearTimeout(timer);
+                            timer = null;
+                            }
+                        //openingVideo(0);
+                        break;
+                    case 'viewing':
+                        /*showVideoElement(); -- no longer doing this as prior updateMetadata() will do it properly & consider if video is already paused
+                                                on initial connection */
+                        showVideoAsMD(indicators.md);
+                        break;
+                    case 'access_denied':
+                        timer = setTimeout(function(){
+                                timer = null;
+                                if (callState==='access_denied') {
+                                    state('broadcastable');
+                                    }
+                                }, 2000);
+                        showFrame();
+                        updateStatus('Camera / Microphone access denied');
+                        break;
+                    case 'broadcastable':
+                        switch(callState) {
+                            case 'available': opts.showControl('view',false); break;
+                            }
+                        opts.showControl('start',true);
+                        opts.showControl('stop',false);
+                        opts.showControl('mute',false);
+                        opts.showControl('unmute',false);
+                        opts.showControl('video_on',false);
+                        opts.showControl('video_off',false);
+                        showFrame(false);
+                        indicators.broadcasting = false;
+                        indicators.md = {};
+                        opts.updateBroadcasterIndicators(indicators);
+                        break;
+                    case 'broadcasting':
+                        opts.showControl('start',false);
+                        opts.showControl('stop',true);
+                        opts.showControl('mute',true);
+                        opts.showControl('video_off',true);
+                        showFrame();
+                        showVideoElement();
+                        indicators.broadcasting = true;
+                        opts.updateBroadcasterIndicators(indicators);
+                        break;
+                    default: return;
+                    }
+                callState = new_state;
+                }
+            function make_key() {
+                return Math.random().toString(36).substring(2);
+                }
+            function webrtc_open_webcam() {
+                /* broadcaster */
+                wrapRTC.openWebcam({
+                    element: videoElement.get(0),
+                    onSupportFailure: function(msg) { console.log(1,msg); /*TODO*/ },
+                    onError: function(code) {
+                        switch(code) {
+                            case 1: /* camera / microphone access denied */
+                                state('access_denied');
+                                break;
+                            default:
+                            }
+                        },
+                    setStream: function(stream) {
+/*
+-- doesn't work
+console.log(stream);
+stream.onmute=function(event) {
+console.log('mute');
+    opts.showControl('mute',false);
+    opts.showControl('unmute',true);
+}
+stream.onunmute=function(event) {
+console.log('unmute');
+    opts.showControl('mute',true);
+    opts.showControl('unmute',false);
+}
+*/
+                        webrtc_data = {key: make_key(), stream: stream, pcs:{}};
+                        BRCommands.videoAction('webrtc-' + webrtc_data.key, '');
+                        state('broadcasting');
                         }
                     });
                 }
-            function webrtc_signalOut(peer_salt, msg) {
-                BRCommands.videoAction('webrtc', BR.room.context.connection_salt + '-' + peer_salt, JSON.stringify(msg));
+            function webrtc_signalOut(key, peer_key, msg) {
+                BRCommands.videoAction('webrtc-' + key + '-' + peer_key, JSON.stringify(msg));
                 }
-            function webrtc_signalIn(peer_salt, msg) {
+            function webrtc_signalIn(peer_connection_id, peer_key, msg) {
 //console.log('signal',msg);
+                ass(webrtc_data);
                 switch(msg.type) {
                     case 'br_callme':
-                        wrapRTC.callPeer(webrtc_data.localStream, {
-                            setPC: function(pc) { webrtc_data.pcs[peer_salt] = pc; },
-                            signalOut: function(msg) { webrtc_signalOut(peer_salt, msg); }
+                        wrapRTC.callPeer(webrtc_data.stream, {
+                            key: webrtc_data.key,
+                            peer_key: peer_key,
+                            setPC: function(pc) { if (webrtc_data){webrtc_data.pcs[this.peer_key]=pc;} },
+                            signalOut: function(msg) { webrtc_signalOut(this.key, this.peer_key, msg); }
                             });
                         break;
                     case 'offer':
-                        (BRUtils.ass(!webrtc_data));
-                        webrtc_data = {pcs:{}};
-b.find('#video_parent').show();
-opts.showBackground(false);
                         wrapRTC.answer(msg, {
-                            element: b.find('#video_parent > video').get(0),
-                            setPC: function(pc) { webrtc_data.pcs[peer_salt] = pc; },
-                            signalOut: function(new_msg) { webrtc_signalOut(peer_salt, new_msg); }
+                            key: webrtc_data.key,
+                            peer_key: peer_key,
+                            element: videoElement.get(0),
+                            setPC: function(pc) { if (webrtc_data){webrtc_data.pcs[this.peer_key]=pc;} },
+                            setStream: function(stream) {
+                                if (!webrtc_data || webrtc_data.key!==this.key) return;
+                                webrtc_data.stream = stream;
+                                },
+                            signalOut: function(new_msg) {
+                                if (!webrtc_data || webrtc_data.key!==this.key) return;
+                                state('answering');
+                                webrtc_signalOut(this.key, this.peer_key, new_msg);
+                                },
+                            connected: function() { if (webrtc_data && webrtc_data.key===this.key) { updateMetadata(peer_key); state('viewing'); } },
+                            disconnected: function() { webrtc_data && webrtc_data.key===this.key && stop_webcam_view(); }
                             });
                         break;
                     case 'answer':
-                        wrapRTC.setRemoteDescription(webrtc_data.pcs[peer_salt], msg);
+                        if (webrtc_data.pcs[peer_key]) {
+                            wrapRTC.setRemoteDescription(webrtc_data.pcs[peer_key], msg);
+                            indicators.peerCount++;
+                            opts.updateBroadcasterIndicators(indicators);
+                            peerKeys[peer_connection_id] = peer_key;
+                            }
                         break;
                     case 'candidate':
-                        wrapRTC.candidate(webrtc_data.pcs[peer_salt], msg);
+                        if (webrtc_data.pcs[peer_key]) {
+                            webrtc_data.candidate_count = webrtc_data.candidate_count + 1;
+                            openingVideo(webrtc_data.candidate_count);
+//console.log(webrtc_data.candidate_count);
+                            wrapRTC.candidate(webrtc_data.pcs[peer_key], msg);
+                            }
                         break;
                     }
                 }
-            function webrtc_stop_webcam() {
-//console.log(webrtc_data);
+            function webrtc_stop_pc() {
                 for(var i in webrtc_data.pcs) 
                     if (webrtc_data.pcs.hasOwnProperty(i)) 
                         wrapRTC.stopConnection(webrtc_data.pcs[i]);
-                //webrtc_data.pcs = {}; ---
-//console.log(webrtc_data);
-                wrapRTC.stop(b.find('#video_parent > video').get(0), webrtc_data.localStream);
-                b.find('#video_parent').hide();
+                if (typeof(webrtc_data.stream)!=='undefined')     /* because we may have initiated estream negotiation but not attached stream */
+                    wrapRTC.stop(videoElement.get(0), webrtc_data.stream);
+                showVideoElement(false);
+                BRCommands.videoAction('webrtc-'+webrtc_data.key, undefined/*must be undefined for value*/);
                 webrtc_data = null;
-//return false;
                 return true;
                 }
-            function webrtc_signal_in(peer_salt, data) {
-//                BRUtils.ass(webrtc_data && webrtc_data.localStream);
-//                if (webrtc_data && webrtc_data.localStream) {
-                    if (typeof(data)!=='undefined') {
-                        try {
-                            var obj = JSON.parse(data);
-                            webrtc_signalIn(peer_salt, obj);
-                            }
-                        catch(e) { }
+            function webrtc_signal_in(peer_connection_id, peer_key, data) {
+                if (typeof(data)!=='undefined') {
+                    try {
+                        var obj = JSON.parse(data);
+                        webrtc_signalIn(peer_connection_id, peer_key, obj);
                         }
-                    else {
-                        /* they stopped viewing TODO us */
-                        }
-//                    }
+                    catch(e) { }
+                    }
                 }
 
-            function do_flash(broadcast, stream_id) {
+            function do_flash(broadcast, stream_salt) {
                 b.find('#avatar_parent').append('\
 <div id="'+flash_id+'" style="display: none;">\
 <h1>You need the Adobe Flash Player for this demo, download it by clicking the image below.</h1>\
@@ -544,7 +740,7 @@ opts.showBackground(false);
 ');
                 var flashvars = {
                     'csMediaServerURI':  BR.room.context.media_server_uri,
-                    'csStreamId': stream_id
+                    'csStreamId': stream_salt
                     };
                 var params = {
                     //bgcolor: '#282828'
@@ -554,12 +750,12 @@ opts.showBackground(false);
                     //flash_id, "214", "160", "8.0.0", "expressInstall.swf", flashvars, params, attributes);  /* returns 'undefined' */
                     flash_id, "100%", "100%", "8.0.0", "expressInstall.swf", flashvars, params, attributes);  /* returns 'undefined' */
                 if (broadcast)
-                    BRCommands.videoAction('flash', stream_id, ''/*==true*/);
+                    BRCommands.videoAction('flash', stream_salt);
                 }
             function do_stop() {
-                if (use_webrtc) {
+                if (opts.useWebRTC) {
                     if (webrtc_data)
-                        return webrtc_stop_webcam();
+                        return webrtc_stop_pc();
                     }
                 else {
                     var flash_elem = b.find('#'+flash_id);
@@ -568,129 +764,217 @@ opts.showBackground(false);
                         return true;
                         }
                     else    /* how would be get here? */
-                        BRUtils.ass(false);
+                        ass(false);
+                    BRCommands.videoAction('flash', undefined/*must be undefined for value*/);
                     }
                 return false;
                 }
             function start_webcam_broadcast() {
-                if (!my_broadcastable_stream_id) return;
-                if (use_webrtc)
-                    webrtc_open_webcam(my_broadcastable_stream_id);
+                if (callState!=='broadcastable')
+                    return;
+                opts.showControl('start',true,false);
+                if (opts.useWebRTC)
+                    webrtc_open_webcam();
                 else  {
                     do_flash(true, my_broadcastable_stream_id);
-                    broadcasting = true;
-                    update_webcam_buttons();
-                    opts.showBackground(false);
+                    state('broadcasting');
                     }
                 }
             function stop_webcam_broadcast() {
                 if (!do_stop()) return;
-                opts.showBackground(true);
+                showFrame(false);
                 /* notify we've stopped broadcasting */
-                BRCommands.videoAction(use_webrtc ? 'webrtc' : 'flash', my_broadcastable_stream_id, undefined/*must be undefined for value*/);
-                broadcasting = false;
-                update_webcam_buttons();
+                //BRCommands.videoAction((use_webrtc ? 'webrtc' : 'flash'), undefined/*must be undefined for value*/);
+                state('broadcastable');
+                }
+            function pick_a_peer() {
+                /* (almost) a hack here -- choose the highest connection id value (most recent connection) */
+                var max = 0;
+                for(var i in peerKeys)
+                    if (peerKeys.hasOwnProperty(i)) {
+                        var v = parseInt(i, 10);
+                        if (v>max)
+                            max = v;
+                        }
+                return max ? peerKeys[max/*toString() -- not needed*/] : null;
                 }
             function start_webcam_view() {
-                if (use_webrtc)
-                    webrtc_signalOut(broadcasters_salt, {type: 'br_callme'});
+                if (opts.useWebRTC) {
+                    ass(!webrtc_data);
+                    state('br_callme');
+                    webrtc_data = {key: make_key(), pcs:{}, candidate_count: 0};
+                    webrtc_signalOut(webrtc_data.key, pick_a_peer(), {type: 'br_callme'});
+                    }
                 else  {
-                    do_flash(false, broadcasters_salt);
-                    viewing = true;
-                    update_webcam_buttons();
-                    opts.showBackground(false);
+                    do_flash(false, pick_a_peer());
+//                    viewing = true;
+                    state('viewing');
+                    showFrame();
                     }
                 }
             function stop_webcam_view() {
                 if (!do_stop()) return;
-                opts.showBackground(true);
-                viewing = false;
-                update_webcam_buttons();
+                indicators.md = {};
+                opts.updateBroadcasterIndicators(indicators);
+                if (opts.peerCount===0)
+                    state('offline');
+                else
+                    state('available');
                 }
-            function peer_webcam_event(stream_id, data) {
-                if (stream_id) {
-                    if (!peer_stream_id) {
-                        peer_stream_id = stream_id;
-                        update_webcam_buttons();
+            function peer_webcam_onoff(peer_connection_id, peer_user_id, peer_key, value) {
+//console.log(peer_connection_id, peer_key, value);
+                if (typeof(peer_key)==='undefined' || typeof(value)==='undefined') {   /* peer went away */
+                    if (peer_connection_id in peerKeys) {
+                        if (peer_key)
+                            delete peerMetadata[peer_key];
+                        else if (peerKeys[peer_connection_id])
+                            delete peerMetadata[peerKeys[peer_connection_id]];
+                        delete peerKeys[peer_connection_id];
+                        indicators.peerCount--;
+                        ass(indicators.peerCount>=0);
+//console.log(indicators.peerCount);
+                        if (callState==='broadcastable' || callState==='broadcasting') {
+                            if (webrtc_data) {
+                                if (peer_key in webrtc_data.pcs)    /* because we may have inited estream data, but not yet established connection */
+                                    wrapRTC.stopConnection(webrtc_data.pcs[peer_key]);
+                                }
+                            opts.updateBroadcasterIndicators(indicators);
+                            }
+                        else
+                            stop_webcam_view();
+                        if (!indicators.peerCount && callState==='available') {
+                            state('offline');
+                            }
                         }
-peer_stream_id = stream_id;
                     }
                 else {
-                    /* kill any window ... */
-                    do_stop()
-                    peer_stream_id = null;
-                    viewing = false;
-                    update_webcam_buttons();
+                    if (peer_user_id==opts.user_id) { /* (broadcasters) webcam was added */
+                        if (!(peer_connection_id in peerKeys)) {
+                            peerKeys[peer_connection_id] = peer_key;
+                            indicators.peerCount++;
+                            }
+                        if (callState==='offline') {
+                            state('available');
+                            }
+                        }
+                    if (value.length) {
+                        /* track info ... */
+                        try {
+                            var obj = JSON.parse(value);
+                            ass(peer_key.length);
+                            peerMetadata[peer_key] = obj;
+                            if (webrtc_data && webrtc_data.pcs[peer_key])
+                                updateMetadata(peer_key);
+                            }
+                        catch(e) {}
+                        }
+                    }
+                }
+
+            /* --- intercept for mute/unmute to peer via webrtc --- */
+            function mediaChannelAction(action, defaultFn) {
+                if (opts.useWebRTC && callState==='broadcasting') {
+                    if (webrtc_data && webrtc_data.stream && wrapRTC.mediaChannelAction(webrtc_data.stream, action)) {
+                        switch(action) {
+                            case 'mute':
+                                opts.showControl('mute',false);
+                                opts.showControl('unmute',true);
+                                indicators.md.audio = false;
+                                break;
+                            case 'unmute':
+                                opts.showControl('mute',true);
+                                opts.showControl('unmute',false);
+                                indicators.md.audio = true;
+                                break;
+                            case 'video_off':
+                                opts.showControl('video_on',true);
+                                opts.showControl('video_off',false);
+                                indicators.md.video = false;
+                                break;
+                            case 'video_on':
+                                opts.showControl('video_on',false);
+                                opts.showControl('video_off',true);
+                                indicators.md.video = true;
+                                break;
+                            }
+                        opts.updateBroadcasterIndicators(indicators);
+                        BRCommands.videoAction('webrtc-' + webrtc_data.key, JSON.stringify(indicators.md));
+                        }
+                    }
+                else
+                    return defaultFn && defaultFn(action);
+                }
+            function checkCanBroadcast() {
+                /* we only get here if connection_id indicates we could be a broadcaster */
+                switch(callState) {
+                    case 'broadcastable':
+                    case 'broadcasting':
+                        return;
+                    default:
+                        state('broadcastable');
                     }
                 }
             BRDashboard.subscribe(function(o) {
                 var sk = o.subkey.split(/-/, 3); // subkeys
-                if (sk.length<2)    /* this is an error */
+                if (sk.length<1)    /* this is an error */
                     return;
                 var mechanism = sk[0];
-                var event_peer_salt = sk[1];
-                var target_salt = sk[2];
-                BRUtils.ass(event_peer_salt != target_salt);
-                if (target_salt) { /* targeted for a specific peer */
-                    if (target_salt === peer_stream_id) /* handle only if directed specifically at this box */
-                        webrtc_signal_in(event_peer_salt, o.data);
+                var from_key = sk[1];
+                var to_key = sk[2];
+                if (to_key) { /* targeted for a specific peer */
+                    if (
+                            webrtc_data     &&
+                            to_key === webrtc_data.key)                             /* webcam for this box (user_id matches) */
+                        webrtc_signal_in(o.connection_id, from_key, o.data);
                     return;
                     }
-                if (
-                        (event_peer_salt!=BR.room.context.connection_salt)  /* not our own webcam */
-                        && (o.user_id==user_id)) {                          /* webcam for this box (user_id matches) */
-                    if (typeof(o.data)!=='undefined')
-                        peer_webcam_event(event_peer_salt, o.data);
-                    else
-                        peer_webcam_event(null);         /* stop viewing webcam */
+                if (o.connection_id != BRDashboard.connection_id) {                 /* not our own webcam */
+                    peer_webcam_onoff(o.connection_id, o.user_id, from_key, o.data);
                     }
                 },'video');
             BRDashboard.subscribe(function(o) {
                 /* user has gone offline, delete any associated video */
-                if (o.command==='del' && BRDashboard.online_2_user_map[o.connection_id]==opts.user_id) {
-                    if (!my_broadcastable_stream_id /* not broadcasting */) {
-                        /* TODO what if a user is logged-in multiple times with different webcams? */
-                        peer_webcam_event(null);         /* stop viewing webcam */
-                        }
+                if (o.command==='del' && o.connection_id!=/*obviously this can't happen but include for completeness*/BRDashboard.connection_id) {
+                    peer_webcam_onoff(o.connection_id);
                     }
                 },'online');
 
+            /* --- */
             return {
-                isVideoOn: function() { return on; }
+                isVideoOn: function() { return (callState==='viewing')||(callState==='broadcasting'); },
+                setMe: checkCanBroadcast,
+                startBroadcast: start_webcam_broadcast,
+                stopBroadcast: stop_webcam_broadcast,
+                startView: start_webcam_view,
+                stopView: stop_webcam_view,
+                mediaChannelAction: mediaChannelAction
                 };
             }
         function make_box(user_id) {
-
-// purge any video related stuff
             var deferred_src = {};
             var box_id = 'box_' + user_id
                 , title_id = box_id + '_title'
-                , dtmf_id = box_id + '_dtmf__not_currently_used'
-//                , flash_id = box_id + '_flash'
+                , rtitle_id = box_id + '_rtitle'
                 ;
-//            var my_broadcastable_stream_id = null;  // change to some sort of bool
-//            var peer_stream_id = null;              // change name to box_source_connection_salt or something ..
-//            var webrtc_data = null;
-//            var webrtc_idx = 1;
-//            var broadcasting = false;
-//            var viewing = false;
 
             /* margin here and "10" in sort_boxes() is play */
             boxes_container.append('\
 <div id="'+box_id+'" class="br-person-box" style="margin: 4px; display: none;">\
-<div class="ui-dialog-titlebar ui-widget-header ui-corner-top ui-helper-clearfix"><div style="float: left; padding-left: 5px;"><span id="'+title_id+'" style="overflow: hidden;">&nbsp;</span></div><div style="float: right; padding-right: 5px;"><!-- this is good, but still working on it ... <i class="icon icon2-resize-full br-mini-button"></i><i id="foof" class="icon icon2-menu br-mini-button"></i>--><span id="'+dtmf_id+'"></span></div><div style="clear: all;"></div></div>\
+<div class="ui-dialog-titlebar ui-widget-header ui-corner-top ui-helper-clearfix"><div style="float: left; padding-left: 5px;"><span id="'+title_id+'" style="overflow: hidden;">&nbsp;</span></div><div style="float: right; padding-right: 5px;"><!-- this is good, but still working on it ... <i class="icon icon2-resize-full br-mini-button"></i><i id="foof" class="icon icon2-menu br-mini-button"></i>--><span id="'+rtitle_id+'"></span></div><div style="clear: all;"></div></div>\
 <div class="ui-widget-content">\
 <div id="avatar_parent">\
-    <div id="video_parent" style="display: none;">\
+    <!--<div id="video_parent" style="display: none;">\
         <video width="100%" height="100%" autoplay="autoplay" />\
-    </div>\
+    </div>-->\
     <div id="avatar_medium" style="display: none;"><img id="avatar_medium_img"><i class="icon icon2-phone" style="font-size: 8em;"></i></div>\
     <div id="avatar_large" style="display: none;"><img id="avatar_large_img"><i class="icon icon2-phone" style="font-size: 16em;"></i></div>\
 </div>\
 <span class="u-widget-header u-corner-all" style="padding: 10px 4px;">\
     <button id="talking" title="Audio Indicator">T</button>\
+    <button id="video_off" title="Pause Video">P</button>\
+    <button id="video_on" title="Resume Video">R</button>\
     <button id="mute" title="Mute">M</button>\
-    <button title="Unmute">U</button>\
+    <button id="unmute" title="Unmute">U</button>\
     <button id="start_webcam" title="Start My Webcam">B</button>\
     <button id="stop_webcam" title="Stop My Webcam">C</button>\
     <button id="start_video" title="View Webcam">S</button>\
@@ -704,7 +988,6 @@ peer_stream_id = stream_id;
             var b = box_by_user(user_id);
             //b.draggable({containment: "parent", scroll: false, stack: ".br-person-box", /*opacity: 0.5, /*helper: "clone",*./ grid: [100,100]*/});
             b.draggable({containment: "document", scroll: false, stack: ".br-person-box"/*, opacity: 0.5, /*helper: "clone",*./ grid: [100,100]*/});
-
 
 /*
 // refactor this to actually update as per instructions 
@@ -734,13 +1017,49 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                 }
 */
 
-
-
-
+            var vc = makeVideoController({
+                user_id: user_id,
+                rootElement: b.find('#avatar_parent'),
+                showBackground: show_avatar,
+                showControl: function(ctrl,show,enabled) {
+                    id = null;
+                    switch(ctrl) {
+                        case 'start': id = '#start_webcam'; break;
+                        case 'stop': id = '#stop_webcam'; break;
+                        case 'view': id = '#start_video'; break;
+                        case 'unview': id = '#stop_video'; break;
+                        case 'mute': id = '#mute'; break;
+                        case 'unmute': id = '#unmute'; break;
+                        case 'video_on': id = '#video_on'; break;
+                        case 'video_off': id = '#video_off'; break;
+                        }
+                    if (!id || !((id=b.find(id)).length)) return;
+                    (show?id.show():id.hide());
+                    id.button((enabled!==false)?"enable":"disable");
+                    },
+                updateBroadcasterIndicators: function(indicators) {
+                    var rtitle = '';
+                    if (indicators.md.video===false)
+                        rtitle += '<i class="icon2-pause-circled" style="font-size: 0.9em;"></i> ';
+                    if (indicators.md.audio===false)
+                        rtitle += '<i class="icon2-mic-off" style="font-size: 0.9em"> </i> ';   /* font-size is a temp. hack as not sure why chrome 
+                                                                                                alters font-height +1px when icon added */
+                    if (indicators.broadcasting) {
+                        if (indicators.peerCount) {
+                            rtitle += indicators.peerCount.toString() + ' viewer';
+                            if (indicators.peerCount>1)
+                                rtitle += 's';
+                            }
+                        }
+                    b.find('#'+rtitle_id).html(rtitle);
+                    },
+                autoStartViewer: true,  /* automatically startup webcam viewers */
+                useWebRTC: BRDashboard.conference_access_config && BRDashboard.conference_access_config.peer_to_peer
+                });
 
             function show_avatar(show) {
                 if (show===undefined) /* check if video is on */
-                    show = vc.isVideoOn();
+                    show = !(vc.isVideoOn());
                 if (show) {
                     var av = $j((b.hasClass("br-person-big-box")?'#avatar_large':'#avatar_medium'),b)
                         img = $j('img',av);
@@ -753,12 +1072,6 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                 else
                     $j('#avatar_medium, #avatar_large',b).hide();
                 }
-
-            var vc = makeVideoController({
-                user_id: user_id,
-                video_parent: b.find('#avatar_parent'),
-                showBackground: show_avatar
-                });
 
             function avatar_icon_online(online) {
                 var icon = 'icon2-phone';
@@ -793,19 +1106,20 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                     }
                 show_avatar(undefined);
                 }
+
+            /* --- */
             b.find('#mute').parent().buttonset();
             b.find('#talking')
                 //.button({label: '<i class="icon2-mute"></i>'}).show().next()
                 .button({label: '<i class=""></i>'}).show().next()
-                .button({label: '<i class="icon2-mic-off"></i>'}).click(function(){ audio_action('mute'); }).next()
-                .button({label: '<i class="icon2-mic"></i>'}).click(function(){ audio_action('unmute'); }).next()
-/*                .button({text: false, icons: { primary: "ui-icon-volume-on" }}).click(function(){ audio_action('mute'); }).next()
-                .button({text: false, icons: { primary: "ui-icon-volume-off" }}).click(function(){ audio_action('unmute'); }).next() */
-                //.button({ text: false, icons: { primary: "ui-icon-person" }}).click(function(){ WRONG,webcam_action(b); }).next()
-                .button({label: '<i class="icon icon2-videocam"></i>'}).click(function(){ start_webcam_broadcast(); }).next()
-                .button({label: '<i class="icon icon2-stop"></i>'}).click(function(){ stop_webcam_broadcast(); }).next()
-                .button({label: '<i class="icon icon2-eye"></i>'}).click(function(){ start_webcam_view(); }).next()
-                .button({label: '<i class="icon icon2-eye-off"></i>'}).click(function(){ stop_webcam_view(); }).next()
+                .button({label: '<i class="icon2-pause-circled"></i>'}).click(function(){ vc.mediaChannelAction('video_off'); }).next()
+                .button({label: '<i class="icon2-play-circled"></i>'}).click(function(){ vc.mediaChannelAction('video_on'); }).next()
+                .button({label: '<i class="icon2-mic-off"></i>'}).click(function(){ vc.mediaChannelAction('mute',audio_action); }).next()
+                .button({label: '<i class="icon2-mic-1"></i>'}).click(function(){ vc.mediaChannelAction('unmute',audio_action); }).next()
+                .button({label: '<i class="icon icon2-videocam"></i>'}).click(function(){ vc.startBroadcast(); }).next()
+                .button({label: '<i class="icon icon2-stop"></i>'}).click(function(){ vc.stopBroadcast(); }).next()
+                .button({label: '<i class="icon icon2-eye-1"></i>'}).click(function(){ vc.startView(); }).next()
+                .button({label: '<i class="icon icon2-eye-off-1"></i>'}).click(function(){ vc.stopView(); }).next()
                 //.button({ text: false, icons: { primary: "ui-icon-circle-minus" }}).click(function(){ resize(false); }).next()
                 .button({label: '<i class="icon icon2-resize-small"></i>'}).click(function(){ resize(false); }).next()
                 //.button({ text: false, icons: { primary: "ui-icon-circle-plus" }}).click(function(){ resize(true); }).next()
@@ -822,7 +1136,7 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
             //b.find("button:contains('+')").show();
             b.find("#small").next().show();
             show_avatar(true);
-//            update_webcam_buttons();
+
             /* === the somewhat complex interplay of talking / muting etc. etc. */
             var lmut_store = {};
             function lmut(listening,mute,talking,is_host){
@@ -929,17 +1243,21 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                             avatar_icon_online(o.data._online);
                             }
 /*
+*/
                         if (BRDashboard.connection_id) {
+                            if (BRDashboard.connection_id in o.data.connection_ids)
+                                vc.setMe();
+/*
                             var salt = (BRDashboard.connection_id in o.data.connection_ids) ? BR.room.context.connection_salt : null;
                             if (salt!==my_broadcastable_stream_id) {
                                 my_broadcastable_stream_id = salt;
 peer_stream_id = salt;
                                 update_webcam_buttons();
                                 }
+*/
                             if (o.data._online!==o.old_data._online && o.id)
                                 b.find('#'+title_id).html(BRWidgets.user_name(o.data.connection_ids,o.id));
                             }
-*/
                         break;
                     }
                 if (!o.old_data._listeners && o.data._listeners)
@@ -1913,7 +2231,7 @@ problems getting this to center correctly
             }
         $j('#'+id+'_mute').button("option", "label", '<i class="pull-left icon2-mic-off"></i> Mute').click(function(){BRCommands.conferenceSelectedAction('mute');})
 //        $j('#'+id+'_mute').button("option", "icons", {primary:'ui-icon-volume-off'}).click(function(){BRCommands.conferenceSelectedAction('mute');})
-        $j('#'+id+'_unmute').button("option", "label", '<i class="pull-left icon2-mic"></i> Unmute').click(function(){BRCommands.conferenceSelectedAction('unmute');})
+        $j('#'+id+'_unmute').button("option", "label", '<i class="pull-left icon2-mic-1"></i> Unmute').click(function(){BRCommands.conferenceSelectedAction('unmute');})
 //        $j('#'+id+'_unmute').button("option", "icons", {primary:'ui-icon-volume-on'}).click(function(){BRCommands.conferenceSelectedAction('unmute');})
         $j('#'+id+'_pa').click(function(){BRCommands.conferenceSelectedAction('pa');})
         $j('#'+id+'_unpa').click(function(){BRCommands.conferenceSelectedAction('unpa');})

@@ -148,9 +148,21 @@
       "src": "fontawesome"
     },
     {
+      "uid": "ce06b5805120d0c2f8d60cd3f1a4fdb5",
+      "css": "play",
+      "code": 59429,
+      "src": "fontawesome"
+    },
+    {
       "uid": "b624a1e512819d410ddbee84e6918b9d",
       "css": "stop",
       "code": 59421,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "0b28050bac9d3facf2f0226db643ece0",
+      "css": "pause",
+      "code": 59428,
       "src": "fontawesome"
     },
     {
@@ -232,9 +244,33 @@
       "src": "iconic"
     },
     {
+      "uid": "858e967d1c67608546add6beebade5b3",
+      "css": "mic",
+      "code": 59432,
+      "src": "mfglabs"
+    },
+    {
+      "uid": "5dc427ad9f0644447ca5292911c378f1",
+      "css": "mic-off",
+      "code": 59433,
+      "src": "mfglabs"
+    },
+    {
       "uid": "f274acf461473025f0d75518b653ec14",
       "css": "webcam",
       "code": 57360,
+      "src": "elusive"
+    },
+    {
+      "uid": "e45a3da2ebde8bc8e30a873f3bd51f30",
+      "css": "eye-1",
+      "code": 59434,
+      "src": "elusive"
+    },
+    {
+      "uid": "d218294e6f9f7191f6b0b3d1ff6239ff",
+      "css": "eye-off-1",
+      "code": 59435,
       "src": "elusive"
     },
     {
@@ -247,6 +283,18 @@
       "uid": "012ff5762ccb18c16bdfdd6baf187406",
       "css": "volume-up",
       "code": 57355,
+      "src": "elusive"
+    },
+    {
+      "uid": "fc006ff27e50163bdec3a7588226171b",
+      "css": "play-circled",
+      "code": 59431,
+      "src": "elusive"
+    },
+    {
+      "uid": "8710d1e404dcb3a55b3ab97f797355b5",
+      "css": "pause-circled",
+      "code": 59430,
       "src": "elusive"
     }
   ]
