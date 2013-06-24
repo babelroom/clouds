@@ -5,7 +5,7 @@
  
 
 <!-- PRODUCTION -->
-<link href="//cdn.babelroom.com/cdn/v1/c/css/gen_workspace.css?20130527" rel="stylesheet" type="text/css" />
+<link href="//cdn.babelroom.com/cdn/v1/c/css/gen_workspace.css?2013062300" rel="stylesheet" type="text/css" />
 <!--
 -->
 <!--DEVEL dev -->
@@ -13,8 +13,10 @@
 <link rel="stylesheet" type="text/css" media="screen" href="/cdn/v1/c/css/html5-doctor-reset.css" />
 <link rel="stylesheet" type="text/css" media="screen" href="/cdn/v1/c/css/babelroom.css" />
 <link rel="stylesheet" type="text/css" media="screen" href="/cdn/v1/c/css/jquery-ui-1.10.1.custom.min.css" />
-<link rel="stylesheet" href="/cdn/v1/c/css/font-awesome.min.css">
-<link rel="stylesheet" href="/cdn/v1/c/css/br_icons.css">
+
+<link rel="stylesheet" href="/cdn/v1/c/fo/css/br_icons.css">
+<link rel="stylesheet" href="/cdn/v1/c/icon_foo_adj.css">
+
 <link rel="stylesheet" type="text/css" media="screen" href="/cdn/v1/c/jquery/css/ui.jqgrid.css" />
 <link href="/cdn/v1/c/css/widget.css" rel="stylesheet" type="text/css" /> 
 -->
@@ -23,13 +25,19 @@
 <!--
 .bg {
     background-color: #f7f7f7;  /* this color is white, just off by 1 to make it stick out in file */
-    background-image: none;
+    background-image: 'none';
+/*
+    background: url("//s3-us-west-1.amazonaws.com/bblr-assets/landscape.jpg") 0 100%;
+    overflow: hidden;
+    background-attachment: fixed;
+*/
     font-size: 10px;
     overflow-x: hidden;
     margin: 0;
     font-family: Tahoma, Geneva, sans-serif;
 }
 .chat_position {position:absolute; left:0px; bottom:0px; margin-left:0px; margin-bottom:0px; }
+.version_position {position:absolute; right:0px; bottom:0px; margin-right:0px; margin-bottom:0px; }
 .bold-text { font-weight: bold; }
 .secure-green { color: #22aa22; }
 .secure-bright-green { color: #33ff33; }
@@ -133,7 +141,7 @@ input.br-phone-display {
 
 <!-- right -->
 <div><!-- got to move this elsewhere -->
-    <img style="right: 210px; position: absolute; top: 2px; margin: 4px;" src="//cdn.babelroom.com/cdn/v1/c/img/logo_18.png" alt="" class="br-z-index-logo">
+    <img style="right: 210px; position: absolute; top: 2px; margin: 4px;" src="/cdn/v1/c/img/logo_18.png" alt="" class="br-z-index-logo">
 </div>
 <div id="right_column" class="br-z-index-panels"></div> 
  
@@ -159,8 +167,8 @@ input.br-phone-display {
 
 <div>
         <ul id="menu" class="br-z-index-menu" style="display: none;">
-            <li><a href="#" onClick="return m('a');" title="Manage Audio Connection"><span class="ui-icon ui-icon-transferthick-e-w"></span>Connect...</a></li>
-            <li></li>
+            <li class="not-p2p"><a href="#" onClick="return m('a');" title="Manage Audio Connection"><span class="ui-icon ui-icon-transferthick-e-w"></span>Connect...</a></li>
+            <li class="not-p2p"></li>
             <!--<li class="host-only-menuitem"><a href="#" onClick="return m('b');"><span class="ui-icon ui-icon-plusthick"></span>Add People...</a></li>-->
             <li class="host-only-menuitem"><a href="#" onClick="return m('d');"><span class="ui-icon ui-icon-gear"></span>Settings...</a></li>
             <li class="host-only-menuitem"><a href="#" onClick="return m('e');"><span class="ui-icon ui-icon-refresh"></span>Reset...</a></li>
@@ -196,15 +204,15 @@ input.br-phone-display {
 
 
 <!-- PRODUCTION -->
-<script type="text/javascript" src="//cdn.babelroom.com/cdn/v1/c/gen.min.js?2013050127"> </script>
-<script type='text/javascript' src="//cdn.babelroom.com/cdn/v1/br_api.full.min.js?2013050127"></script>
+<script type="text/javascript" src="//cdn.babelroom.com/cdn/v1/c/gen.min.js?2013062300"> </script>
+<script type='text/javascript' src="//cdn.babelroom.com/cdn/v1/br_api.full.min.js?2013062300"></script>
 <!--
 -->
 
 <!-- DEVEL everything that follows is devel -->
-<!--<script type='text/javascript' src='/cdn/v1/c/wraprtc/wraprtc.js'></script>-->
 <!--
 <script type='text/javascript' src='/cdn/v1/src/js_fixups.js'></script>
+<script type='text/javascript' src='/cdn/v1/c/wraprtc/wraprtc.js'></script>
 <script type='text/javascript' src="/cdn/v1/c/jquery/js/jquery-1.9.1.js"></script>
 <script type="text/javascript" src="/cdn/v1/c/jquery/js/i18n/grid.locale-en.js"></script>
 <script type="text/javascript" src="/cdn/v1/c/jquery/js/jquery.jqGrid.min.js"></script>
@@ -233,7 +241,9 @@ input.br-phone-display {
 
 /* --- globals (soon...) --- */
 var a = BR.api.v1;
-a.init({query_string:window.location.search, _dynamic_form_id:'_ie_dynform'});
+//a.init({query_string:window.location.search, _dynamic_form_id:'_ie_dynform',hosts:'192.168.66.139'});
+a.init({query_string:window.location.search, _dynamic_form_id:'_ie_dynform',hosts:''});
+//a.init({query_string:window.location.search, _dynamic_form_id:'_ie_dynform',hosts:{live:''}});
 BR.room = {
     countries: null,
     context: {}
@@ -303,7 +313,6 @@ function br_v1_c_ready() {
             .removeClass('ui-corner-all').addClass('menubar-button ui-corner-left').css($j.extend(pos, {right: '202px'}));
         }
     var rp = $j('#right_panels').button();
-//    $j('#right_buttons').buttonset().css(pos);
     var rl = rp.next().addClass('menubar-button')
         .css($j.extend(pos,{width: '202px', right: '0px'}));    // the label following the input checkbox is actually the parent object to be styled
     if (extra_foo) rl.removeClass('ui-corner-all').addClass('ui-corner-right');
@@ -323,7 +332,6 @@ function br_v1_c_ready() {
         }
     rp.click(rp_update);
     rc.css($j.extend(pos,{'width': '205px', 'top': '2.8em'}));
-//pos.top = '26px';
 
     /* --- at this point we need the right column, and the right column (apparently) needs the main div visible --- */ 
     $j(".bg > div:first").show();
@@ -334,8 +342,8 @@ function br_v1_c_ready() {
     /* --- */
     $j('#menu_button').button({ icons: {secondary: 'ui-icon-triangle-1-s'}, label: '<i class=""></i> Loading...' });
 
-    /* align some heights TODO tmp. think this is going away ... */
-    var pos = $j('#top-tabs').height();
+    /* align some heights TODO tmp. think this is going away ... -- delete next time you see this */
+//    var pos = $j('#top-tabs').height();
 
     /* --- display (rest of) dashboard --- */
     $j(".bg > div:first").next().hide();
@@ -368,6 +376,6 @@ function br_v1_c_connect(loginTokenOrNull) {
 jQuery(document).ready(function(){ br_v1_c_ready(); });
 br_v1_c_loaded();
 </script>
-<form id="_ie_dynform" style="display: none;" action="//api.babelroom.com/api/v1/_dynform"></form>
+<form id="_ie_dynform" style="display: none;" action="//api-dev.babelroom.com/api/v1/_dynform"></form>
 </body> 
 </html> 
