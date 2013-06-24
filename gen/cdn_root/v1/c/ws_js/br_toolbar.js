@@ -35,12 +35,26 @@ var BRToolbar = {
         BR.api.v1.login({token: dict.t}, {success_url:success_url, fnerror:fnerror});
         },
 
+    update_viz: function(selector, show) {
+        jQuery(selector).each(function(idx,elem){
+            var e = jQuery(elem)
+                , h = e.data('br_viz') || {};
+            if (show) delete h[selector];
+            else h[selector] = true;
+            var cnt = 0;
+            for(var i in h) if (h.hasOwnProperty(i)) cnt++;
+            if (show && !cnt) e.show();
+            else e.hide();
+            e.data('br_viz',h);
+            });
+        },
+
     setup: function() {
         var $j = jQuery;
         /* --- menu and it's button -- */
         var menu = $j('#menu').menu().hide();
         var menu_button = $j('#menu_button');
-        menu_button.find('span:first').css({overflow: 'hidden', 'white-space': 'nowrap', width: '64px'});
+//        menu_button.find('span:first').css({overflow: 'hidden', 'white-space': 'nowrap', width: '64px'});
         menuOn = function() {
 //            menu.show();
             menu.show().position({
@@ -79,21 +93,24 @@ var BRToolbar = {
 
         var my_user_id = null;
         var my_invitee_id = null;
-//        var my_role = 'undetermined';
         var my_label = null;
         function contextUpdated(o) {
             if (!o || o.updated.is_host) {
                 if (BR.room.context.is_host) {
-                    //$j('.participant_only').css({'display': 'none'});
                     $j('.participant-only').hide();
-                    $j('.host-only').show();
+                    BRToolbar.update_viz('.host-only', true);
                     menu.find('.host-only-menuitem').removeClass('ui-state-disabled');
                     }
                 else {
                     $j('.participant-only').show();
-                    $j('.host-only').hide();
+                    BRToolbar.update_viz('.host-only', false);
                     menu.find('.host-only-menuitem').addClass('ui-state-disabled');
                     }
+                }
+            if (!o || o.updated.conference_access_config) {
+                BRToolbar.update_viz('.not-p2p', !BRDashboard.conference_access_config.peer_to_peer);
+                /* TODO -- hack */
+                $j('#people_toolbar').find('#list').button(BRDashboard.conference_access_config.peer_to_peer?'disable':'enable');
                 }
             if (!o || o.updated.email_address) {
                 if (BR.room.context.email_address) menu.find('.non-ephemeral-only-menuitem').removeClass('ui-state-disabled');
@@ -106,7 +123,7 @@ var BRToolbar = {
             new_label += (my_user_id && BRWidgets.full_name(my_user_id)) || 'Loading...';
             if (my_label!==new_label) {
                 my_label = new_label;
-                menu_button.button('option','label',my_label);
+                menu_button.button('option','label',my_label).find('span').css({overflow:'hidden', 'white-space':'nowrap', 'text-align':'left', 'padding-left': 0, 'text-overflow':'ellipsis'});
                 }
             }
         BRDashboard.subscribe(function(o){
@@ -190,7 +207,6 @@ var BRToolbar = {
 ';
                 },
             logic: function(id,selector) {
-//                console.log(id,selector);
                 var dlg = jQuery(selector), pdlg = dlg.parent();
                 pdlg.find(':button').button();
                 function e(name) { return jQuery('#'+id+name,pdlg); }
@@ -234,13 +250,6 @@ var BRToolbar = {
         var startFn = null;
         var waitingForHost = false;
         var defaultButton = null;   /* which button is default for Enter on dialog? */
-/*
-        function detectHost2(o) {
-            if (o.data && o.data.invitee_id && BRDashboard.invitees[o.data.invitee_id].role=='Host') {
-                BRToolbar._doorAction('host');
-                }
-            }
-*/
         function detectHost(o) {
             if (o.data._online > o.old_data._online) {
                 var iid = BRDashboard.invitee_id_by_user[o.id]
@@ -261,26 +270,20 @@ var BRToolbar = {
                 if (val<100)
                     pb.show().progressbar("option", "value", val+2);
                 }, 20));
-            //pb.progressbar("option","value",20).css('display','block');
             pb.progressbar("option","value",20).show();
             if (button)
                 button.button("disable");
-//            jQuery('#'+id+'_footer').show();
             }
         function statusOff(id,button) {
             var pb = jQuery('#'+id+'_progress');
             clearInterval(pb.data("cs_timer"));
             pb.progressbar("option","value",100);
-//.progressbar("destroy");
             setTimeout(function(){
-                //pb.css('display','none');
                 pb.hide();
                 }, 50);
             jQuery('#'+id+'_status').text('');
             if (button)
                 button.button("enable");
-//console.log( jQuery('#'+id+'_footer') );
-//            jQuery('#'+id+'_footer').hide();
             }
         function set_error(pdlg, c, msg) {
             if (c) {
@@ -574,7 +577,6 @@ if (qs && qs['e']) {
                         case 'loaded':
                         case 'host':
                             statusOff(id);  /* loaded, but leave start button off */
-//console.log(verb,waitingForHost);
                             if ((verb==='host')===waitingForHost) {
                                 statusOff(id, sb);
                                 $j('.ui-dialog-titlebar-close',pdlg).show();

@@ -131,7 +131,7 @@ var BRWidgets = {
                 Dialpad: 'icon2-phone',
                 Participants: 'icon2-user',
                 Files: 'icon2-folder-open',
-                Controls: 'icon2-guage',
+                Controls: 'icon2-gauge',
                 'Breakout Groups': 'icon2-users',
                 Polling: 'icon2-chart-bar',
                 'Advanced Audio Controls': 'icon2-equalizer',
@@ -143,13 +143,19 @@ var BRWidgets = {
 
         newId = BRWidgets.nextId();
         rootSelector = newId+'_root';
-        accStr = PanelTitleHTML('Dialpad')+BRContent.content_dialpad(newId,rootSelector);
+        accStr = PanelTitleHTML('Files')+BRWidgets.content_files(newId,rootSelector);
+        $j(acc).append(accStr);
+        BRWidgets.files(newId,'#'+rootSelector);
+
+        newId = BRWidgets.nextId();
+        rootSelector = newId+'_root';
+        accStr = PanelTitleHTML('Dialpad','not-p2p')+BRContent.content_dialpad(newId,rootSelector);
         $j(acc).append(accStr);
         BRWidgets.dialpad(newId,'#'+rootSelector);
 
         newId = BRWidgets.nextId();
         rootSelector = newId+'_root';
-        accStr = PanelTitleHTML('Participants')+BRWidgets.content_participantSummary(newId, rootSelector);
+        accStr = PanelTitleHTML('Participants','not-p2p')+BRWidgets.content_participantSummary(newId, rootSelector);
         $j(acc).append(accStr);
 
         // TODO -- refactor the logic starting here in a seperate method
@@ -215,31 +221,25 @@ var BRWidgets = {
 
         newId = BRWidgets.nextId();
         rootSelector = newId+'_root';
-        accStr = PanelTitleHTML('Files')+BRWidgets.content_files(newId,rootSelector);
-        $j(acc).append(accStr);
-        BRWidgets.files(newId,'#'+rootSelector);
-
-        newId = BRWidgets.nextId();
-        rootSelector = newId+'_root';
-        accStr = PanelTitleHTML('Controls','host-only')+BRContent.content_controls(newId,rootSelector);
+        accStr = PanelTitleHTML('Controls','host-only not-p2p')+BRContent.content_controls(newId,rootSelector);
         $j(acc).append(accStr);
         BRWidgets.controls(newId,'#'+rootSelector);
 
         newId = BRWidgets.nextId();
         rootSelector = newId+'_root';
-        accStr = PanelTitleHTML('Breakout Groups','host-only')+BRContent.content_breakoutGroups(newId,rootSelector);
+        accStr = PanelTitleHTML('Breakout Groups','host-only not-p2p')+BRContent.content_breakoutGroups(newId,rootSelector);
         $j(acc).append(accStr);
         BRWidgets.breakoutGroups(newId,'#'+rootSelector);
 
         newId = BRWidgets.nextId();
         rootSelector = newId+'_root';
-        accStr = PanelTitleHTML('Polling','host-only')+BRContent.content_polling(newId,rootSelector);
+        accStr = PanelTitleHTML('Polling','host-only not-p2p')+BRContent.content_polling(newId,rootSelector);
         $j(acc).append(accStr);
         BRWidgets.polling(newId,'#'+rootSelector);
 
         newId = BRWidgets.nextId();
         rootSelector = newId+'_root';
-        accStr = PanelTitleHTML('Advanced Audio Controls', 'host-only')+BRContent.content_systemControls(newId,rootSelector);
+        accStr = PanelTitleHTML('Advanced Audio Controls', 'host-only not-p2p')+BRContent.content_systemControls(newId,rootSelector);
         $j(acc).append(accStr);
         BRWidgets.systemControls(newId,'#'+rootSelector);
 
@@ -250,16 +250,6 @@ var BRWidgets = {
 */
 
 
-/*
-        $j(sel).resizable({
-            minHeight: 140,
-            resize: function() {
-                $j('#right_listeners_table').accordion('resize');
-                }
-            }).append('<span class="ui-icon ui-icon-grip-dotted-horizontal" style="margin:2px auto;"></span>').css('display','block');
-*/
-//        $j(sel).find('.ui-jqgrid-sortable').css('display','none');
-        //$j(acc).accordion({autoHeight: false}).css('display','block');
         $j(acc).accordion({
             autoHeight: true,
             /* reset any notification on new heading we've just clicked */
@@ -276,26 +266,10 @@ var BRWidgets = {
 
         newId = BRWidgets.nextId();
         BRWidgets.chat(newId);
-/*
--- so looks like this is not in use
-        BRDashboard.subscribe(function(o){
-            var rows = $j('#right_online_table').jqGrid('getRowData');
-            for(var i=0; i<rows.length; i++) {
-// methinks this is still in devel ...
-                }
-            },'invitee');
-*/
-/*
-        function callers_change() {
-            if (BRDashboard.listeners.length)
-                $j('button.need1caller').button("enable");
-            else
-                $j('button.need1caller').button("disable");
-            modified();
-            }
-        BRDashboard.subscribe(callers_change,'listener');
-        callers_change();
-*/
+
+        newId = BRWidgets.nextId();
+        BRWidgets.version(newId);
+
     },
 
     centerArea: function(sel) {
@@ -440,19 +414,18 @@ console.log( $j('#tile',sel) );
                 showControl: function(){},
                 updateBroadcasterIndicators: function(){},
                 autoStartViewer: true,
-                useWebRTC: false
+                useWebRTC: false,
+                stereo: true
                 }, opts);
-
-/// all this temp ....
-//                , flash_id = box_id + '_flash'
                 ;
             /* id of the connection for the (one of the webcams) associated with this box.
             null - we are neither broadcasting nor viewing
             our connection id - we are broadcasting
             other connection id - we are viewing */
-            var peerKeys = {}     /* keys of available peer webcams for this box */
+            var peerKeys = {}               /* keys of available peer webcams for this box */
                 , peerMetadata = {}
                 , videoFrame = null
+                , videoFrameVisible         /* redundant -- not I don't trust .is(':visible') */
                 , statusElement = null
                 , videoElement = null
                 , webrtc_data = null
@@ -464,22 +437,16 @@ console.log( $j('#tile',sel) );
             /* non-state related temporary variables */
             var timer = null
                 , have_video_capability = (opts.useWebRTC ? have_webrtc : have_flash)
+                , flash_id = 'flash'    /* for flash */
                 ;
             if (opts.rootElement) {
                 opts.rootElement.append('<div id="video_parent"><div></div><video width="100%" height="100%" autoplay="autoplay" /></div>');
                 videoFrame = opts.rootElement.find('div#video_parent').hide();
+                videoFrameVisible = false;
                 statusElement = videoFrame.find('div:first-child');
                 videoElement = videoFrame.find('video').hide();
                 }
-/*
-            var my_broadcastable_stream_id = null;  // change to some sort of bool
-            var peer_stream_id = null;              // change name to box_source_connection_salt or something ..
-            var broadcasting = false;
-            var viewing = false;
-// all this temp ....
-*/
-
-            function ass(bool) {    /* assert */
+            function ass(bool) {    /* assert :-) */
                 if (!bool && console && console.log) {
                     console.log('assertion failure');
                     undefined.throw_trace;
@@ -501,9 +468,11 @@ console.log( $j('#tile',sel) );
                         opts.showBackground(false);
                         showVideoElement(false);
                         videoFrame.show();
+                        videoFrameVisible = true;
                         }
                     else {
                         videoFrame.hide();
+                        videoFrameVisible = false;
                         opts.showBackground(true);
                         }
                     }
@@ -533,6 +502,7 @@ console.log( $j('#tile',sel) );
             function updateMetadata(peer_key) {
                 /* metadata from broadcaster */
                 var md = peerMetadata[peer_key];
+//console.log('um',md,indicators);
                 if (!md)
                     return;
                 if (indicators.md.video!==md.video) {
@@ -566,7 +536,7 @@ console.log( $j('#tile',sel) );
                                     webrtc_data = null;
                                     state('available');
                                     }
-                                }, 10000);
+                                }, 15000);
                         opts.showControl('view',false);
                         opts.showControl('unview',true);
                         break;
@@ -575,7 +545,6 @@ console.log( $j('#tile',sel) );
                             clearTimeout(timer);
                             timer = null;
                             }
-                        //openingVideo(0);
                         break;
                     case 'viewing':
                         /*showVideoElement(); -- no longer doing this as prior updateMetadata() will do it properly & consider if video is already paused
@@ -596,7 +565,7 @@ console.log( $j('#tile',sel) );
                         switch(callState) {
                             case 'available': opts.showControl('view',false); break;
                             }
-                        opts.showControl('start',true);
+                        opts.showControl('start',true,have_video_capability);
                         opts.showControl('stop',false);
                         opts.showControl('mute',false);
                         opts.showControl('unmute',false);
@@ -638,22 +607,9 @@ console.log( $j('#tile',sel) );
                             }
                         },
                     setStream: function(stream) {
-/*
--- doesn't work
-console.log(stream);
-stream.onmute=function(event) {
-console.log('mute');
-    opts.showControl('mute',false);
-    opts.showControl('unmute',true);
-}
-stream.onunmute=function(event) {
-console.log('unmute');
-    opts.showControl('mute',true);
-    opts.showControl('unmute',false);
-}
-*/
                         webrtc_data = {key: make_key(), stream: stream, pcs:{}};
-                        BRCommands.videoAction('webrtc-' + webrtc_data.key, '');
+                        indicators.md = {video: true, audio: true};
+                        BRCommands.videoAction('webrtc-' + webrtc_data.key, JSON.stringify(indicators.md));
                         state('broadcasting');
                         }
                     });
@@ -669,15 +625,19 @@ console.log('unmute');
                         wrapRTC.callPeer(webrtc_data.stream, {
                             key: webrtc_data.key,
                             peer_key: peer_key,
+                            onError: function(error) { console.log("error from wrapRTC.callPeer()", error); },
                             setPC: function(pc) { if (webrtc_data){webrtc_data.pcs[this.peer_key]=pc;} },
                             signalOut: function(msg) { webrtc_signalOut(this.key, this.peer_key, msg); }
                             });
                         break;
                     case 'offer':
+                        if (opts.stereo)
+                            wrapRTC.addStereoToSDP(msg);
                         wrapRTC.answer(msg, {
                             key: webrtc_data.key,
                             peer_key: peer_key,
                             element: videoElement.get(0),
+                            onError: function(error) { console.log("error from wrapRTC.answer()", error); },
                             setPC: function(pc) { if (webrtc_data){webrtc_data.pcs[this.peer_key]=pc;} },
                             setStream: function(stream) {
                                 if (!webrtc_data || webrtc_data.key!==this.key) return;
@@ -688,12 +648,19 @@ console.log('unmute');
                                 state('answering');
                                 webrtc_signalOut(this.key, this.peer_key, new_msg);
                                 },
-                            connected: function() { if (webrtc_data && webrtc_data.key===this.key) { updateMetadata(peer_key); state('viewing'); } },
+                            connected: function() {
+                                if (webrtc_data && webrtc_data.key===this.key) {
+                                    updateMetadata(peer_key);
+                                    state('viewing');
+                                    }
+                                },
                             disconnected: function() { webrtc_data && webrtc_data.key===this.key && stop_webcam_view(); }
                             });
                         break;
                     case 'answer':
                         if (webrtc_data.pcs[peer_key]) {
+                            if (opts.stereo)
+                                wrapRTC.addStereoToSDP(msg);
                             wrapRTC.setRemoteDescription(webrtc_data.pcs[peer_key], msg);
                             indicators.peerCount++;
                             opts.updateBroadcasterIndicators(indicators);
@@ -732,14 +699,18 @@ console.log('unmute');
                 }
 
             function do_flash(broadcast, stream_salt) {
-                b.find('#avatar_parent').append('\
+                if (!opts.rootElement)
+                    return false;
+                opts.rootElement.append('\
 <div id="'+flash_id+'" style="display: none;">\
 <h1>You need the Adobe Flash Player for this demo, download it by clicking the image below.</h1>\
             <p><a href="//www.adobe.com/go/getflashplayer"><img src="//www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="Get Adobe Flash player" /></a></p>\
 </div>\
 ');
                 var flashvars = {
-                    'csMediaServerURI':  BR.room.context.media_server_uri,
+                    //'csMediaServerURI':  BR.room.context.media_server_uri,
+// TODO
+'csMediaServerURI':  'rtmp%3A%2F%2Fvideo.babelroom.com%3A1936%2FoflaDemo',
                     'csStreamId': stream_salt
                     };
                 var params = {
@@ -749,8 +720,11 @@ console.log('unmute');
                 swfobject.embedSWF( BR.api.v1.get_host('cdn') + "/cdn/v1/c/flash/" + (broadcast ? "brBroadcast.swf" : "brViewer.swf"),
                     //flash_id, "214", "160", "8.0.0", "expressInstall.swf", flashvars, params, attributes);  /* returns 'undefined' */
                     flash_id, "100%", "100%", "8.0.0", "expressInstall.swf", flashvars, params, attributes);  /* returns 'undefined' */
-                if (broadcast)
-                    BRCommands.videoAction('flash', stream_salt);
+console.log(flashvars);
+                opts.showBackground(false);
+                if (broadcast) {
+                    BRCommands.videoAction('flash-' + stream_salt, '');
+                    }
                 }
             function do_stop() {
                 if (opts.useWebRTC) {
@@ -772,12 +746,12 @@ console.log('unmute');
             function start_webcam_broadcast() {
                 if (callState!=='broadcastable')
                     return;
-                opts.showControl('start',true,false);
-                if (opts.useWebRTC)
+                if (opts.useWebRTC) {
+                    opts.showControl('start',true,false);
                     webrtc_open_webcam();
+                    }
                 else  {
-                    do_flash(true, my_broadcastable_stream_id);
-                    state('broadcasting');
+                    do_flash(true, make_key());
                     }
                 }
             function stop_webcam_broadcast() {
@@ -941,7 +915,7 @@ console.log('unmute');
 
             /* --- */
             return {
-                isVideoOn: function() { return (callState==='viewing')||(callState==='broadcasting'); },
+                isVideoOn: function() { return videoFrameVisible; },
                 setMe: checkCanBroadcast,
                 startBroadcast: start_webcam_broadcast,
                 stopBroadcast: stop_webcam_broadcast,
@@ -970,18 +944,18 @@ console.log('unmute');
     <div id="avatar_large" style="display: none;"><img id="avatar_large_img"><i class="icon icon2-phone" style="font-size: 16em;"></i></div>\
 </div>\
 <span class="u-widget-header u-corner-all" style="padding: 10px 4px;">\
-    <button id="talking" title="Audio Indicator">T</button>\
-    <button id="video_off" title="Pause Video">P</button>\
-    <button id="video_on" title="Resume Video">R</button>\
-    <button id="mute" title="Mute">M</button>\
-    <button id="unmute" title="Unmute">U</button>\
-    <button id="start_webcam" title="Start My Webcam">B</button>\
-    <button id="stop_webcam" title="Stop My Webcam">C</button>\
-    <button id="start_video" title="View Webcam">S</button>\
-    <button id="stop_video" title="Stop Viewing Webcam">H</button>\
-    <button id="small" title="Normal Window">-</button>\
-    <button title="Large Window">+</button>\
-    <button id="select" title_disabled="Select">L</button>\
+<button id="talking" title="Audio Indicator">T</button>\
+<button id="video_off" title="Pause Video">P</button>\
+<button id="video_on" title="Resume Video">R</button>\
+<button id="mute" title="Mute">M</button>\
+<button id="unmute" title="Unmute">U</button>\
+<button id="start_webcam" title="Start My Webcam">B</button>\
+<button id="stop_webcam" title="Stop My Webcam">C</button>\
+<button id="start_video" title="View Webcam">S</button>\
+<button id="stop_video" title="Stop Viewing Webcam">H</button>\
+<button id="small" title="Normal Window">-</button>\
+<button title="Large Window">+</button>\
+<button id="select" title_disabled="Select">L</button>\
 </span>\
 </div>\
 </div>'); 
@@ -1120,27 +1094,19 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                 .button({label: '<i class="icon icon2-stop"></i>'}).click(function(){ vc.stopBroadcast(); }).next()
                 .button({label: '<i class="icon icon2-eye-1"></i>'}).click(function(){ vc.startView(); }).next()
                 .button({label: '<i class="icon icon2-eye-off-1"></i>'}).click(function(){ vc.stopView(); }).next()
-                //.button({ text: false, icons: { primary: "ui-icon-circle-minus" }}).click(function(){ resize(false); }).next()
                 .button({label: '<i class="icon icon2-resize-small"></i>'}).click(function(){ resize(false); }).next()
-                //.button({ text: false, icons: { primary: "ui-icon-circle-plus" }}).click(function(){ resize(true); }).next()
                 .button({label: '<i class="icon icon2-resize-full"></i>'}).click(function(){ resize(true); }).next()
-                // highlighting -- for referenceb.removeClass('ui-state-highlight'); b.addClass('ui-state-highlight');
                 .button({label: '<!--<i class="icon2-check-empty"></i>-->'}).click(function(){ ; }).next()
                     ;
-            //b.find(".ui-button-text").css('padding','0.4em');   /* no text in buttons: remove left, right padding around fontawesome icons */
             b.find(".ui-button-text").css({padding: '0.4em', height: '16px', width: '16px'});
-   /* no text in buttons: remove left, right padding around fontawesome icons */
             b.find("button").hide();
             b.find("#talking,#select").show();
-//console.log('did initial hide',user_id);
-            //b.find("button:contains('+')").show();
             b.find("#small").next().show();
             show_avatar(true);
 
             /* === the somewhat complex interplay of talking / muting etc. etc. */
             var lmut_store = {};
             function lmut(listening,mute,talking,is_host){
-//console.log(listening,mute,talking,is_host);
                 if (typeof(listening)!=="undefined") lmut_store.listening = listening;
                 if (typeof(mute)!=="undefined") lmut_store.mute = mute;
                 if (typeof(talking)!=="undefined") lmut_store.talking = talking;
@@ -1154,7 +1120,6 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                     if (nc.length) b.find('#talking i').addClass(nc);
                     var sel = b.find('#mute');
                     if (lmut_store.mute) sel = sel.next();
-//console.log("option", BR.room.context.user_id,user_id,lmut_store.is_host);
                     sel.show().button((BR.room.context.user_id==user_id || lmut_store.is_host) ? "enable" : "disable");
                     }
                 }
@@ -1211,6 +1176,10 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
             b.data('box_function',function(o){
                 /* better than the above function, pre-selected for this box only */
                 switch(o.command) {
+                    case 'hide':
+                        avatar_icon_online(o.data._online);
+                        b.hide();
+                        break;
                     case 'show':
                         if (deferred_src) {
                             deferred_src.avatar_medium && b.find('#avatar_medium_img').prop('src',deferred_src.avatar_medium);
@@ -1220,11 +1189,7 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                             }
                         avatar_icon_online(o.data._online);
                         b.show();
-                        break;
-                    case 'hide':
-                        avatar_icon_online(o.data._online);
-                        b.hide();
-                        break;
+                    /* fall thru .. hack? newly online is sent as "show", not "update"    break; */
                     case 'update':
                         if (o.data.dtmf !== o.old_data.dtmf)
 /*
@@ -1245,13 +1210,13 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
 /*
 */
                         if (BRDashboard.connection_id) {
-                            if (BRDashboard.connection_id in o.data.connection_ids)
+                            if (BRDashboard.connection_id in o.data.connection_ids) {
                                 vc.setMe();
+                                }
 /*
                             var salt = (BRDashboard.connection_id in o.data.connection_ids) ? BR.room.context.connection_salt : null;
                             if (salt!==my_broadcastable_stream_id) {
                                 my_broadcastable_stream_id = salt;
-peer_stream_id = salt;
                                 update_webcam_buttons();
                                 }
 */
@@ -1267,12 +1232,6 @@ peer_stream_id = salt;
                 });
             return b;
             }
-/* playing ...
-        BRDashboard.subscribe(function(o){
-            if (o.updated.is_live && BR.room.context.is_live) { /* we just went live *./
-                }
-            },'room_context');
-*/
         BRDashboard.subscribe(function(o){
             var b = box_by_user(o.idx);
             if (b.data('data') && ('connection_ids' in b.data('data')) && (typeof o.attr != 'undefined'))
@@ -1510,12 +1469,10 @@ peer_stream_id = salt;
                 $j('#show_button').css('display','none');
                 $j('#hide_button').css('display','inline');
                 var surl;
-//console.log(mp_url.length);
                 if (mp_url.length)
                     surl = mp_url + '-' + page_num + '.png';
                 else
                     surl = url;
-//console.log(surl);
                 selImg.css('display','block').attr('src',surl.replace(/^https?:/,''));
                 selPtr.css('display','block');
 
@@ -1589,8 +1546,6 @@ peer_stream_id = salt;
         BRDashboard.subscribe(function(h){
             if (h.attr===undefined && h.value===undefined) {
                 if (presentations[h.idx] !== undefined) {
-//console.log('0=' + sel_pr.val());
-//console.log('1=' + h.idx);
                     if (sel_pr.val()==h.idx) /* if currently selected? */
                         set_presentation('');
                     sel_pr.find('option[value="' + h.idx + '"]').remove();
@@ -1625,12 +1580,9 @@ peer_stream_id = salt;
             }
         var lastPointerTime = 0;    // don't need to reset this
         function fnMM(e) {
-//console.log(e);
             lastMMEvent = e;
-//console.log([0,lastMMEvent.csX,lastMMEvent.csY]);
             lastMMEvent.csX = lastMMEvent.pageX - Math.round(selImg.offset().left),
             lastMMEvent.csY = lastMMEvent.pageY - Math.round(selImg.offset().top),
-//console.log([1,lastMMEvent.csX,lastMMEvent.csY]);
             lastMMEventTime = (new Date).getTime();
             }
         function adjustOutPtr(pair) {
@@ -2628,6 +2580,17 @@ if needed use the enableSelect() instead
                     break;
                 }
             },'command');
+        },
+
+    version: function(id) {
+        var $j = jQuery;
+        $j('body').append('<div class="version_position"><div id="'+id+'_version"></div></div>');
+        var selector = '#' + id + '_version';
+        BRDashboard.subscribe(function(o){if(o.updated.is_live){        /* aiming for ugliest js award */
+                var sv = null;
+                try { sv = JSON.parse(BR.room.context.server_version); } catch(e){};
+                $j(selector).html(''+(sv?(sv.stamp):'<2.37.193'));
+            };},'room_context');
         }
 };
 

@@ -6,9 +6,10 @@ DEP_v1=cdn_root/v1
 DEP_co=cdn_root/v1/AUTO/conference_options.js
 DEP_aa=node/AUTO_routes.js
 DEP_ag=node/AUTO_gen.tmp
+DEP_vv=node/AUTO_version.js
 DEP_2clean=$(DEP_co) rails/my/app/models/*
 
-all: main $(DEP_co) $(DEP_v1) $(DEP_aa)
+all: main $(DEP_co) $(DEP_v1) $(DEP_aa) $(DEP_vv)
 
 main $(DEP_aa): ./schema/main.sch
 	rm -f $(DEP_ag)
@@ -21,7 +22,10 @@ $(DEP_co): ./schema/conference_options.sch
 $(DEP_v1): $(DEP_co)
 	$(MAKE) -C $@
 
+$(DEP_vv): ../clouds/misc/version/stamp
+	(echo -n "var _version='" && cat $^ | tr -d '\n' && echo -n "." && brrev | tr -d '\n' && echo "';" && echo "module.exports=_version;") | cat >$@
+
 clean:
 	$(MAKE) -C $(DEP_v1) clean
-	rm -f $(DEP_2clean) $(DEP_co) $(DEP_aa) $(DEP_ag)
+	rm -f $(DEP_2clean) $(DEP_co) $(DEP_aa) $(DEP_ag) $(DEP_vv)
 

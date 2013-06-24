@@ -1,0 +1,51 @@
+
+/* --- icon stuff --- */
+.pull-right {
+  float: right;
+}
+.pull-left {
+  float: left;
+}
+[class^="icon2-"].pull-left,
+[class*=" icon2-"].pull-left {
+  margin-right: .3em;
+}
+[class^="icon2-"].pull-right,
+[class*=" icon2-"].pull-right {
+  margin-left: .3em;
+}
+.btn [class^="icon2-"].pull-left.icon-2x,
+.btn [class*=" icon2-"].pull-left.icon-2x,
+.btn [class^="icon2-"].pull-right.icon-2x,
+.btn [class*=" icon2-"].pull-right.icon-2x {
+  margin-top: .18em;
+}
+
+/* from font-awesome ...
+ * -------------------------- */
+/* Stacked and layered icon *. hmmm didn't really work out -- purge? /
+.icon2-stack {
+  position: relative;
+  display: inline-block;
+  width: 2em;
+  height: 2em;
+  line-height: 2em;
+  vertical-align: -35%;
+}
+.icon2-stack [class^="icon2-"],
+.icon2-stack [class*=" icon2-"] {
+  display: block;
+  text-align: center;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  font-size: 1em;
+  line-height: inherit;
+  *line-height: 2em;
+}
+.icon2-stack .icon2-stack-base {
+  font-size: 2em;
+  *line-height: 1em;
+}
+*/
+

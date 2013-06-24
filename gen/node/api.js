@@ -4,6 +4,7 @@ var     SessionManager = require('./session_manager')
     ,   DBManager = require('./db_manager')
     ,   crypto = require('crypto')
     ,   he = require('./http_errors')
+    ,   version_stamp = require('./AUTO_version')
     ;
 
 var API = function(config) {
@@ -19,9 +20,18 @@ function get_status(self, req, res, match, opts)
     res.end();
 }
 
+function _version() 
+{
+    if (!/^(\d+)\.(\d+)\.(.*)$/.exec(version_stamp))
+        return null;
+    return {major: RegExp.$1, minor: RegExp.$2, commit: RegExp.$3, stamp: version_stamp};
+}
 function get_version(self, req, res, match, opts)
 {
-    res.send({major: 2, minor: 37, build: 42});
+    var v = _version();
+    if (!v)
+        return he.internal_server_error(res);
+    res.send(v);
     res.end();
 }
 
@@ -203,11 +213,11 @@ user and conference -- question: how could it have created multople invites???
         for(var i=0; i<fields.length; i++)
             data.push([fields[i].name, row[fields[i].name]]);
         /* extra *special* stuff */
-//        data.push(['media_server_uri', 'rtmp%3A%2F%2Fvideo.babelroom.com%3A1936%2FoflaDemo']);
         var a='', l=10, b = crypto.randomBytes(l);
         for(var i=0; i<l; i++)
             a += ('0'+((b[i] & 0xff).toString(16))).substr(-2);
         data.push(['connection_salt', a]);
+        data.push(['server_version', JSON.stringify(_version())]);
         //res.send({data: data}); -- don't do this; express "helps" with ETag and other _--_
         obj = {};
         for(var i=0; i<data.length; i++)
