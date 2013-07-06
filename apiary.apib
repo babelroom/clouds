@@ -9,81 +9,7 @@ Welcome to the our sample API documentation. All comments can be written in (sup
 Authentication and Special Purpose APIs
 APIs for authentication and special purposes.
 --
-POST signup
-> Content-Type: application/json; charset=utf-8
-{}
-< 201
-< Content-Type: application/json; charset=utf-8
-{}
 
-GET login
-< 200
-< Content-Type: application/json; charset=utf-8
-{}
-
-POST login
-> Content-Type: application/json; charset=utf-8
-{}
-< 201
-< Content-Type: application/json; charset=utf-8
-{}
-
-DELETE login
-> Content-Type: application/json; charset=utf-8
-{}
-< 201
-< Content-Type: application/json; charset=utf-8
-{}
-
-POST logout
-> Content-Type: application/json; charset=utf-8
-{}
-< 201
-< Content-Type: application/json; charset=utf-8
-{}
-
-GET invitation
-< 200
-< Content-Type: application/json; charset=utf-8
-{}
-
-POST add_self
-> Content-Type: application/json; charset=utf-8
-{}
-< 201
-< Content-Type: application/json; charset=utf-8
-{}
-
-POST add_participant
-> Content-Type: application/json; charset=utf-8
-{}
-< 201
-< Content-Type: application/json; charset=utf-8
-{}
-
-
---
-General Purpose Resources
-These resources are automatically generated from [https://github.com/babelroom/clouds/blob/master/gen/schema/main.sch](https://github.com/babelroom/clouds/blob/master/gen/schema/main.sch)
---
-Server status. This is mainly for use by automated server monitoring tools.
-GET status
-< 200
-< Content-Type: application/json; charset=utf-8
-{
-  "status": "OK"
-}
-
-Server version. 
-GET version
-< 200
-< Content-Type: application/json; charset=utf-8
-{
-  "major": "2",
-  "minor": "37",
-  "commit": "201",
-  "stamp": "2.37.201"
-}
 
 --
 Server
@@ -108,3 +34,62 @@ GET version
   "stamp": "2.37.201"
 }
 
+--
+General Purpose Resources
+These resources are automatically generated from
+[https://github.com/babelroom/clouds/blob/master/gen/schema/main.sch](https://github.com/babelroom/clouds/blob/master/gen/schema/main.sch)
+--
+
+GET users/{id}{?c}
+< 200
+< Content-Type: application/json; charset=utf-8
+{"name": "First","email_address": "mail@example.com","last_name": "Last","company": "Fastbuck, Inc.","email": "mail@example.com","origin_data": "Origin System (optional)","origin_id": 37}
++++++
+< 403
+{"error":{"code":403,"text":"Access Denied"}}
+
+GET conferences/2{?c}
+< 200
+< Content-Type: application/json; charset=utf-8
+{"name": "My Conference","uri": "myuri","introduction": "My summary, introduction or description","access_config": "{}","origin_data": "Origin data (optional)","origin_id": 37}
++++++
+< 403
+{"error":{"code":403,"text":"Access Denied"}}
+
+POST conferences
+> Content-Type: application/json; charset=utf-8
+{"name": "My Conference","introduction": "My summary, introduction or description","access_config": "{}","origin_data": "Origin data (optional)","origin_id": 37}
+< 201
+< Content-Type: application/json; charset=utf-8
+{}
++++++
+< 403
+{"error":{"code":403,"text":"Access Denied"}}
+
+PUT /conferences/2
+> Content-Type: application/json; charset=utf-8
+{"name": "My Conference","introduction": "My summary, introduction or description","access_config": "{}","origin_data": "Origin data (optional)","origin_id": 37}
+< 200
+< Content-Type: application/json; charset=utf-8
+{}
++++++
+< 403
+{"error":{"code":403,"text":"Access Denied"}}
+
+DELETE conferences/2
+< 200
+< Content-Type: application/json; charset=utf-8
+{}
++++++
+< 403
+{"error":{"code":403,"text":"Access Denied"}}
+
+POST /avatar
+> Content-Type: application/json; charset=utf-8
+{"upload_url": "http://files.example.com/file/my_master_avatar.png"}
+< 201
+< Content-Type: application/json; charset=utf-8
+{}
++++++
+< 403
+{"error":{"code":403,"text":"Access Denied"}}
