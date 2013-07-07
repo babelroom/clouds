@@ -16,11 +16,11 @@
 {"$system":
 [
     { _: #user,
-    generators: [#rails_model,#rest_routes],
+    generators: [#rails_model,#rest_routes,#rest_apiary],
 #    meta: [$db_create,{_:$ws, flags:[#a,#b]}],
     hobo_model_name: #hobo_user_model,
     rest_routes: [
-        {_:#pk, pattern: "rgx: /(GET):\\/(users)\\/(\\d+)$/i, rgx_key: '_default_rgx_key', permfn: 'perm_the_same_user', dbfn: 'db_1_by_pk'", },
+        {_:#pk, pattern: "rgx: /(GET):\\/(users)\\/(\\d+)$/i, rgx_key: '_default_rgx_key', permfn: 'perm_the_same_user', dbfn: 'db_1_by_pk'", api_doc: {signature:"GET users/{id}", description:""}},
         ],
     columns: [
 #| id                        | int(11)      | NO   | PRI | NULL                       | auto_increment |
@@ -28,8 +28,8 @@
 #| salt                      | varchar(40)  | YES  |     | NULL                       |                |
 #| remember_token            | varchar(255) | YES  |     | NULL                       |                |
 #| remember_token_expires_at | datetime     | YES  |     | NULL                       |                |
-        {_:#name, rails_flags:[#required], rest:[#pk]},
-        {_:#email_address, type:#email_address, rails_map:{login:true}, index:true, rest:[#pk]},    # heavily overloaded with hobo ****, use to indicate !ephemeral
+        {_:#name, rails_flags:[#required], rest:[#pk], api_doc:{sample:"First"}},
+        {_:#email_address, type:#email_address, rails_map:{login:true}, index:true, rest:[#pk], api_doc:{sample:"mail@example.com"}},    # heavily overloaded with hobo ****, use to indicate !ephemeral
         {_:#administrator, type:$col_boolean, rails_map:{default:false}},
         $col_timestamps,
 
@@ -46,32 +46,32 @@
         # JR added ---- these are all profile type things ...
 #    last_name       :string, :required -- leave out the required, because we might not be able
 #       to populate via conference invitation, and stuff breaks if a required field is not there
-        {_:#last_name, rest:[#pk]},
+        {_:#last_name, rest:[#pk], api_doc:{sample:"Last"}},
         {_:#timezone, rails_map:{default:'Pacific Time (US & Canada)'}},
-        {_:#company, rest:[#pk]},
+        {_:#company, rest:[#pk], api_doc:{sample:"Fastbuck, Inc."}},
         {_:#pin},
         # ---
         {_:#api_key},
         #avatar_small,
         #avatar_medium,
         #avatar_large,
-        {_:#email, type:$col_string, rest:[#pk]},   # free of extra hobo **** semantics
-        {_:#origin_data, type:$col_string, rest:[#pk]},
-        {_:#origin_id, type:$col_id, rest:[#pk]},
+        {_:#email, type:$col_string, rest:[#pk], api_doc:{sample:"mail@example.com"}},   # free of extra hobo **** semantics
+        {_:#origin_data, type:$col_string, rest:[#pk], api_doc:{sample:"Origin System (optional)"}},
+        {_:#origin_id, type:$col_id, rest:[#pk], api_doc:{sample:37}},
         ],
     rails_extra: @schema/my/user.rb.sch,
     },
     { _: #conference,
 #    meta: [$db_create,{_:#ws, flags:[#foo]}],
-    generators: [#rails_model,#rest_routes],
+    generators: [#rails_model,#rest_routes,#rest_apiary],
     rest_routes: [
-        {_:#pk, pattern: "rgx: /(GET):\\/(conferences)\\/(\\d+)$/i, rgx_key: '_default_rgx_key', permfn: 'perm_conference_owner_or_participant', dbfn: 'db_1_by_pk'", flags:{not_deleted:true}},
-        {_:#cr, pattern: "rgx: /(POST):\\/(conferences)\\/?$/i, rgx_key: '_default_rgx_key', permfn: 'perm_valid_user', dbfn: 'db_create'", flags:{insert_uid_as:#owner_id}},
-        {_:#up, pattern: "rgx: /(PUT):\\/(conferences)\\/(\\d+)$/i, rgx_key: '_default_rgx_key', permfn: 'perm_conference_owner_or_host', dbfn: 'db_update_by_pk'", flags:{not_deleted:true}},
-        {_:#dl, pattern: "rgx: /(DELETE):\\/(conferences)\\/(\\d+)$/i, rgx_key: '_default_rgx_key', permfn: 'perm_conference_owner_or_host', dbfn: 'db_set_deleted_flag_by_pk'"},
+        {_:#pk, pattern: "rgx: /(GET):\\/(conferences)\\/(\\d+)$/i, rgx_key: '_default_rgx_key', permfn: 'perm_conference_owner_or_participant', dbfn: 'db_1_by_pk'", flags:{not_deleted:true}, api_doc: {signature:"GET conferences/2", description:""}},
+        {_:#cr, pattern: "rgx: /(POST):\\/(conferences)\\/?$/i, rgx_key: '_default_rgx_key', permfn: 'perm_valid_user', dbfn: 'db_create'", flags:{insert_uid_as:#owner_id}, api_doc: {signature:"POST conferences", description:""}},
+        {_:#up, pattern: "rgx: /(PUT):\\/(conferences)\\/(\\d+)$/i, rgx_key: '_default_rgx_key', permfn: 'perm_conference_owner_or_host', dbfn: 'db_update_by_pk'", flags:{not_deleted:true}, api_doc: {signature:"PUT /conferences/2", description:""}},
+        {_:#dl, pattern: "rgx: /(DELETE):\\/(conferences)\\/(\\d+)$/i, rgx_key: '_default_rgx_key', permfn: 'perm_conference_owner_or_host', dbfn: 'db_set_deleted_flag_by_pk'", api_doc: {signature:"DELETE conferences/2", description:""}},
         ],
     columns: [
-        {_:#name, rest:[#pk,#cr,#up]},
+        {_:#name, rest:[#pk,#cr,#up], api_doc:{sample:"My Conference"}},
         {_:#start, type:$col_datetime},
         {_:#config},
         $col_timestamps,
@@ -83,11 +83,11 @@
         {_:#actual_start, type:$col_datetime},
         {_:#actual_end, type:$col_datetime},
         {_:#participant_emails, type:$col_text, rails_map:{limit:2147483647}},
-        {_:#uri, index:true, rest:[#pk]},
-        {_:#introduction, type:$col_text, rest:[#pk,#cr,#up]},
-        {_:#access_config, type:$col_text, rest:[#pk,#cr,#up]},
-        {_:#origin_data, type:$col_string, rest:[#pk,#cr,#up]},
-        {_:#origin_id, type:$col_id, rest:[#pk,#cr,#up]},
+        {_:#uri, index:true, rest:[#pk], api_doc:{sample:"myuri"}},
+        {_:#introduction, type:$col_text, rest:[#pk,#cr,#up], api_doc:{sample:"My summary, introduction or description"}},
+        {_:#access_config, type:$col_text, rest:[#pk,#cr,#up], api_doc:{sample:"{}"}},
+        {_:#origin_data, type:$col_string, rest:[#pk,#cr,#up], api_doc:{sample:"Origin data (optional)"}},
+        {_:#origin_id, type:$col_id, rest:[#pk,#cr,#up], api_doc:{sample:37}},
         ],
     rails_extra: @schema/my/conference.rb.sch,
     },
@@ -190,10 +190,10 @@
     rails_extra: @schema/my/invitation.rb.sch,
     },
     { _: #media_file,
-    generators: [#rails_model,#rest_routes],
+    generators: [#rails_model,#rest_routes,#rest_apiary],
     rest_routes: [
         # added this but didn't use. should still be usabilty -- never tested
-        {_:#av, pattern: "rgx: /(POST):\\/(avatar)\\/?$/i, rgx_key: '_default_rgx_key', permfn: 'perm_valid_user', dbfn: 'db_create'", flags:{insert_uid_as:#user_id}},
+        {_:#av, pattern: "rgx: /(POST):\\/(avatar)\\/?$/i, rgx_key: '_default_rgx_key', permfn: 'perm_valid_user', dbfn: 'db_create'", flags:{insert_uid_as:#user_id}, api_doc: {signature:"POST /avatar", description:""}},
         ],
     columns: [
         #name,
@@ -209,7 +209,7 @@
         #bucket,
         #length,
         $col_timestamps,
-        {_:#upload_url, type:$col_string, rest:[#av]},
+        {_:#upload_url, type:$col_string, rest:[#av], api_doc:{sample:"http://files.example.com/file/my_master_avatar.png"}},
         ],
     rails_extra: @schema/my/media_file.rb.sch,
     },

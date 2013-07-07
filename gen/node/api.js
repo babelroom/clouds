@@ -13,28 +13,19 @@ var API = function(config) {
     this.autoAPI = new AutoAPI(this.sessionManager, this.db);
 }
 
-function get_status(self, req, res, match, opts)
-{
-    /* blunt status -- for use by pingdom et. al. */
-    res.send({status: 'OK'});
-    res.end();
-}
+//++apiary--
+--
+Authentication
+APIs for authentication
+--
+POST signup
+> Content-Type: application/json; charset=utf-8
+{}
+< 201
+< Content-Type: application/json; charset=utf-8
+{}
 
-function _version() 
-{
-    if (!/^(\d+)\.(\d+)\.(.*)$/.exec(version_stamp))
-        return null;
-    return {major: RegExp.$1, minor: RegExp.$2, commit: RegExp.$3, stamp: version_stamp};
-}
-function get_version(self, req, res, match, opts)
-{
-    var v = _version();
-    if (!v)
-        return he.internal_server_error(res);
-    res.send(v);
-    res.end();
-}
-
+//++apiary--
 function signup(self, req, res, match, opts)
 {
     self.db.query("INSERT INTO my.users (name) VALUES ("+self.e(req.body.name)+")", [], function(err, rows, fields){
@@ -44,6 +35,13 @@ function signup(self, req, res, match, opts)
         });
 }
 
+//++apiary--
+GET login
+< 200
+< Content-Type: application/json; charset=utf-8
+{}
+
+//++apiary--
 function get_current_user(self, req, res, match, opts)
 {
     var uid = self.sessionManager.uid_from_req(req);
@@ -62,6 +60,15 @@ function get_current_user(self, req, res, match, opts)
             });
 }
 
+//++apiary--
+POST login
+> Content-Type: application/json; charset=utf-8
+{}
+< 201
+< Content-Type: application/json; charset=utf-8
+{}
+
+//++apiary--
 function _login(self, req, res, match, opts)
 {
     self.db.query("SELECT id, crypted_password, salt, email_address, email, name, last_name FROM users WHERE email_address="+self.e(req.body.login), [], function(err, rows, fields){
@@ -119,6 +126,18 @@ function login(self, req, res, match, opts)
         return he.bad(res);
 }
 
+//++apiary--
+DELETE login
+< 200
+< Content-Type: application/json; charset=utf-8
+{}
+
+POST logout
+< 200
+< Content-Type: application/json; charset=utf-8
+{}
+
+//++apiary--
 function logout(self, req, res, match, opts)
 {
     if (!self.sessionManager.delete_rails(res))
@@ -128,6 +147,8 @@ function logout(self, req, res, match, opts)
         return he.ok(req, res, {});
 }
 
+//++apiary--
+//++apiary--
 var db_cols = [
     ['u.id', 'user_id'],
     ['u.email_address', 'email_address'],
@@ -147,6 +168,13 @@ var db_cols = [
     ['i.dialin', 'myAccessInfo'],
     ];
 var db_cols_sql = null;
+//++apiary--
+GET invitation
+< 200
+< Content-Type: application/json; charset=utf-8
+{}
+
+//++apiary--
 function invitation(self, req, res, match, opts)
 {
 //console.log('>> ' + new Date().getTime());
@@ -240,6 +268,22 @@ user and conference -- question: how could it have created multople invites???
         });
 }
 
+//++apiary--
+POST add_self
+> Content-Type: application/json; charset=utf-8
+{}
+< 201
+< Content-Type: application/json; charset=utf-8
+{}
+
+POST add_participant
+> Content-Type: application/json; charset=utf-8
+{}
+< 201
+< Content-Type: application/json; charset=utf-8
+{}
+
+//++apiary--
 function _enter(self, creating_uid, req, res, match, opts)
 {
     /* check conference existance and access */
@@ -443,6 +487,55 @@ Not implemented
 */
 }
 
+//++apiary--
+--
+Server
+APIs for server version and status.
+--
+Server status. This is mainly for use by automated server monitoring tools.
+GET status
+< 200
+< Content-Type: application/json; charset=utf-8
+{
+  "status": "OK"
+}
+
+//++apiary--
+function get_status(self, req, res, match, opts)
+{
+    /* blunt status -- for use by pingdom et. al. */
+    res.send({status: 'OK'});
+    res.end();
+}
+
+//++apiary--
+Server version. 
+GET version
+< 200
+< Content-Type: application/json; charset=utf-8
+{
+  "major": "2",
+  "minor": "37",
+  "commit": "201",
+  "stamp": "2.37.201"
+}
+
+//++apiary--
+function _version() 
+{
+    if (!/^(\d+)\.(\d+)\.(.*)$/.exec(version_stamp))
+        return null;
+    return {major: RegExp.$1, minor: RegExp.$2, commit: RegExp.$3, stamp: version_stamp};
+}
+function get_version(self, req, res, match, opts)
+{
+    var v = _version();
+    if (!v)
+        return he.internal_server_error(res);
+    res.send(v);
+    res.end();
+}
+
 var routes = [
 [/GET:\/status$/i, get_status],
 [/GET:\/version$/i, get_version],
@@ -459,6 +552,17 @@ var routes = [
 [/POST:\/add_self\/(.*)$/i, enter],
 [/POST:\/add_participant\/(.*)$/i, enter, {no_cookie: true, create_separate_user:true}],
 ];
+
+
+/* write apiary prolog for next (auto) section */
+//++apiary--
+--
+General Purpose Resources
+These resources are automatically generated from
+[https://github.com/babelroom/clouds/blob/master/gen/schema/main.sch](https://github.com/babelroom/clouds/blob/master/gen/schema/main.sch)
+--
+//++apiary--
+
 
 API.prototype = {
     addUseHandlers: function(express, app, options) {

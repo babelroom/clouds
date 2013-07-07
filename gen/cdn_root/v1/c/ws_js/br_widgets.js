@@ -496,7 +496,7 @@ console.log( $j('#tile',sel) );
                     }
                 else {
                     showVideoElement(false);
-                    updateStatus('Video stream paused');
+                    updateStatus('Video Stream Paused');
                     }
                 }
             function updateMetadata(peer_key) {
