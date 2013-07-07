@@ -203,7 +203,7 @@ GET invitation/apitest
     "invitation_id":2,
     "pin":"444444",
     "role":"Host",
-    "myAccessInfo":"<internal data>",
+    "myAccessInfo":"<internal data>"
     }
 }
 
