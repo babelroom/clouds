@@ -159,26 +159,24 @@ GET conferences/3{?c}
 {"error":{"code":403,"text":"Access Denied"}}
 
 POST conferences
+> Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 > Content-Type: application/json; charset=utf-8
 {"name": "My Conference","introduction": "My summary, introduction or description","access_config": "{}","origin_data": "Origin data (optional)","origin_id": 37}
-> Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 < 201
 < Content-Type: application/json; charset=utf-8
 {}
 +++++
-> Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 < 401
 {"error":{"code": 401,"text": "HTTP Basic Auth or Cookie Session Required" }}
 
 PUT /conferences/3
+> Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 > Content-Type: application/json; charset=utf-8
 {"name": "My Conference","introduction": "My summary, introduction or description","access_config": "{}","origin_data": "Origin data (optional)","origin_id": 37}
-> Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 < 200
 < Content-Type: application/json; charset=utf-8
 {}
 +++++
-> Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 < 401
 {"error":{"code": 401,"text": "HTTP Basic Auth or Cookie Session Required" }}
 
@@ -192,13 +190,12 @@ DELETE conferences/3
 {"error":{"code": 401,"text": "HTTP Basic Auth or Cookie Session Required" }}
 
 POST /avatar
+> Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 > Content-Type: application/json; charset=utf-8
 {"upload_url": "http://files.example.com/file/my_master_avatar.png"}
-> Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 < 201
 < Content-Type: application/json; charset=utf-8
 {}
 +++++
-> Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 < 401
 {"error":{"code": 401,"text": "HTTP Basic Auth or Cookie Session Required" }}
