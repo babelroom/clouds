@@ -13,8 +13,8 @@ var API = function(config) {
     this.autoAPI = new AutoAPI(this.sessionManager, this.db);
 }
 
-/* --- this was only an example remove it 
-//++apiary--
+/* --- this was only an example -- remove it 
+..//++apiary--
 --
 Authentication
 APIs for authentication
@@ -36,14 +36,16 @@ function signup(self, req, res, match, opts)
         });
 }
 
-..//++apiary--
 */
+//++apiary--
 Retrieve user data associated with active cookie session. The empty set is returned if there is no valid active cookie session.
 GET login
 < 200
 < Content-Type: application/json; charset=utf-8
 {}
 +++++
+< 200
+< Content-Type: application/json; charset=utf-8
 {"user": {"id":3, "email_address":"apitest@example.com", "email":"apitest@example.com", "name":"API", "last_name":"Test"}}
 
 //++apiary--
@@ -74,6 +76,8 @@ POST login
 < Content-Type: application/json; charset=utf-8
 {"user": {"id":3, "email_address":"apitest@example.com", "email":"apitest@example.com", "name":"API", "last_name":"Test"}}
 +++++
+< 200
+< Content-Type: application/json; charset=utf-8
 {}
 
 //++apiary--
@@ -178,6 +182,7 @@ var db_cols = [
 var db_cols_sql = null;
 //++apiary--
 Retrieve the superset of context for the currently logged in user, the specified conference and any associated invitation.
+The conference uri is appended to the end of the REST resource path /api/v1/invitation
 GET invitation/apitest
 < 200
 < Content-Type: application/json; charset=utf-8
@@ -296,17 +301,47 @@ user and conference -- question: how could it have created multople invites???
 }
 
 //++apiary--
-POST add_self
+Add the current user as a conference participant
+The conference uri is appended to the end of the REST resource path /api/v1/add_self
+POST add_self/apitest
 > Content-Type: application/json; charset=utf-8
-{}
-< 201
+{
+    "user": {
+        "name" => "API",
+        "last_name" => "Test",
+        "email" => "apitest@example.com",
+        "origin_data" => "Origin System Name",
+        "origin_id" => 37,
+        "phone" => "650.555.1212",
+        },
+    "invitation": {
+        },
+    "avatar_url": "http://example.com/path/to/my/avatar"
+}
+< 200
 < Content-Type: application/json; charset=utf-8
 {}
 
+Add another user as a conference participant
+The conference uri is appended to the end of the REST resource path /api/v1/add_participant
 POST add_participant
 > Content-Type: application/json; charset=utf-8
-{}
-< 201
+{
+    "user": {
+        "name" => "API",
+        "last_name" => "Test",
+        "email" => "apitest@example.com",
+        "origin_data" => "Origin System Name",
+        "origin_id" => 37,
+        "phone" => "650.555.1212",
+        },
+    "invitation": {
+        "role":"Host",
+        },
+    "avatar_url": "http://example.com/path/to/my/avatar",
+    "return_token":true
+}
+< 200
 < Content-Type: application/json; charset=utf-8
 {}
 

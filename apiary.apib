@@ -5,35 +5,14 @@ HOST: http://test.babelroom.com/api/v1/
 Welcome to the our sample API documentation. All comments can be written in (support [Markdown](http://daringfireball.net/projects/markdown/syntax) syntax)
 ---
 
---
-Authentication
-APIs for authentication
---
-POST signup
-> Content-Type: application/json; charset=utf-8
-{}
-< 200
-< Content-Type: application/json; charset=utf-8
-{}
-
-..//++apiary--
-function signup(self, req, res, match, opts)
-{
-    self.db.query("INSERT INTO my.users (name) VALUES ("+self.e(req.body.name)+")", [], function(err, rows, fields){
-        if (err) return he.db_error(res, err);
-        res.send(rows);     // TMP todo -- is this wise?
-        res.end();
-        });
-}
-
-..//++apiary--
-*/
 Retrieve user data associated with active cookie session. The empty set is returned if there is no valid active cookie session.
 GET login
 < 200
 < Content-Type: application/json; charset=utf-8
 {}
 +++++
+< 200
+< Content-Type: application/json; charset=utf-8
 {"user": {"id":3, "email_address":"apitest@example.com", "email":"apitest@example.com", "name":"API", "last_name":"Test"}}
 
 Login. If successful set a new cookie session.
@@ -44,6 +23,8 @@ POST login
 < Content-Type: application/json; charset=utf-8
 {"user": {"id":3, "email_address":"apitest@example.com", "email":"apitest@example.com", "name":"API", "last_name":"Test"}}
 +++++
+< 200
+< Content-Type: application/json; charset=utf-8
 {}
 
 Logout. Destroy the currently active cookie session
@@ -59,6 +40,7 @@ POST logout
 {}
 
 Retrieve the superset of context for the currently logged in user, the specified conference and any associated invitation.
+The conference uri is appended to the end of the REST resource path /api/v1/invitation
 GET invitation/apitest
 < 200
 < Content-Type: application/json; charset=utf-8
@@ -82,17 +64,47 @@ GET invitation/apitest
     }
 }
 
-POST add_self
+Add the current user as a conference participant
+The conference uri is appended to the end of the REST resource path /api/v1/add_self
+POST add_self/apitest
 > Content-Type: application/json; charset=utf-8
-{}
-< 201
+{
+    "user": {
+        "name" => "API",
+        "last_name" => "Test",
+        "email" => "apitest@example.com",
+        "origin_data" => "Origin System Name",
+        "origin_id" => 37,
+        "phone" => "650.555.1212",
+        },
+    "invitation": {
+        },
+    "avatar_url": "http://example.com/path/to/my/avatar"
+}
+< 200
 < Content-Type: application/json; charset=utf-8
 {}
 
+Add another user as a conference participant
+The conference uri is appended to the end of the REST resource path /api/v1/add_participant
 POST add_participant
 > Content-Type: application/json; charset=utf-8
-{}
-< 201
+{
+    "user": {
+        "name" => "API",
+        "last_name" => "Test",
+        "email" => "apitest@example.com",
+        "origin_data" => "Origin System Name",
+        "origin_id" => 37,
+        "phone" => "650.555.1212",
+        },
+    "invitation": {
+        "role":"Host",
+        },
+    "avatar_url": "http://example.com/path/to/my/avatar",
+    "return_token":true
+}
+< 200
 < Content-Type: application/json; charset=utf-8
 {}
 
