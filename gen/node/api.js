@@ -324,7 +324,8 @@ POST add_self/apitest
 
 Add another user as a conference participant
 The conference uri is appended to the end of the REST resource path /api/v1/add_participant
-POST add_participant
+POST add_participant/apitest
+< Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 > Content-Type: application/json; charset=utf-8
 {
     "user": {

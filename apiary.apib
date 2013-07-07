@@ -87,7 +87,8 @@ POST add_self/apitest
 
 Add another user as a conference participant
 The conference uri is appended to the end of the REST resource path /api/v1/add_participant
-POST add_participant
+POST add_participant/apitest
+< Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 > Content-Type: application/json; charset=utf-8
 {
     "user": {
@@ -137,7 +138,8 @@ These resources are automatically generated from
 [https://github.com/babelroom/clouds/blob/master/gen/schema/main.sch](https://github.com/babelroom/clouds/blob/master/gen/schema/main.sch)
 --
 
-GET users/{id}{?c}
+GET users/3{?c}
+> Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 < 200
 < Content-Type: application/json; charset=utf-8
 {"name": "First","email_address": "mail@example.com","last_name": "Last","company": "Fastbuck, Inc.","email": "mail@example.com","origin_data": "Origin System (optional)","origin_id": 37}
@@ -145,7 +147,8 @@ GET users/{id}{?c}
 < 403
 {"error":{"code":403,"text":"Access Denied"}}
 
-GET conferences/2{?c}
+GET conferences/3{?c}
+> Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 < 200
 < Content-Type: application/json; charset=utf-8
 {"name": "My Conference","uri": "myuri","introduction": "My summary, introduction or description","access_config": "{}","origin_data": "Origin data (optional)","origin_id": 37}
@@ -156,24 +159,29 @@ GET conferences/2{?c}
 POST conferences
 > Content-Type: application/json; charset=utf-8
 {"name": "My Conference","introduction": "My summary, introduction or description","access_config": "{}","origin_data": "Origin data (optional)","origin_id": 37}
+> Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 < 201
 < Content-Type: application/json; charset=utf-8
 {}
 +++++
+> Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 < 401
 {"error":{"code": 401,"text": "HTTP Basic Auth or Cookie Session Required" }}
 
-PUT /conferences/2
+PUT /conferences/3
 > Content-Type: application/json; charset=utf-8
 {"name": "My Conference","introduction": "My summary, introduction or description","access_config": "{}","origin_data": "Origin data (optional)","origin_id": 37}
+> Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 < 200
 < Content-Type: application/json; charset=utf-8
 {}
 +++++
+> Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 < 401
 {"error":{"code": 401,"text": "HTTP Basic Auth or Cookie Session Required" }}
 
-DELETE conferences/2
+DELETE conferences/3
+> Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 < 200
 < Content-Type: application/json; charset=utf-8
 {}
@@ -184,9 +192,11 @@ DELETE conferences/2
 POST /avatar
 > Content-Type: application/json; charset=utf-8
 {"upload_url": "http://files.example.com/file/my_master_avatar.png"}
+> Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 < 201
 < Content-Type: application/json; charset=utf-8
 {}
 +++++
+> Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 < 401
 {"error":{"code": 401,"text": "HTTP Basic Auth or Cookie Session Required" }}
