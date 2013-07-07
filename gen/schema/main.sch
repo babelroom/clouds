@@ -20,7 +20,7 @@
 #    meta: [$db_create,{_:$ws, flags:[#a,#b]}],
     hobo_model_name: #hobo_user_model,
     rest_routes: [
-        {_:#pk, pattern: "rgx: /(GET):\\/(users)\\/(\\d+)$/i, rgx_key: '_default_rgx_key', permfn: 'perm_the_same_user', dbfn: 'db_1_by_pk'", api_doc: {signature:"GET users/3", description:""}},
+        {_:#pk, pattern: "rgx: /(GET):\\/(users)\\/(\\d+)$/i, rgx_key: '_default_rgx_key', permfn: 'perm_the_same_user', dbfn: 'db_1_by_pk'", api_doc: {signature:"GET users/3", description:"Get user data"}},
         ],
     columns: [
 #| id                        | int(11)      | NO   | PRI | NULL                       | auto_increment |
@@ -65,10 +65,10 @@
 #    meta: [$db_create,{_:#ws, flags:[#foo]}],
     generators: [#rails_model,#rest_routes,#rest_apiary],
     rest_routes: [
-        {_:#pk, pattern: "rgx: /(GET):\\/(conferences)\\/(\\d+)$/i, rgx_key: '_default_rgx_key', permfn: 'perm_conference_owner_or_participant', dbfn: 'db_1_by_pk'", flags:{not_deleted:true}, api_doc: {signature:"GET conferences/3", description:""}},
-        {_:#cr, pattern: "rgx: /(POST):\\/(conferences)\\/?$/i, rgx_key: '_default_rgx_key', permfn: 'perm_valid_user', dbfn: 'db_create'", flags:{insert_uid_as:#owner_id}, api_doc: {signature:"POST conferences", description:""}},
-        {_:#up, pattern: "rgx: /(PUT):\\/(conferences)\\/(\\d+)$/i, rgx_key: '_default_rgx_key', permfn: 'perm_conference_owner_or_host', dbfn: 'db_update_by_pk'", flags:{not_deleted:true}, api_doc: {signature:"PUT /conferences/3", description:""}},
-        {_:#dl, pattern: "rgx: /(DELETE):\\/(conferences)\\/(\\d+)$/i, rgx_key: '_default_rgx_key', permfn: 'perm_conference_owner_or_host', dbfn: 'db_set_deleted_flag_by_pk'", api_doc: {signature:"DELETE conferences/3", description:""}},
+        {_:#pk, pattern: "rgx: /(GET):\\/(conferences)\\/(\\d+)$/i, rgx_key: '_default_rgx_key', permfn: 'perm_conference_owner_or_participant', dbfn: 'db_1_by_pk'", flags:{not_deleted:true}, api_doc: {signature:"GET conferences/3", description:"Get conference data"}},
+        {_:#cr, pattern: "rgx: /(POST):\\/(conferences)\\/?$/i, rgx_key: '_default_rgx_key', permfn: 'perm_valid_user', dbfn: 'db_create'", flags:{insert_uid_as:#owner_id}, api_doc: {signature:"POST conferences", description:"Create a new conference"}},
+        {_:#up, pattern: "rgx: /(PUT):\\/(conferences)\\/(\\d+)$/i, rgx_key: '_default_rgx_key', permfn: 'perm_conference_owner_or_host', dbfn: 'db_update_by_pk'", flags:{not_deleted:true}, api_doc: {signature:"PUT /conferences/3", description:"Update an existing conference"}},
+        {_:#dl, pattern: "rgx: /(DELETE):\\/(conferences)\\/(\\d+)$/i, rgx_key: '_default_rgx_key', permfn: 'perm_conference_owner_or_host', dbfn: 'db_set_deleted_flag_by_pk'", api_doc: {signature:"DELETE conferences/3", description:"Delete a conference"}},
         ],
     columns: [
         {_:#name, rest:[#pk,#cr,#up], api_doc:{sample:"My Conference"}},
@@ -193,7 +193,7 @@
     generators: [#rails_model,#rest_routes,#rest_apiary],
     rest_routes: [
         # added this but didn't use. should still be usabilty -- never tested
-        {_:#av, pattern: "rgx: /(POST):\\/(avatar)\\/?$/i, rgx_key: '_default_rgx_key', permfn: 'perm_valid_user', dbfn: 'db_create'", flags:{insert_uid_as:#user_id}, api_doc: {signature:"POST /avatar", description:""}},
+        {_:#av, pattern: "rgx: /(POST):\\/(avatar)\\/?$/i, rgx_key: '_default_rgx_key', permfn: 'perm_valid_user', dbfn: 'db_create'", flags:{insert_uid_as:#user_id}, api_doc: {signature:"POST /avatar", description:"Create a new avatar for the current user"}},
         ],
     columns: [
         #name,

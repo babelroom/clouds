@@ -143,7 +143,7 @@ General Purpose Resources
 These resources are automatically generated from
 [https://github.com/babelroom/clouds/blob/master/gen/schema/main.sch](https://github.com/babelroom/clouds/blob/master/gen/schema/main.sch)
 --
-
+Get user data
 
 Retrieve specified columns only by appending query string 'c' parameter, e.g. ?c=name,email_address,last_name,company,email,origin_data,origin_id
 
@@ -154,9 +154,12 @@ GET users/3
 < Content-Type: application/json; charset=utf-8
 {"name": "First","email_address": "mail@example.com","last_name": "Last","company": "Fastbuck, Inc.","email": "mail@example.com","origin_data": "Origin System (optional)","origin_id": 37}
 +++++
+< 401
+{"error":{"code": 401,"text": "HTTP Basic Auth or Cookie Session Required" }}
++++++
 < 403
 {"error":{"code":403,"text":"Access Denied"}}
-
+Get conference data
 
 Retrieve specified columns only by appending query string 'c' parameter, e.g. ?c=name,uri,introduction,access_config,origin_data,origin_id
 
@@ -167,9 +170,12 @@ GET conferences/3
 < Content-Type: application/json; charset=utf-8
 {"name": "My Conference","uri": "myuri","introduction": "My summary, introduction or description","access_config": "{}","origin_data": "Origin data (optional)","origin_id": 37}
 +++++
+< 401
+{"error":{"code": 401,"text": "HTTP Basic Auth or Cookie Session Required" }}
++++++
 < 403
 {"error":{"code":403,"text":"Access Denied"}}
-
+Create a new conference
 
 Access required to execute this API will be documented shortly.
 POST conferences
@@ -182,7 +188,10 @@ POST conferences
 +++++
 < 401
 {"error":{"code": 401,"text": "HTTP Basic Auth or Cookie Session Required" }}
-
++++++
+< 403
+{"error":{"code":403,"text":"Access Denied"}}
+Update an existing conference
 
 Access required to execute this API will be documented shortly.
 PUT /conferences/3
@@ -195,7 +204,10 @@ PUT /conferences/3
 +++++
 < 401
 {"error":{"code": 401,"text": "HTTP Basic Auth or Cookie Session Required" }}
-
++++++
+< 403
+{"error":{"code":403,"text":"Access Denied"}}
+Delete a conference
 
 Access required to execute this API will be documented shortly.
 DELETE conferences/3
@@ -206,7 +218,10 @@ DELETE conferences/3
 +++++
 < 401
 {"error":{"code": 401,"text": "HTTP Basic Auth or Cookie Session Required" }}
-
++++++
+< 403
+{"error":{"code":403,"text":"Access Denied"}}
+Create a new avatar for the current user
 
 Access required to execute this API will be documented shortly.
 POST /avatar
@@ -219,3 +234,6 @@ POST /avatar
 +++++
 < 401
 {"error":{"code": 401,"text": "HTTP Basic Auth or Cookie Session Required" }}
++++++
+< 403
+{"error":{"code":403,"text":"Access Denied"}}
