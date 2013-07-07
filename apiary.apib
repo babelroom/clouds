@@ -143,6 +143,7 @@ General Purpose Resources
 These resources are automatically generated from
 [https://github.com/babelroom/clouds/blob/master/gen/schema/main.sch](https://github.com/babelroom/clouds/blob/master/gen/schema/main.sch)
 --
+
 Get user data
 
 Retrieve specified columns only by appending query string 'c' parameter, e.g. ?c=name,email_address,last_name,company,email,origin_data,origin_id
@@ -161,6 +162,7 @@ GET users/3
 < 403
 < Content-Type: application/json; charset=utf-8
 {"error":{"code":403,"text":"Access Denied"}}
+
 Get conference data
 
 Retrieve specified columns only by appending query string 'c' parameter, e.g. ?c=name,uri,introduction,access_config,origin_data,origin_id
@@ -179,6 +181,7 @@ GET conferences/3
 < 403
 < Content-Type: application/json; charset=utf-8
 {"error":{"code":403,"text":"Access Denied"}}
+
 Create a new conference
 
 Access required to execute this API will be documented shortly.
@@ -197,6 +200,7 @@ POST conferences
 < 403
 < Content-Type: application/json; charset=utf-8
 {"error":{"code":403,"text":"Access Denied"}}
+
 Update an existing conference
 
 Access required to execute this API will be documented shortly.
@@ -215,6 +219,7 @@ PUT /conferences/3
 < 403
 < Content-Type: application/json; charset=utf-8
 {"error":{"code":403,"text":"Access Denied"}}
+
 Delete a conference
 
 Access required to execute this API will be documented shortly.
@@ -231,6 +236,7 @@ DELETE conferences/3
 < 403
 < Content-Type: application/json; charset=utf-8
 {"error":{"code":403,"text":"Access Denied"}}
+
 Create a new avatar for the current user
 
 Access required to execute this API will be documented shortly.
