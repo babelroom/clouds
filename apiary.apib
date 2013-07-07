@@ -155,9 +155,11 @@ GET users/3
 {"name": "First","email_address": "mail@example.com","last_name": "Last","company": "Fastbuck, Inc.","email": "mail@example.com","origin_data": "Origin System (optional)","origin_id": 37}
 +++++
 < 401
+< Content-Type: application/json; charset=utf-8
 {"error":{"code": 401,"text": "HTTP Basic Auth or Cookie Session Required" }}
 +++++
 < 403
+< Content-Type: application/json; charset=utf-8
 {"error":{"code":403,"text":"Access Denied"}}
 Get conference data
 
@@ -171,9 +173,11 @@ GET conferences/3
 {"name": "My Conference","uri": "myuri","introduction": "My summary, introduction or description","access_config": "{}","origin_data": "Origin data (optional)","origin_id": 37}
 +++++
 < 401
+< Content-Type: application/json; charset=utf-8
 {"error":{"code": 401,"text": "HTTP Basic Auth or Cookie Session Required" }}
 +++++
 < 403
+< Content-Type: application/json; charset=utf-8
 {"error":{"code":403,"text":"Access Denied"}}
 Create a new conference
 
@@ -187,9 +191,11 @@ POST conferences
 {}
 +++++
 < 401
+< Content-Type: application/json; charset=utf-8
 {"error":{"code": 401,"text": "HTTP Basic Auth or Cookie Session Required" }}
 +++++
 < 403
+< Content-Type: application/json; charset=utf-8
 {"error":{"code":403,"text":"Access Denied"}}
 Update an existing conference
 
@@ -203,9 +209,11 @@ PUT /conferences/3
 {}
 +++++
 < 401
+< Content-Type: application/json; charset=utf-8
 {"error":{"code": 401,"text": "HTTP Basic Auth or Cookie Session Required" }}
 +++++
 < 403
+< Content-Type: application/json; charset=utf-8
 {"error":{"code":403,"text":"Access Denied"}}
 Delete a conference
 
@@ -217,9 +225,11 @@ DELETE conferences/3
 {}
 +++++
 < 401
+< Content-Type: application/json; charset=utf-8
 {"error":{"code": 401,"text": "HTTP Basic Auth or Cookie Session Required" }}
 +++++
 < 403
+< Content-Type: application/json; charset=utf-8
 {"error":{"code":403,"text":"Access Denied"}}
 Create a new avatar for the current user
 
@@ -233,7 +243,9 @@ POST /avatar
 {}
 +++++
 < 401
+< Content-Type: application/json; charset=utf-8
 {"error":{"code": 401,"text": "HTTP Basic Auth or Cookie Session Required" }}
 +++++
 < 403
+< Content-Type: application/json; charset=utf-8
 {"error":{"code":403,"text":"Access Denied"}}
