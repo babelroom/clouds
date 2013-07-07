@@ -12,36 +12,75 @@ APIs for authentication
 POST signup
 > Content-Type: application/json; charset=utf-8
 {}
-< 201
-< Content-Type: application/json; charset=utf-8
-{}
-
-GET login
 < 200
 < Content-Type: application/json; charset=utf-8
 {}
 
-POST login
-> Content-Type: application/json; charset=utf-8
-{}
-< 201
+..//++apiary--
+function signup(self, req, res, match, opts)
+{
+    self.db.query("INSERT INTO my.users (name) VALUES ("+self.e(req.body.name)+")", [], function(err, rows, fields){
+        if (err) return he.db_error(res, err);
+        res.send(rows);     // TMP todo -- is this wise?
+        res.end();
+        });
+}
+
+..//++apiary--
+*/
+Retrieve user data associated with active cookie session. The empty set is returned if there is no valid active cookie session.
+GET login
+< 200
 < Content-Type: application/json; charset=utf-8
 {}
++++++
+{"user": {"id":3, "email_address":"apitest@example.com", "email":"apitest@example.com", "name":"API", "last_name":"Test"}}
 
+Login. If successful set a new cookie session.
+POST login
+> Content-Type: application/json; charset=utf-8
+{"login":"apitest@example.com", "password":"default"}
+< 200
+< Content-Type: application/json; charset=utf-8
+{"user": {"id":3, "email_address":"apitest@example.com", "email":"apitest@example.com", "name":"API", "last_name":"Test"}}
++++++
+{}
+
+Logout. Destroy the currently active cookie session
 DELETE login
 < 200
 < Content-Type: application/json; charset=utf-8
 {}
 
+Logout. Synonymous with DELETE login
 POST logout
 < 200
 < Content-Type: application/json; charset=utf-8
 {}
 
-GET invitation
+Retrieve the superset of context for the currently logged in user, the specified conference and any associated invitation.
+GET invitation/apitest
 < 200
 < Content-Type: application/json; charset=utf-8
-{}
+{"data": {
+    "user_id":3,
+    "email_address":"apitest@example.com",
+    "email":"apitest@example.com",
+    "first_name":"API",
+    "last_name":"Test",
+    "conference_id":3,
+    "conference_name":"API Test Conference",
+    "conference_config":"<internal data>",
+    "conference_introduction":"API Test Conference",
+    "conference_uri":"apitest",
+    "conference_access_config":"{}",
+    "conference_skin_id":1,
+    "invitation_id":2,
+    "pin":"444444",
+    "role":"Host",
+    "myAccessInfo":"<internal data>",
+    }
+}
 
 POST add_self
 > Content-Type: application/json; charset=utf-8

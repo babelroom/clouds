@@ -11,6 +11,7 @@ LOCK TABLES `accounts` WRITE;
 INSERT INTO `accounts` (id,name,balance,balance_limit,max_call_rate,max_users,max_duration,created_at,updated_at,owner_id,plan_code) VALUES (1,'Primary Account','0.00','0.00','0.00',100,240,NOW(),NOW(),NULL,'free');
 /*!40000 ALTER TABLE `accounts` ENABLE KEYS */;
 INSERT INTO `accounts` (id,name,balance,balance_limit,max_call_rate,max_users,max_duration,created_at,updated_at,owner_id,plan_code) VALUES (2,'Default\'s Primary Account','0.00','0.00','0.00',100,240,NOW(),NOW(),2,'free');
+INSERT INTO `accounts` (id,name,balance,balance_limit,max_call_rate,max_users,max_duration,created_at,updated_at,owner_id,plan_code) VALUES (3,'API Test\'s Primary Account','0.00','0.00','0.00',100,240,NOW(),NOW(),3,'free');
 ALTER TABLE `accounts` AUTO_INCREMENT=10;
 UNLOCK TABLES;
 
@@ -26,6 +27,7 @@ LOCK TABLES `conferences` WRITE;
 ALTER TABLE `conferences` ALTER `skin_id` SET DEFAULT 1;
 INSERT INTO `conferences` (id,name,created_at,updated_at,owner_id,account_id,schedule,uri,skin_id,introduction) VALUES (1,'Master Conference Template',NOW(),NOW(),NULL,NULL,NULL,NULL,1,NULL);
 INSERT INTO `conferences` (id,name,created_at,updated_at,owner_id,account_id,schedule,uri,skin_id,introduction) VALUES (2,'Demo',NOW(),NOW(),2,2,'s','demo',NULL,'Demo Conference');
+INSERT INTO `conferences` (id,name,created_at,updated_at,owner_id,account_id,schedule,uri,skin_id,introduction) VALUES (3,'API Test Conference',NOW(),NOW(),3,3,'s','apitest',NULL,'API Test Conference');
 /*!40000 ALTER TABLE `conferences` ENABLE KEYS */;
 ALTER TABLE `conferences` AUTO_INCREMENT=10;
 UNLOCK TABLES;
@@ -36,8 +38,10 @@ DELETE FROM `countries`; ALTER TABLE `countries` AUTO_INCREMENT=10;
 DELETE FROM `tokens`; ALTER TABLE `tokens` AUTO_INCREMENT=10;
 DELETE FROM `emails`; ALTER TABLE `emails` AUTO_INCREMENT=10;
 
-DELETE FROM `invitations`; ALTER TABLE `invitations` AUTO_INCREMENT=10;
+DELETE FROM `invitations`;
 INSERT INTO `invitations` (id,pin,role,created_at,updated_at,conference_id,user_id,dialin) VALUES (1,'888888','Host',NOW(),NOW(),2,2,NULL);
+INSERT INTO `invitations` (id,pin,role,created_at,updated_at,conference_id,user_id,dialin) VALUES (2,'444444','Host',NOW(),NOW(),3,3,NULL);
+ALTER TABLE `invitations` AUTO_INCREMENT=10;
 
 DELETE FROM `media_files`; ALTER TABLE `media_files` AUTO_INCREMENT=10;
 DELETE FROM `phones`; ALTER TABLE `phones` AUTO_INCREMENT=10;
@@ -65,7 +69,8 @@ UNLOCK TABLES;
 DELETE FROM `users`;
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` (id,crypted_password,salt,name,email_address,administrator,created_at,updated_at,state,last_name,timezone) VALUES (2,'3713602b0042c26ffa78ec392358c54d52274756','8ef1712c9e05d6427924f012f018b6d16c09e539','Default','default@bademail.bad',0,NOW(),NOW(),'active','Install','Pacific Time (US & Canada)');
+INSERT INTO `users` (id,crypted_password,salt,name,email_address,administrator,created_at,updated_at,state,last_name,timezone,api_key) VALUES (2,'3713602b0042c26ffa78ec392358c54d52274756','8ef1712c9e05d6427924f012f018b6d16c09e539','Default','default@bademail.bad',0,NOW(),NOW(),'active','Install','Pacific Time (US & Canada)',NULL);
+INSERT INTO `users` (id,crypted_password,salt,name,email_address,administrator,created_at,updated_at,state,last_name,timezone,api_key) VALUES (3,'3713602b0042c26ffa78ec392358c54d52274756','8ef1712c9e05d6427924f012f018b6d16c09e539','API','apitest@example.com',0,NOW(),NOW(),'active','Test','Pacific Time (US & Canada)','7cb524fb64eb4e26d1b233d2f293d10c');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 ALTER TABLE `users` AUTO_INCREMENT=10;
 UNLOCK TABLES;

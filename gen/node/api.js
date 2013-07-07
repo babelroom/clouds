@@ -13,6 +13,7 @@ var API = function(config) {
     this.autoAPI = new AutoAPI(this.sessionManager, this.db);
 }
 
+/* --- this was only an example remove it 
 //++apiary--
 --
 Authentication
@@ -21,11 +22,11 @@ APIs for authentication
 POST signup
 > Content-Type: application/json; charset=utf-8
 {}
-< 201
+< 200
 < Content-Type: application/json; charset=utf-8
 {}
 
-//++apiary--
+..//++apiary--
 function signup(self, req, res, match, opts)
 {
     self.db.query("INSERT INTO my.users (name) VALUES ("+self.e(req.body.name)+")", [], function(err, rows, fields){
@@ -35,11 +36,15 @@ function signup(self, req, res, match, opts)
         });
 }
 
-//++apiary--
+..//++apiary--
+*/
+Retrieve user data associated with active cookie session. The empty set is returned if there is no valid active cookie session.
 GET login
 < 200
 < Content-Type: application/json; charset=utf-8
 {}
++++++
+{"user": {"id":3, "email_address":"apitest@example.com", "email":"apitest@example.com", "name":"API", "last_name":"Test"}}
 
 //++apiary--
 function get_current_user(self, req, res, match, opts)
@@ -61,11 +66,14 @@ function get_current_user(self, req, res, match, opts)
 }
 
 //++apiary--
+Login. If successful set a new cookie session.
 POST login
 > Content-Type: application/json; charset=utf-8
-{}
-< 201
+{"login":"apitest@example.com", "password":"default"}
+< 200
 < Content-Type: application/json; charset=utf-8
+{"user": {"id":3, "email_address":"apitest@example.com", "email":"apitest@example.com", "name":"API", "last_name":"Test"}}
++++++
 {}
 
 //++apiary--
@@ -127,11 +135,13 @@ function login(self, req, res, match, opts)
 }
 
 //++apiary--
+Logout. Destroy the currently active cookie session
 DELETE login
 < 200
 < Content-Type: application/json; charset=utf-8
 {}
 
+Logout. Synonymous with DELETE login
 POST logout
 < 200
 < Content-Type: application/json; charset=utf-8
@@ -147,8 +157,6 @@ function logout(self, req, res, match, opts)
         return he.ok(req, res, {});
 }
 
-//++apiary--
-//++apiary--
 var db_cols = [
     ['u.id', 'user_id'],
     ['u.email_address', 'email_address'],
@@ -169,10 +177,29 @@ var db_cols = [
     ];
 var db_cols_sql = null;
 //++apiary--
-GET invitation
+Retrieve the superset of context for the currently logged in user, the specified conference and any associated invitation.
+GET invitation/apitest
 < 200
 < Content-Type: application/json; charset=utf-8
-{}
+{"data": {
+    "user_id":3,
+    "email_address":"apitest@example.com",
+    "email":"apitest@example.com",
+    "first_name":"API",
+    "last_name":"Test",
+    "conference_id":3,
+    "conference_name":"API Test Conference",
+    "conference_config":"<internal data>",
+    "conference_introduction":"API Test Conference",
+    "conference_uri":"apitest",
+    "conference_access_config":"{}",
+    "conference_skin_id":1,
+    "invitation_id":2,
+    "pin":"444444",
+    "role":"Host",
+    "myAccessInfo":"<internal data>",
+    }
+}
 
 //++apiary--
 function invitation(self, req, res, match, opts)
@@ -547,7 +574,7 @@ var routes = [
 [/POST:\/logout$/i, logout],    /* synomym for delete login, easier to read/debug in form */
 // -- [/GET:\/country$/i, country],
 [/GET:\/invitation\/(.*)$/i, invitation],
-[/POST:\/_aq$/i, aq],           /* depreciate soon in preference to much specific, secure functions */
+[/POST:\/_aq$/i, aq],           /* depreciate soon in preference to specific, secure functions */
 // -- [/GET:\/conference_access\/(.*)$/i, conference_access],
 [/POST:\/add_self\/(.*)$/i, enter],
 [/POST:\/add_participant\/(.*)$/i, enter, {no_cookie: true, create_separate_user:true}],
