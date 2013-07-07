@@ -202,7 +202,8 @@ GET invitation/apitest
     "conference_skin_id":1,
     "invitation_id":2,
     "pin":"444444",
-    "role":"Host",
+    "is_host":true,
+    "is_live":false,
     "myAccessInfo":"<internal data>"
     }
 }
