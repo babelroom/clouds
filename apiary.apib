@@ -144,7 +144,10 @@ These resources are automatically generated from
 [https://github.com/babelroom/clouds/blob/master/gen/schema/main.sch](https://github.com/babelroom/clouds/blob/master/gen/schema/main.sch)
 --
 
+
 Retrieve specified columns only by appending query string 'c' parameter, e.g. ?c=name,email_address,last_name,company,email,origin_data,origin_id
+
+Access required to execute this API will be documented shortly.
 GET users/3
 > Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 < 200
@@ -154,7 +157,10 @@ GET users/3
 < 403
 {"error":{"code":403,"text":"Access Denied"}}
 
+
 Retrieve specified columns only by appending query string 'c' parameter, e.g. ?c=name,uri,introduction,access_config,origin_data,origin_id
+
+Access required to execute this API will be documented shortly.
 GET conferences/3
 > Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 < 200
@@ -164,6 +170,8 @@ GET conferences/3
 < 403
 {"error":{"code":403,"text":"Access Denied"}}
 
+
+Access required to execute this API will be documented shortly.
 POST conferences
 > Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 > Content-Type: application/json; charset=utf-8
@@ -175,6 +183,8 @@ POST conferences
 < 401
 {"error":{"code": 401,"text": "HTTP Basic Auth or Cookie Session Required" }}
 
+
+Access required to execute this API will be documented shortly.
 PUT /conferences/3
 > Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 > Content-Type: application/json; charset=utf-8
@@ -186,6 +196,8 @@ PUT /conferences/3
 < 401
 {"error":{"code": 401,"text": "HTTP Basic Auth or Cookie Session Required" }}
 
+
+Access required to execute this API will be documented shortly.
 DELETE conferences/3
 > Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 < 200
@@ -195,6 +207,8 @@ DELETE conferences/3
 < 401
 {"error":{"code": 401,"text": "HTTP Basic Auth or Cookie Session Required" }}
 
+
+Access required to execute this API will be documented shortly.
 POST /avatar
 > Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 > Content-Type: application/json; charset=utf-8
