@@ -184,6 +184,7 @@ var db_cols_sql = null;
 Retrieve the superset of context for the currently logged in user, the specified conference and any associated invitation.
 The conference uri is appended to the end of the REST resource path /api/v1/invitation
 GET invitation/apitest
+< Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 < 200
 < Content-Type: application/json; charset=utf-8
 {"data": {
@@ -304,6 +305,7 @@ user and conference -- question: how could it have created multople invites???
 Add the current user as a conference participant
 The conference uri is appended to the end of the REST resource path /api/v1/add_self
 POST add_self/apitest
+< Authorization: Basic N2NiNTI0ZmI2NGViNGUyNmQxYjIzM2QyZjI5M2QxMGM6
 > Content-Type: application/json; charset=utf-8
 {
     "user": {
