@@ -1968,7 +1968,7 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
             function newLine(token, state, full_number, sec) {
                 modified();
                 var html = '<div id="'+id+'_'+token+'_line">\
-<button id="'+id+'_'+token+'_hup" title="Hangup"><i class="icon icon2-cancel-circle" stle="color: red;"></i></button>\
+<button id="'+id+'_'+token+'_hup" title="Hangup"><i class="icon icon2-cancel-circled" stle="color: red;"></i></button>\
 <button disabled><span id="'+id+'_'+token+'_status"></span></button>\
 </div>';
                 d.append(html);
