@@ -11,8 +11,7 @@ DEP_gen_preminified=css/jquery-ui-1.10.1.custom.min.css
 
 # in order of inclusion ... but pre-minified are separated out
 DEP_gen_jquery_base_min_js=
-#DEP_gen_other1_js=wraprtc/wraprtc.js jquery/js/jquery-1.9.1.js jquery/js/i18n/grid.locale-en.js -- temporarily remove wraprtc
-DEP_gen_other1_js=jquery/js/jquery-1.9.1.js jquery/js/i18n/grid.locale-en.js
+DEP_gen_other1_js=wraprtc/wraprtc.js jquery/js/jquery-1.9.1.js jquery/js/i18n/grid.locale-en.js
 #DEP_gen_jquery_min_js=jquery/js/jquery.jqGrid.min.js jquery/js/jquery.tools.min.js jquery/js/jquery-ui-1.8.23.custom.min.js
 DEP_gen_jquery_min_js=jquery/js/jquery.jqGrid.min.js jquery/js/jquery-ui-1.10.1.custom.min.js jquery/js/query.tools.scrollable-1.2.7.min.js
 DEP_gen_other2_js=jquery/js/jquery.placeholder.js flash/swfobject.js
