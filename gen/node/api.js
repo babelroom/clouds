@@ -37,7 +37,7 @@ function signup(self, req, res, match, opts)
 }
 
 */
-//++apiary--
+/*++apiary--
 Retrieve user data associated with active cookie session. The empty set is returned if there is no valid active cookie session.
 GET login
 < 200
@@ -48,7 +48,7 @@ GET login
 < Content-Type: application/json; charset=utf-8
 {"user": {"id":3, "email_address":"apitest@example.com", "email":"apitest@example.com", "name":"API", "last_name":"Test"}}
 
-//++apiary--
+++apiary--*/
 function get_current_user(self, req, res, match, opts)
 {
     var uid = self.sessionManager.uid_from_req(req);
@@ -67,7 +67,7 @@ function get_current_user(self, req, res, match, opts)
             });
 }
 
-//++apiary--
+/*++apiary--
 Login. If successful set a new cookie session.
 POST login
 > Content-Type: application/json; charset=utf-8
@@ -80,7 +80,7 @@ POST login
 < Content-Type: application/json; charset=utf-8
 {}
 
-//++apiary--
+++apiary--*/
 function _login(self, req, res, match, opts)
 {
     self.db.query("SELECT id, crypted_password, salt, email_address, email, name, last_name FROM users WHERE email_address="+self.e(req.body.login), [], function(err, rows, fields){
@@ -138,7 +138,7 @@ function login(self, req, res, match, opts)
         return he.bad(res);
 }
 
-//++apiary--
+/*++apiary--
 Logout. Destroy the currently active cookie session
 DELETE login
 < 200
@@ -151,7 +151,7 @@ POST logout
 < Content-Type: application/json; charset=utf-8
 {}
 
-//++apiary--
+++apiary--*/
 function logout(self, req, res, match, opts)
 {
     if (!self.sessionManager.delete_rails(res))
@@ -180,7 +180,7 @@ var db_cols = [
     ['i.dialin', 'myAccessInfo'],
     ];
 var db_cols_sql = null;
-//++apiary--
+/*++apiary--
 Retrieve the superset of context for the currently logged in user, the specified conference and any associated invitation.
 The conference uri is appended to the end of the REST resource path /api/v1/invitation
 GET invitation/apitest
@@ -211,7 +211,7 @@ GET invitation/apitest
     }
 }
 
-//++apiary--
+++apiary--*/
 function invitation(self, req, res, match, opts)
 {
 //console.log('>> ' + new Date().getTime());
@@ -305,7 +305,7 @@ user and conference -- question: how could it have created multople invites???
         });
 }
 
-//++apiary--
+/*++apiary--
 Add the current user as a conference participant
 The conference uri is appended to the end of the REST resource path /api/v1/add_self
 POST add_self/apitest
@@ -352,7 +352,7 @@ POST add_participant/apitest
 < Content-Type: application/json; charset=utf-8
 {}
 
-//++apiary--
+++apiary--*/
 function _enter(self, creating_uid, req, res, match, opts)
 {
     /* check conference existance and access */
@@ -556,7 +556,7 @@ Not implemented
 */
 }
 
-//++apiary--
+/*++apiary--
 --
 Server
 APIs for server version and status.
@@ -569,7 +569,7 @@ GET status
   "status": "OK"
 }
 
-//++apiary--
+++apiary--*/
 function get_status(self, req, res, match, opts)
 {
     /* blunt status -- for use by pingdom et. al. */
@@ -577,7 +577,7 @@ function get_status(self, req, res, match, opts)
     res.end();
 }
 
-//++apiary--
+/*++apiary--
 Server version. 
 GET version
 < 200
@@ -589,7 +589,7 @@ GET version
   "stamp": "2.37.201"
 }
 
-//++apiary--
+++apiary--*/
 function _version() 
 {
     if (!/^(\d+)\.(\d+)\.(.*)$/.exec(version_stamp))
@@ -608,7 +608,7 @@ function get_version(self, req, res, match, opts)
 var routes = [
 [/GET:\/status$/i, get_status],
 [/GET:\/version$/i, get_version],
-[/POST:\/signup\/(.)(.)(.*)$/i, signup],
+// [/POST:\/signup\/(.)(.)(.*)$/i, signup],
 // -- [/(?:GET|POST):\/current_user\/?(.*)$/i, current_user], // --- preserve useful regex for reference
 [/GET:\/login$/i, get_current_user],
 [/POST:\/login$/i, login],
@@ -624,13 +624,13 @@ var routes = [
 
 
 /* write apiary prolog for next (auto) section */
-//++apiary--
+/*++apiary--
 --
 General Purpose Resources
 These resources are automatically generated from
 [https://github.com/babelroom/clouds/blob/master/gen/schema/main.sch](https://github.com/babelroom/clouds/blob/master/gen/schema/main.sch)
 --
-//++apiary--
+++apiary--*/
 
 
 API.prototype = {

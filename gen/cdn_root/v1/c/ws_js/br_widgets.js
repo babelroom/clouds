@@ -425,10 +425,11 @@ console.log( $j('#tile',sel) );
             var peerKeys = {}               /* keys of available peer webcams for this box */
                 , peerMetadata = {}
                 , videoFrame = null
-                , videoFrameVisible         /* redundant -- not I don't trust .is(':visible') */
+                , videoOn = false           /* redundant -- not I don't trust .is(':visible') */
                 , statusElement = null
                 , videoElement = null
                 , webrtc_data = null
+                , flash_key = null
                 , callState = 'offline'
                 //, autoStartViewerOnce = opts.autoStartViewer -- actually it's problematic
                 , autoStartViewerOnce = false
@@ -442,7 +443,6 @@ console.log( $j('#tile',sel) );
             if (opts.rootElement) {
                 opts.rootElement.append('<div id="video_parent"><div></div><video width="100%" height="100%" autoplay="autoplay" /></div>');
                 videoFrame = opts.rootElement.find('div#video_parent').hide();
-                videoFrameVisible = false;
                 statusElement = videoFrame.find('div:first-child');
                 videoElement = videoFrame.find('video').hide();
                 }
@@ -462,23 +462,22 @@ console.log( $j('#tile',sel) );
                 if (broadcaster)
                     updateStatus('Gathering ICE candidates...' + (progress? (' ['+progress+']') :''));
                 }
-            function showFrame(show) {
+            function showWebRTCFrame(show) {
                 if (videoFrame) {
                     if (show || typeof(show)==='undefined') {
                         opts.showBackground(false);
                         showVideoElement(false);
                         videoFrame.show();
-                        videoFrameVisible = true;
+                        videoOn = true;
                         }
                     else {
                         videoFrame.hide();
-                        videoFrameVisible = false;
+                        videoOn = false;
                         opts.showBackground(true);
                         }
                     }
                 }
             function showVideoElement(show) {
-//console.log(show);
                 if (videoElement) {
                     if (show || typeof(show)==='undefined') {
                         statusElement && statusElement.hide();
@@ -502,7 +501,6 @@ console.log( $j('#tile',sel) );
             function updateMetadata(peer_key) {
                 /* metadata from broadcaster */
                 var md = peerMetadata[peer_key];
-//console.log('um',md,indicators);
                 if (!md)
                     return;
                 if (indicators.md.video!==md.video) {
@@ -511,24 +509,25 @@ console.log( $j('#tile',sel) );
                 indicators.md = md;
                 opts.updateBroadcasterIndicators(indicators);
                 }
+            /* this is really webrtc state */
             function state(new_state) {
                 switch(new_state) {
                     case 'offline':
                         opts.showControl('view',false);
                         opts.showControl('unview',false);
-                        showFrame(false);
+                        showWebRTCFrame(false);
                         break;
                     case 'available':
                         opts.showControl('view', true, have_video_capability);
                         opts.showControl('unview',false);
-                        showFrame(false);
+                        showWebRTCFrame(false);
                         if (autoStartViewerOnce) {
                             autoStartViewerOnce = false;
                             start_webcam_view();
                             }
                         break;
                     case 'br_callme':
-                        showFrame(true);
+                        showWebRTCFrame(true);
                         updateStatus('Contacting peer...');
                         timer = setTimeout(function(){
                                 timer = null;
@@ -558,7 +557,7 @@ console.log( $j('#tile',sel) );
                                     state('broadcastable');
                                     }
                                 }, 2000);
-                        showFrame();
+                        showWebRTCFrame();
                         updateStatus('Camera / Microphone access denied');
                         break;
                     case 'broadcastable':
@@ -571,7 +570,7 @@ console.log( $j('#tile',sel) );
                         opts.showControl('unmute',false);
                         opts.showControl('video_on',false);
                         opts.showControl('video_off',false);
-                        showFrame(false);
+                        showWebRTCFrame(false);
                         indicators.broadcasting = false;
                         indicators.md = {};
                         opts.updateBroadcasterIndicators(indicators);
@@ -581,7 +580,7 @@ console.log( $j('#tile',sel) );
                         opts.showControl('stop',true);
                         opts.showControl('mute',true);
                         opts.showControl('video_off',true);
-                        showFrame();
+                        showWebRTCFrame();
                         showVideoElement();
                         indicators.broadcasting = true;
                         opts.updateBroadcasterIndicators(indicators);
@@ -618,7 +617,6 @@ console.log( $j('#tile',sel) );
                 BRCommands.videoAction('webrtc-' + key + '-' + peer_key, JSON.stringify(msg));
                 }
             function webrtc_signalIn(peer_connection_id, peer_key, msg) {
-//console.log('signal',msg);
                 ass(webrtc_data);
                 switch(msg.type) {
                     case 'br_callme':
@@ -671,7 +669,6 @@ console.log( $j('#tile',sel) );
                         if (webrtc_data.pcs[peer_key]) {
                             webrtc_data.candidate_count = webrtc_data.candidate_count + 1;
                             openingVideo(webrtc_data.candidate_count);
-//console.log(webrtc_data.candidate_count);
                             wrapRTC.candidate(webrtc_data.pcs[peer_key], msg);
                             }
                         break;
@@ -708,9 +705,9 @@ console.log( $j('#tile',sel) );
 </div>\
 ');
                 var flashvars = {
-                    //'csMediaServerURI':  BR.room.context.media_server_uri,
-// TODO
-'csMediaServerURI':  'rtmp%3A%2F%2Fvideo.babelroom.com%3A1936%2FoflaDemo',
+                    'csMediaServerURI':  BR.room.context.media_server_uri,
+//'csMediaServerURI':  'rtmp%3A%2F%2Fvideo.babelroom.com%3A1936%2FoflaDemo',
+//console.log('TDBR', BR.room.context);
                     'csStreamId': stream_salt
                     };
                 var params = {
@@ -720,11 +717,7 @@ console.log( $j('#tile',sel) );
                 swfobject.embedSWF( BR.api.v1.get_host('cdn') + "/cdn/v1/c/flash/" + (broadcast ? "brBroadcast.swf" : "brViewer.swf"),
                     //flash_id, "214", "160", "8.0.0", "expressInstall.swf", flashvars, params, attributes);  /* returns 'undefined' */
                     flash_id, "100%", "100%", "8.0.0", "expressInstall.swf", flashvars, params, attributes);  /* returns 'undefined' */
-console.log(flashvars);
                 opts.showBackground(false);
-                if (broadcast) {
-                    BRCommands.videoAction('flash-' + stream_salt, '');
-                    }
                 }
             function do_stop() {
                 if (opts.useWebRTC) {
@@ -732,14 +725,13 @@ console.log(flashvars);
                         return webrtc_stop_pc();
                     }
                 else {
-                    var flash_elem = b.find('#'+flash_id);
+                    var flash_elem = opts.rootElement.find('#'+flash_id);
                     if (flash_elem.length) {                                /* if we we're viewing/broadcasting webcam */
                         flash_elem.remove();
                         return true;
                         }
                     else    /* how would be get here? */
                         ass(false);
-                    BRCommands.videoAction('flash', undefined/*must be undefined for value*/);
                     }
                 return false;
                 }
@@ -751,15 +743,27 @@ console.log(flashvars);
                     webrtc_open_webcam();
                     }
                 else  {
-                    do_flash(true, make_key());
+                    do_flash(true, (flash_key=make_key()));
+                    opts.showControl('stop',true);
+                    opts.showControl('start',false);
+                    videoOn = true;
+                    BRCommands.videoAction('flash-' + flash_key, '');
                     }
                 }
             function stop_webcam_broadcast() {
                 if (!do_stop()) return;
-                showFrame(false);
-                /* notify we've stopped broadcasting */
-                //BRCommands.videoAction((use_webrtc ? 'webrtc' : 'flash'), undefined/*must be undefined for value*/);
-                state('broadcastable');
+                if (opts.useWebRTC) {
+                    showWebRTCFrame(false);
+                    state('broadcastable');
+                    }
+                else {
+                    opts.showControl('stop',false);
+                    opts.showControl('start',true,have_video_capability);
+                    flash_key = null;
+                    videoOn = false;
+                    /* notify we've stopped broadcasting */
+                    BRCommands.videoAction('flash', undefined/*must be undefined for value*/);
+                    }
                 }
             function pick_a_peer() {
                 /* (almost) a hack here -- choose the highest connection id value (most recent connection) */
@@ -780,20 +784,28 @@ console.log(flashvars);
                     webrtc_signalOut(webrtc_data.key, pick_a_peer(), {type: 'br_callme'});
                     }
                 else  {
-                    do_flash(false, pick_a_peer());
-//                    viewing = true;
-                    state('viewing');
-                    showFrame();
+                    do_flash(false, (flash_key=pick_a_peer()));
+                    opts.showControl('view',false);
+                    opts.showControl('unview',true);
+                    videoOn = true;
                     }
                 }
             function stop_webcam_view() {
                 if (!do_stop()) return;
-                indicators.md = {};
-                opts.updateBroadcasterIndicators(indicators);
-                if (opts.peerCount===0)
-                    state('offline');
-                else
-                    state('available');
+                if (opts.useWebRTC) {
+                    indicators.md = {};
+                    opts.updateBroadcasterIndicators(indicators);
+                    if (opts.peerCount===0)
+                        state('offline');
+                    else
+                        state('available');
+                    }
+                else {
+                    opts.showControl('view',true);
+                    opts.showControl('unview',false);
+                    videoOn = false;
+                    flash_key = null;
+                    }
                 }
             function peer_webcam_onoff(peer_connection_id, peer_user_id, peer_key, value) {
 //console.log(peer_connection_id, peer_key, value);
@@ -809,7 +821,7 @@ console.log(flashvars);
 //console.log(indicators.peerCount);
                         if (callState==='broadcastable' || callState==='broadcasting') {
                             if (webrtc_data) {
-                                if (peer_key in webrtc_data.pcs)    /* because we may have inited estream data, but not yet established connection */
+                                if (peer_key in webrtc_data.pcs)    /* because we may have initiated estream data, but not yet established connection */
                                     wrapRTC.stopConnection(webrtc_data.pcs[peer_key]);
                                 }
                             opts.updateBroadcasterIndicators(indicators);
@@ -915,7 +927,7 @@ console.log(flashvars);
 
             /* --- */
             return {
-                isVideoOn: function() { return videoFrameVisible; },
+                isVideoOn: function() { return videoOn; },
                 setMe: checkCanBroadcast,
                 startBroadcast: start_webcam_broadcast,
                 stopBroadcast: stop_webcam_broadcast,
@@ -1070,12 +1082,10 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                 show_avatar(false);
                 if (to_big) {
                     b.removeClass("br-person-box").addClass("br-person-big-box");
-                    //b.find("button:contains('-')").show().next().hide();
                     b.find("#small").show().next().hide();
                     }
                 else {
                     b.removeClass("br-person-big-box").addClass("br-person-box");
-                    //b.find("button:contains('-')").hide().next().show();
                     b.find("#small").hide().next().show();
                     }
                 show_avatar(undefined);

@@ -197,7 +197,7 @@ sub conferences_queue_created
     $_data=[];
     my $did_something = 0;
     # -- why the deployed_at>updated_at here?? (reviewed once)
-    db_select("SELECT id,state,fs_server,updated_at,origin_id FROM conferences WHERE (state='queue_created') AND system_id=$system_id ORDER BY updated_at", '_data',$dbh) or die;
+    db_select("SELECT id,state,fs_server,updated_at,origin_id FROM conferences WHERE (state='queue_created') AND system_id=$system_id AND is_deleted IS NULL ORDER BY updated_at", '_data',$dbh) or die;
     foreach my $l(@{$_data}) {
         print "conference queue created id=[$l->{id}]\tstate=[$r->{state}]\tupdated_at=[$r->{updated_at}]\n";
         my $ipv4 = $1 if $l->{fs_server} =~ /ipv4=([^,]*)/;
