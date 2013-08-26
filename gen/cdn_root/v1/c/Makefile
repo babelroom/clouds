@@ -1,4 +1,3 @@
-
 2gen=css/gen_workspace.css ws_js/gen.min.js gen-other1.min.js gen-other2.min.js gen.min.js
 #2gen=css/gen_lobby.css css/gen_lobby_old_ie.css css/gen_workspace.css ws_js/gen.min.js gen-other1.min.js gen-other2.min.js gen.min.js
 DEP_gen_lobby=lobby/customized.css lobby/br_override.css css/widget.css recurly-js/recurly-customized.css
@@ -24,6 +23,9 @@ DEP_gen_ws_js=ws_js/br_dashboard.js ws_js/br_commands.js ws_js/br_utils.js ws_js
 
 
 all: $(2gen)
+
+wraprtc/wraprtc.js:
+	git clone https://github.com/babelroom/wraprtc.git
 
 css/gen_lobby.css: $(DEP_gen_lobby)
 	/bin/cat $^ > $@
