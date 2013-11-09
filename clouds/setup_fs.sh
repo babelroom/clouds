@@ -34,7 +34,7 @@ cd $HOME/gits
 test -d FS && echo "FS directory already exists -- cleanup (rm -rf FS) then restart" && exit -1
 
 # get files to build
-git clone http://github.com/babelroom/FS.git || exit -1
+git clone https://github.com/babelroom/FS.git || exit -1
 cd FS
 git clone -b v1.2.stable git://git.freeswitch.org/freeswitch.git
 
