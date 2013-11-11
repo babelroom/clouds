@@ -42,7 +42,7 @@ case "$1" in
         # this does --JR
         #PID=`ps ax | grep '\-Dred5.root=/home/br/gits/red5/' | grep -v grep | awk '/\s*(\d+)\s/ {print "$1"}'`;
         PID=`ps ax | grep '\-Dred5.root=/home/br/gits/red5/' | grep -v grep | perl -e 'print (<>+0)'`;
-        if [ -n "$PID" ] ; then
+        if [ -n "$PID" ] && [ $PID -gt 0 ] ; then
             echo
             echo "Terminating..."
 #            echo "$PID";

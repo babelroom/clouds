@@ -133,8 +133,10 @@ print F <<__EOT__
   cmd="set" data="global_codec_prefs=G7221\@32000h,G7221\@16000h,G722,PCMU,PCMA,GSM"
   cmd="set" data="outbound_codec_prefs=PCMU,PCMA,GSM"
   -->
-  <X-PRE-PROCESS cmd="set" data="global_codec_prefs=speex,G7221\@32000h,G7221\@16000h,G722,PCMU,PCMA,GSM"/>
-  <X-PRE-PROCESS cmd="set" data="outbound_codec_prefs=PCMU,PCMA,GSM"/>
+  <!--<X-PRE-PROCESS cmd="set" data="global_codec_prefs=speex,G7221\@32000h,G7221\@16000h,G722,PCMU,PCMA,GSM"/>
+  <X-PRE-PROCESS cmd="set" data="outbound_codec_prefs=PCMU,PCMA,GSM"/>-->
+  <X-PRE-PROCESS cmd="set" data="global_codec_prefs=speex,G7221\@32000h,G7221\@16000h,G722,PCMU,PCMA,GSM,H264"/>
+  <X-PRE-PROCESS cmd="set" data="outbound_codec_prefs=PCMU,PCMA,GSM,H264"/>
 
   <!--
       xmpp_client_profile and xmpp_server_profile

@@ -24,7 +24,8 @@ cd $HOME/gits/clouds/gen/rails/netops
 # 5. add PINS!!!!
 echo 'Loading pins...'
 echo 'DELETE FROM `pins`; ALTER TABLE `pins` AUTO_INCREMENT=1;' | mysql -uroot my
-mysql -uroot my <$HOME/gits/clouds/gen/rails/my/db/pin.sql
+# change value after 'head -n' to be number of pincodes to preload
+cat $HOME/gits/clouds/gen/rails/my/db/pin.sql | head -n 100000 | mysql -uroot my
 
 # 6. reset master so binlog isn't sucking thru all this setup
 echo "Ignore reset master failure (if any)"

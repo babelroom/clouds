@@ -14,6 +14,7 @@ git pull || exit -1     # get latest version
 # ---
 make clean && make
 sudo sh -c "cd $HOME/gits/clouds/eStream && make install"
+test -L /var/log/br/estream || ln -s /var/estream/log /var/log/br/estream
 make clean
 sudo /sbin/chkconfig estream off        # make install puts this on by default, disable it as we'll use primers
 

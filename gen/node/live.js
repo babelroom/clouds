@@ -62,7 +62,7 @@ function estream_get(es, socket, url_suffix, fn)
         });
     req.on('error', function(e) {
         // such as connection refused
-        console.log('problem with request: ' + e.message);
+        console.log('problem with request (estream_get): ' + e.message);
         fn(false);
         });
     set(socket, 'estreamRequest', req);
@@ -90,7 +90,7 @@ function estream_put(es, socket, data)
         });
     req.on('error', function(e) {
         // such as connection refused
-        console.log('problem with request: ' + e.message);
+        console.log('problem with request: (estream_put)' + e.message);
         });
     req.write(data.data);
     req.end();

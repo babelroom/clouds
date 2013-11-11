@@ -34,7 +34,8 @@ var config = {
             },
         mini: {
             root: '/home/br/gits/clouds/gen/cdn_root',
-            index: '/v1/c/index_dev.html',
+            dashboard: '/v1/c/index_vm.html',
+            index: '/home/br/index.html',
             },
         mysql: {
             poolsize: 20,
