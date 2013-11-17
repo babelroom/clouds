@@ -9,6 +9,7 @@
 # ---
 $|++;
 use BRDB;
+use BRUDP;
 use String::Random;
 
 # ---
@@ -368,6 +369,7 @@ sub update_conference_in
     my $schedule = ($r->{schedule} eq 's') ? 'NULL' : $dbh->quote($r->{schedule});
     # state -> undeployed as we've updated people (avoid race condition with assign and deployment scripts)
     db_exec($dbh,"UPDATE conferences SET name=$name,start=$start,schedule=$schedule,state='undeployed',updated_at=NOW() WHERE id='$l->{id}' AND is_deleted IS NULL") or return 0;
+    $udp->send('no_conference');
     db_exec($dbrh,"UPDATE conferences SET deployed_at=NOW() WHERE id='$r->{id}' AND is_deleted IS NULL AND updated_at = '$r->{updated_at}'") or return 0;
     return 1;
 }
@@ -431,6 +433,7 @@ sub cross_reference_remote_and_local_conferences
 # ---
 db_remote_connect() or die;
 db_local_connect() or die;
+$udp = BRUDP->new(Port=>$ENV{BR_UDPPORT}) or die;
 
 # ---
 for(my $it=0; $it<$ENV{BR_ITERATIONS}; $it++) 
@@ -454,7 +457,8 @@ for(my $it=0; $it<$ENV{BR_ITERATIONS}; $it++)
 
     $did_something = 1 if conferences_status_updated_out();
 
-    sleep $ENV{BR_SLEEP_SHORT} if not $did_something;
+#    sleep $ENV{BR_SLEEP_SHORT} if not $did_something;
+    ($udp->recv('updated_conference', $ENV{BR_SLEEP_SHORT}) or die) if not $did_something; 
     print "--------------------------------------------------------------------------------\n";
 }
 

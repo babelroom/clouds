@@ -9,6 +9,7 @@
 # ---
 $|++;
 use BRDB;
+use BRUDP;
 
 # ---
 sub get_pending_conferences
@@ -53,6 +54,7 @@ sub assign_people_to_servers
 
 # ---
 $dbh = db_quick_connect();
+$udp = BRUDP->new(Port=>$ENV{BR_UDPPORT}) or die;
 
 # ---
 for(my $it=0; $it<$ENV{BR_ITERATIONS}; $it++) 
@@ -71,8 +73,13 @@ for(my $it=0; $it<$ENV{BR_ITERATIONS}; $it++)
         $did_something = 1 if assign_people_to_servers();
         }
 
-    # ---
-    sleep $ENV{BR_SLEEP_SHORT} if not $did_something;
+    if ($did_something) {
+        $udp->send('no_assigned') or die;
+        }
+    else {
+#        sleep $ENV{BR_SLEEP_SHORT};
+        $udp->recv('no_conference|no_people', $ENV{BR_SLEEP_SHORT}) or die;
+        }
 }
 
 # ---

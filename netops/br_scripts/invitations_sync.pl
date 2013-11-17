@@ -9,6 +9,7 @@
 # ---
 $|++;
 use BRDB;
+use BRUDP;
 use Data::Dumper;
 %conference_map = ();
 $invitations = undef;
@@ -84,6 +85,7 @@ sub new_people
     my $rows = undef;
     BRDB::db_exec2($dbh, $sql, \$rows) or die;
     die if $rows != $count;
+    $udp->send('no_people');
     $sql = 'UPDATE invitations SET deployed_at = NOW() WHERE id IN (' . join(',', @iids) . ')';
     BRDB::db_exec2($dbrh, $sql, \$rows) or die;
     die if $rows != $count;
@@ -123,6 +125,7 @@ sub updated_people
 # ---
 db_remote_connect() or die;
 db_local_connect() or die;
+$udp = BRUDP->new(Port=>$ENV{BR_UDPPORT}) or die;
 
 # ---
 for(my $it=0; $it<$ENV{BR_ITERATIONS}; $it++) 
@@ -136,7 +139,8 @@ for(my $it=0; $it<$ENV{BR_ITERATIONS}; $it++)
         $did_something = 1 if updated_people();
         }
 
-    sleep $ENV{BR_SLEEP_SHORT} if not $did_something;
+#    sleep $ENV{BR_SLEEP_SHORT} if not $did_something;
+    ($udp->recv('updated_invitation', $ENV{BR_SLEEP_SHORT}) or die) if not $did_something; 
 }
 
 # ---

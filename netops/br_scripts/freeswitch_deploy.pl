@@ -9,6 +9,7 @@
 # ---
 $|++;
 use BRDB;
+use BRUDP;
 use REST::Client;
 use Data::Dumper;
 
@@ -112,6 +113,7 @@ __EOT__
 
 # ---
 $dbh = db_quick_connect();
+$udp = BRUDP->new(Port=>$ENV{BR_UDPPORT}) or die;
 
 # ---
 for(my $it=0; $it<$ENV{BR_ITERATIONS}; $it++) 
@@ -132,9 +134,9 @@ for(my $it=0; $it<$ENV{BR_ITERATIONS}; $it++)
             }
         }
 
-
     # ---
-    sleep $ENV{BR_SLEEP_SHORT} if not $did_something;
+#    sleep $ENV{BR_SLEEP_SHORT} if not $did_something;
+    ($udp->recv('no_assigned', $ENV{BR_SLEEP_SHORT}) or die) if not $did_something; 
 }
 
 # ---

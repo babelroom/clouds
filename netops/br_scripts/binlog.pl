@@ -125,9 +125,22 @@ sub flush_binlog_pos
         }
     return if ($g_binlog_file eq $g_last_binlog_file) and ($pos<=$g_last_binlog_pos);
 #print "binlog: writing [$g_binlog_file:$pos] to [$g_replicate_pos_file]\n";
-    open FO, ">$g_replicate_pos_file";
+
+    # disk space could be full --> 
+    my $newfn = "${g_replicate_pos_file}.new";
+    open FO, ">$newfn";
     print FO "$g_binlog_file:$pos\n";
     close FO;
+    if ((-s $newfn)>0) {
+        rename $newfn, $g_replicate_pos_file;
+        }
+    else {
+        print "binlog: writing [$g_binlog_file:$pos] to [$g_replicate_pos_file]: disk full?\n";
+        print STDERR "binlog: writing [$g_binlog_file:$pos] to [$g_replicate_pos_file]: disk full?\n";
+        sleep(10);
+        return;
+        }
+
     $g_last_binlog_file = $g_binlog_file;
     $g_last_binlog_pos = $pos;
 }
@@ -587,13 +600,6 @@ sub process_result
         else {
             print STDERR "unrecognized log line: [$l]\n";
             }
-#        flush_binlog_pos();
-#        print "\n";
-#        if (defined($verb)) {
-#            }
-#        else {
-#            }
-#        print "$_\n";
     }
 
     $did_something = 1 if process_query();
@@ -649,7 +655,7 @@ for(my $it=0; 1; $it++)
 
     $did_something = 1 if do_log();
 
-    sleep 1 if not $did_something;
+    sleep(1) if not $did_something;
 }
 
 # ---

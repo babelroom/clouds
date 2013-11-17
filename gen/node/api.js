@@ -5,12 +5,14 @@ var     SessionManager = require('./session_manager')
     ,   crypto = require('crypto')
     ,   he = require('./http_errors')
     ,   version_stamp = require('./AUTO_version')
+    ,   UDPSender = require('./udpsender')
     ;
 
 var API = function(config) {
     this.db = new DBManager(config);
     this.sessionManager = new SessionManager(config, this.db);
     this.autoAPI = new AutoAPI(this.sessionManager, this.db);
+    this.us = new UDPSender(config);
 }
 
 /* --- this was only an example -- remove it 
@@ -388,6 +390,7 @@ function _enter(self, creating_uid, req, res, match, opts)
                             if (err) return he.db_error(res, err);
                             if (rows.affectedRows!==1)
                                 return he.internal_server_error(res);
+                            self.us.send('updated_invitation');
                             /* set uid in cookie or make token */
                             if (opts && opts.no_cookie) {
                                 function finish() {
@@ -751,7 +754,7 @@ express.bodyParser.parse['application/json'] = function(data) {
                 , match;
             input = (path==='/_dynform' && req.body._dynform_method && req.body._dynform_path && /^\/api\/v1(\/.*)$/.exec(req.body._dynform_path)) ?
                 (req.body._dynform_method + ':' + RegExp.$1) :
-                (req._method + ':' + path)
+                (req._method + ':' + path);
             res.setHeader('Content-Type', 'application/json; charset=utf-8');       /* all responses are json */
             res.setHeader('Cache-Control', 'no-cache, max-age=0, must-revalidate'); /* kill caching */
             for(i=0; i<routes.length && !found; i++) {
@@ -761,7 +764,7 @@ express.bodyParser.parse['application/json'] = function(data) {
                         opts = routes[i][2];
                         }
                     found = true;
-                        routes[i][1](self, req, res, match, opts);
+                    routes[i][1](self, req, res, match, opts);
                     }
                 }
             if (!found)

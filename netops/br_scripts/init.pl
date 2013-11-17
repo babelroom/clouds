@@ -27,9 +27,10 @@ $ENV{PATH} = '.:' . $ENV{PATH};
 # ---
 $ENV{BR_DBUSER} = 'root';
 $ENV{BR_DBPASS} = '';
-$ENV{BR_SLEEP_SHORT} = 5;
-$ENV{BR_SLEEP_LONG} = 60;
+$ENV{BR_SLEEP_SHORT} = 12000;
+$ENV{BR_SLEEP_LONG} = 120;
 $ENV{BR_ITERATIONS} = 720;
+$ENV{BR_UDPPORT} = 6668;
 
 # --- customize environment here
 #$ENV{BR_ENVIRONMENT} = 'development';

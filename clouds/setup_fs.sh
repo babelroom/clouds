@@ -23,6 +23,8 @@ SAVE=$PWD
 cd $HOME
 test -d src/sounds || mkdir -p src/sounds
 cd src/sounds  || exit -1
+# NB freeswitch documents downloading sounds this way:  make all install cd-sounds-install cd-moh-install
+#   ... from here: http://wiki.freeswitch.org/wiki/Linux_Quick_Install_Guide
 test -f freeswitch-sounds-en-us-callie-8000-1.0.22.tar.gz || wget http://files.freeswitch.org/freeswitch-sounds-en-us-callie-8000-1.0.22.tar.gz
 test -f freeswitch-sounds-en-us-callie-16000-1.0.22.tar.gz || wget http://files.freeswitch.org/freeswitch-sounds-en-us-callie-16000-1.0.22.tar.gz
 test -f freeswitch-sounds-music-8000-1.0.8.tar.gz || wget http://files.freeswitch.org/freeswitch-sounds-music-8000-1.0.8.tar.gz

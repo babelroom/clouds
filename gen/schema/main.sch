@@ -192,7 +192,7 @@
     { _: #media_file,
     generators: [#rails_model,#rest_routes,#rest_apiary],
     rest_routes: [
-        # added this but didn't use. should still be usabilty -- never tested
+        # added this but didn't use. should still be usable -- never tested
         {_:#av, pattern: "rgx: /(POST):\\/(avatar)\\/?$/i, rgx_key: '_default_rgx_key', permfn: 'perm_valid_user', dbfn: 'db_create'", flags:{insert_uid_as:#user_id}, api_doc: {signature:"POST /avatar", description:"Create a new avatar for the current user"}},
         ],
     columns: [
@@ -299,6 +299,20 @@
         {_:#value, type:$col_string},
         $col_timestamps,
         ],
+    },
+    { _: #stream,
+    generators: [#rails_model],
+    columns: [
+        $col_timestamps,
+        ],
+    src: @schema/my/stream.rb.sch,
+    },
+    { _: #stream_ref,
+    generators: [#rails_model],
+    columns: [
+        $col_timestamps,
+        ],
+    src: @schema/my/stream_ref.rb.sch,
     },
 ]
 }
