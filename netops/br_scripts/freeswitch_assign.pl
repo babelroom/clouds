@@ -37,6 +37,7 @@ sub assign_conferences_to_servers
 # this will only work for people added before the conference was touched -- now with invitations the conference doesn't get touched ...
 #        db_exec($dbh,"UPDATE people SET updated_at=NOW(), fs_server=$config WHERE conference_id=$c->{id} AND is_deleted IS NULL",'_rows') or die;
         db_exec($dbh,"UPDATE conferences SET fs_server=$config,state='assigned',updated_at=NOW() WHERE id=$c->{id} AND updated_at='$c->{updated_at}'","_rows") or die;
+        $udp->send("no_conference:conference_assigned|$c->{id}") or die;
         }
     return 1;
 }
@@ -49,7 +50,13 @@ sub assign_people_to_servers
     my $config = $dbh->quote("$fs->{access}");
     my $rows = undef;
     BRDB::db_exec2($dbh, "UPDATE people SET updated_at=NOW(), fs_server=$config WHERE conference_id IS NOT NULL AND pin IS NOT NULL AND fs_server IS NULL", \$rows) or die;
-    return $rows>0 ? 1 : 0;
+    if ($rows>0) {
+        $udp->send("no_conference:people_assigned") or die;
+        return 1;
+        }
+    else {
+        return 0;
+        }
 }
 
 # ---
@@ -70,15 +77,13 @@ for(my $it=0; $it<$ENV{BR_ITERATIONS}; $it++)
                 }
             }
         # ---
-        $did_something = 1 if assign_people_to_servers();
+        if (assign_people_to_servers()) {
+            $did_something = 1;
+            }
         }
 
-    if ($did_something) {
-        $udp->send('no_assigned') or die;
-        }
-    else {
-#        sleep $ENV{BR_SLEEP_SHORT};
-        $udp->recv('no_conference|no_people', $ENV{BR_SLEEP_SHORT}) or die;
+    if (!$did_something) {
+        $udp->recv('no_conference:undeployed|no_people', $ENV{BR_SLEEP_SHORT}) or die;
         }
 }
 

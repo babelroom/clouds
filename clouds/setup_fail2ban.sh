@@ -14,7 +14,7 @@ tar -xvf fail2ban-0.8.4.tar
 cd fail2ban-0.8.4
 sudo python setup.py install
 
-cat <<'EOT' >/tmp/br/jail.conf
+cat <<'EOT' >/home/br/tmp/jail.conf
 # Fail2Ban configuration file
 #
 # Author: Cyril Jaquier
@@ -85,9 +85,9 @@ bantime  = 86400
 
 EOT
 sudo cp -a /etc/fail2ban/jail.conf /etc/fail2ban/jail.conf-orig
-sudo install -o root -m 644 /tmp/br/jail.conf /etc/fail2ban/
+sudo install -o root -m 644 /home/br/tmp/jail.conf /etc/fail2ban/
 
-cat <<'EOT' >/tmp/br/fail2ban.conf
+cat <<'EOT' >/home/br/tmp/fail2ban.conf
 # Fail2Ban configuration file
 #
 # Author: Cyril Jaquier
@@ -125,9 +125,9 @@ socket = /var/run/fail2ban/fail2ban.sock
 
 EOT
 sudo cp -a /etc/fail2ban/fail2ban.conf /etc/fail2ban/fail2ban.conf-orig
-sudo install -o root -m 644 /tmp/br/fail2ban.conf /etc/fail2ban/
+sudo install -o root -m 644 /home/br/tmp/fail2ban.conf /etc/fail2ban/
 
-cat <<'EOT' >/tmp/br/freeswitch.conf
+cat <<'EOT' >/home/br/tmp/freeswitch.conf
 # Fail2Ban configuration file
 #
 # Author: Rupa SChomaker
@@ -152,9 +152,9 @@ failregex = \[WARNING\] sofia_reg.c:\d+ SIP auth failure \(REGISTER\) on sofia p
 ignoreregex =
 
 EOT
-sudo install -o root -m 644 /tmp/br/freeswitch.conf /etc/fail2ban/filter.d/
+sudo install -o root -m 644 /home/br/tmp/freeswitch.conf /etc/fail2ban/filter.d/
 
-cat <<'EOT' >/tmp/br/freeswitch-dos.conf
+cat <<'EOT' >/home/br/tmp/freeswitch-dos.conf
 # Fail2Ban configuration file
 #
 # Author: soapee01
@@ -177,9 +177,9 @@ failregex = \[WARNING\] sofia_reg.c:\d+ SIP auth challenge \(REGISTER\) on sofia
 ignoreregex =
 
 EOT
-sudo install -o root -m 644 /tmp/br/freeswitch-dos.conf /etc/fail2ban/filter.d/
+sudo install -o root -m 644 /home/br/tmp/freeswitch-dos.conf /etc/fail2ban/filter.d/
 
-cat <<'EOT' >/tmp/br/fail2ban
+cat <<'EOT' >/home/br/tmp/fail2ban
 #!/bin/bash
 #
 # chkconfig: - 92 08
@@ -273,7 +273,7 @@ esac
 
 exit $RETVAL
 EOT
-sudo install -o root -m 755 /tmp/br/fail2ban /etc/init.d/
+sudo install -o root -m 755 /home/br/tmp/fail2ban /etc/init.d/
 
 exit 0
 

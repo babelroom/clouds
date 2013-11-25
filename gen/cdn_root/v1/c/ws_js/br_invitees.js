@@ -104,7 +104,7 @@ var BRInvitees = {
         function precreate_token(chain) {
             fetching_token = true;
             st('fetching token');
-            BRInvitees.aj("/invitations/add_guest.js", {invitation:{conference_id:BR.room.context.conference_id}, user:{}, auth: BR.room.context.authen}, function(data, textStatus, jqXHR){
+            BRInvitees.aj("/invitations/add_guest.js", {invitation:{conference_id:BR._api.context.conference_id}, user:{}, auth: BR._api.context.authen}, function(data, textStatus, jqXHR){
                 st(null);
                 if (textStatus=='success') {
                     token = eval(data)[0].invitation.token;
@@ -126,7 +126,7 @@ var BRInvitees = {
             var fn = f('first_name').val();
             var ln = f('last_name').val();
             var full_name = fn + ' ' + ln;
-            BRInvitees.aj("/invitations/add_guest.js", {invitation:{role:null,conference_id:BR.room.context.conference_id,token:token}, user:{name:f('first_name').val(),last_name:f('last_name').val(),phone:full_number}, auth: BR.room.context.authen}, function(data, textStatus, jqXHR){
+            BRInvitees.aj("/invitations/add_guest.js", {invitation:{role:null,conference_id:BR._api.context.conference_id,token:token}, user:{name:f('first_name').val(),last_name:f('last_name').val(),phone:full_number}, auth: BR._api.context.authen}, function(data, textStatus, jqXHR){
                 st(null);
                 if (textStatus=='success') {
                     var invitation = eval(data)[0].invitation;
@@ -176,7 +176,7 @@ var BRInvitees = {
                 f("number").data('cs_load')(BRDashboard.user_map[rec.user_id].phone);
                 }
             //f("number").data('cs_load')(BRDashboard.user_map[rec.user_id].phone);
-            if (BR.room.context.is_host)
+            if (BR._api.context.is_host)
                 f("pin").text(rec.pin?rec.pin:'');
             else
                 f("pin").text("<only viewable by hosts>");
@@ -192,7 +192,7 @@ var BRInvitees = {
         this.dashboard_phone_fieldset(h);
         h.call && $j(h.call)
             .click(function(evt){
-                if (!BR.room.context.is_host) {
+                if (!BR._api.context.is_host) {
                     alert("This host-only feature is shown for demonstration purposes only\n\nOnly hosts may initiate outbound calls to add participants");
                     return;
                     }

@@ -74,10 +74,11 @@ sub update_conference_close_out
         $_updated = 1;
         }
     if ($_updated) {
-        $next_state = $dbh->quote($next_state);
-        $sql = "UPDATE conferences SET state=$next_state,updated_at=NOW() WHERE id=$l->{id}";
+        my $quoted_next_state = $dbh->quote($next_state);
+        $sql = "UPDATE conferences SET state=$quoted_next_state,updated_at=NOW() WHERE id=$l->{id}";
         db_exec($dbh, $sql,'_updated') or die;
         if ($_updated) {
+            $udp->send("no_conference:$next_state|$l->{id}");
             return 1;
             }
         print STDERR "SQL updated failed unexpectedly: [$sql]\n" if not $_updated;
@@ -369,7 +370,7 @@ sub update_conference_in
     my $schedule = ($r->{schedule} eq 's') ? 'NULL' : $dbh->quote($r->{schedule});
     # state -> undeployed as we've updated people (avoid race condition with assign and deployment scripts)
     db_exec($dbh,"UPDATE conferences SET name=$name,start=$start,schedule=$schedule,state='undeployed',updated_at=NOW() WHERE id='$l->{id}' AND is_deleted IS NULL") or return 0;
-    $udp->send('no_conference');
+    $udp->send("no_conference:undeployed|$l->{id}");
     db_exec($dbrh,"UPDATE conferences SET deployed_at=NOW() WHERE id='$r->{id}' AND is_deleted IS NULL AND updated_at = '$r->{updated_at}'") or return 0;
     return 1;
 }
@@ -458,7 +459,7 @@ for(my $it=0; $it<$ENV{BR_ITERATIONS}; $it++)
     $did_something = 1 if conferences_status_updated_out();
 
 #    sleep $ENV{BR_SLEEP_SHORT} if not $did_something;
-    ($udp->recv('updated_conference', $ENV{BR_SLEEP_SHORT}) or die) if not $did_something; 
+    ($udp->recv('created_conference|updated_conference|deleted_conference|no_conference:queue_created', $ENV{BR_SLEEP_SHORT}) or die) if not $did_something; 
     print "--------------------------------------------------------------------------------\n";
 }
 

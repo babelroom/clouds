@@ -1,4 +1,8 @@
 
+/*
+** This file is redanted for historical / references purposes
+*/
+
 var msieMemoryFile = null;
 var doPUT_comet = null;
 var longGET_comet = null;

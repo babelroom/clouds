@@ -14,7 +14,7 @@ br_api.full.min.js: src/tmp.min.js $(DEP_socket_io)
 br_api.min.js: src/js_fixups.js src/br_api.js
 	/bin/cat $^ | uglifyjs > $@
 
-src/tmp.min.js: src/js_fixups.js src/br_api.js src/br_api.streaming.js
+src/tmp.min.js: src/js_fixups.js src/br_api.js src/br_api.streaming.js src/br_api.logic.js src/br_api.controllers.js
 	/bin/cat $^ | uglifyjs > $@
 
 clean:

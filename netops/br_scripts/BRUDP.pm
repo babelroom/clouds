@@ -43,6 +43,7 @@ sub recv
             }
         $socket->recv($data, 128) or return 0;
 #        print "[$verbs][$data]\n";
+        $data =~ s/^([^\|]*)\|.*$/$1/;
         if (index("|$verbs|", "|$data|")!=-1) { # match substring
             return $data;
             }

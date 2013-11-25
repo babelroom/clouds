@@ -1,44 +1,18 @@
 
-var     SessionManager = require('./session_manager')
-    ,   AutoAPI = require('./auto_api')
-    ,   DBManager = require('./db_manager')
+var     AutoAPI = require('./auto_api')
     ,   crypto = require('crypto')
     ,   he = require('./http_errors')
     ,   version_stamp = require('./AUTO_version')
     ,   UDPSender = require('./udpsender')
     ;
 
-var API = function(config) {
-    this.db = new DBManager(config);
-    this.sessionManager = new SessionManager(config, this.db);
-    this.autoAPI = new AutoAPI(this.sessionManager, this.db);
+var API = function(config, db, sessionManager) {
+    this.db = db;
+    this.sessionManager = sessionManager;
     this.us = new UDPSender(config);
+    this.autoAPI = new AutoAPI(sessionManager, db, this.us);
 }
 
-/* --- this was only an example -- remove it 
-..//++apiary--
---
-Authentication
-APIs for authentication
---
-POST signup
-> Content-Type: application/json; charset=utf-8
-{}
-< 200
-< Content-Type: application/json; charset=utf-8
-{}
-
-..//++apiary--
-function signup(self, req, res, match, opts)
-{
-    self.db.query("INSERT INTO my.users (name) VALUES ("+self.e(req.body.name)+")", [], function(err, rows, fields){
-        if (err) return he.db_error(res, err);
-        res.send(rows);     // TMP todo -- is this wise?
-        res.end();
-        });
-}
-
-*/
 /*++apiary--
 Retrieve user data associated with active cookie session. The empty set is returned if there is no valid active cookie session.
 GET login
@@ -108,25 +82,30 @@ if (!result.user) req.body._success_url=req.body._failure_url;    // hack ......
         });
 }
 
-function _login_by_token(self, req, res, match, opts)
+function _validate_and_consume_token(self, token, res, fn)
 {
     var sql = "SELECT t.user_id, u.email_address, u.email, u.name, u.last_name, t.id FROM users u, tokens t  WHERE u.id=? AND u.id=t.user_id AND t.link_key=? AND t.template='ephemeral_once' AND (t.expires>NOW() OR t.expires IS NULL) AND t.is_deleted IS NULL";
-    var token_parts = req.body.token.split(',',2);
+    var token_parts = token.split(',',2);
     self.db.query(sql, [token_parts[0], token_parts[1]], function(err, rows, fields){
         if (err) return he.db_error(res, err);
-        if (rows.length!==1) return he.internal_server_error(res);
+        if (rows.length!==1) return he.forbidden(res);
         var row = rows[0];
-        result = {user: {id: row.user_id, email_address: row.email_address, email: row.email, name: row.name, last_name: row.last_name}};
-        /* this is how we would fake it: -- for reference
-        self.db.query("UPDATE tokens SET updated_at=NOW() WHERE id=?", [row.id], function(err, rows, fields){ */
-        self.db.query("UPDATE tokens SET updated_at=NOW(), is_deleted=1 WHERE id=?", [row.id], function(err, rows, fields){
+        user = {id: row.user_id, email_address: row.email_address, email: row.email, name: row.name, last_name: row.last_name};
+        self.db.query("UPDATE tokens SET updated_at=NOW(), is_deleted=1 WHERE id=? AND is_deleted IS NULL", [row.id], function(err, rows, fields){
             if (err) return he.db_error(res, err);
             if (rows.affectedRows!==1) return he.internal_server_error(res);
-            if (!self.sessionManager.set_rails_uid(res, row.user_id))
-                return he.internal_server_error(res);
-            //_maybe_redirect(req, res, result);
-            he.ok(req, res, result);
+            fn(user);
             });
+        });
+}
+
+function _login_by_token(self, req, res, match, opts)
+{
+    _validate_and_consume_token(self, req.body.token, res, function(user){
+        result = {user: user};
+        if (!self.sessionManager.set_rails_uid(res, user.id))
+            return he.internal_server_error(res);
+        he.ok(req, res, result);
         });
 }
 
@@ -169,6 +148,7 @@ var db_cols = [
     ['u.email', 'email'],
     ['u.name', 'first_name'],
     ['u.last_name', 'last_name'],
+    ['u.origin_id', 'origin_id'],
     ['c.id', 'conference_id'],
     ['c.name', 'conference_name'],
     ['c.config', 'conference_config'],
@@ -195,6 +175,7 @@ GET invitation/apitest
     "email":"apitest@example.com",
     "first_name":"API",
     "last_name":"Test",
+    "origin_id":"37",
     "conference_id":3,
     "conference_name":"API Test Conference",
     "conference_config":"<internal data>",
@@ -214,10 +195,8 @@ GET invitation/apitest
 }
 
 ++apiary--*/
-function invitation(self, req, res, match, opts)
+function _invitation(self, req, res, match, uid)
 {
-//console.log('>> ' + new Date().getTime());
-    var uid = self.sessionManager.uid_from_req(req);
     if (uid<0) /* no session, no problem */ 
         uid = 0;    /* set uid to 0 so we get NULL for the user */
         //return he.forbidden(res)
@@ -285,6 +264,7 @@ user and conference -- question: how could it have created multople invites???
             a += ('0'+((b[i] & 0xff).toString(16))).substr(-2);
         data.push(['connection_salt', a]);
         data.push(['server_version', JSON.stringify(_version())]);
+        data.push(['csrf_token', self.sessionManager.md5_token(row.conference_id||0, row.user_id||0,0)]);
         //res.send({data: data}); -- don't do this; express "helps" with ETag and other _--_
         obj = {};
         for(var i=0; i<data.length; i++)
@@ -305,6 +285,16 @@ user and conference -- question: how could it have created multople invites???
         res.end();
 //console.log('<< ' + new Date().getTime());
         });
+}
+function invitation(self, req, res, match, opts)
+{
+    if (req.query.t)
+        _validate_and_consume_token(self, req.query.t, res, function(user){
+            return _invitation(self, req, res, match, user.id);
+            });
+    else {
+        return _invitation(self, req, res, match, self.sessionManager.uid_from_req(req));
+        }
 }
 
 /*++apiary--
@@ -355,6 +345,34 @@ POST add_participant/apitest
 {}
 
 ++apiary--*/
+function _enter_finish(self, uid, req, res, opts, resultset)
+{
+    /* set uid in cookie or make token */
+    if (opts && opts.no_cookie) {
+        function finish() {
+            res.send(JSON.stringify(resultset));
+            res.end();
+            }
+        if (!req.body.return_token)
+            return finish();
+        self.db.query("UPDATE tokens SET updated_at=NOW(), is_deleted=1 WHERE template='ephemeral_once' AND is_deleted IS NULL AND user_id=?", [uid], function(err, rows, fields){
+            if (err) return he.db_error(res, err);
+            var token = crypto.randomBytes(30).toString('base64').replace(/[^A-Za-z0-9]/g,'J');
+            self.db.query("INSERT INTO tokens (template,link_key,created_at,updated_at,user_id) VALUES ('ephemeral_once',?,NOW(),NOW(),?)", [token,uid], function(err, rows, fields){
+                if (err) return he.db_error(res, err);
+                if (rows.affectedRows!==1)
+                    return he.internal_server_error(res);
+                resultset['token'] = uid+','+token;
+                finish();
+                });
+            });
+        }
+    else {
+        if (!self.sessionManager.set_rails_uid(res, uid))
+            return he.internal_server_error(res);
+        return he.ok(req, res, resultset);
+        }
+}
 function _enter(self, creating_uid, req, res, match, opts)
 {
     /* check conference existance and access */
@@ -365,7 +383,8 @@ function _enter(self, creating_uid, req, res, match, opts)
         sql += 'c.uri=' + self.e(match[1]);
     self.db.query(sql, [], function(err, rows, fields){
         if (err) return he.db_error(res, err);
-        if (rows.length!==1 || !rows[0].id) return he.internal_server_error(res);
+        if (rows.length!==1 || !rows[0].id)
+            return he.internal_server_error(res);
         var cid = rows[0].id;
         var owner_id = rows[0].owner_id;
         var resultset = {user: {}}
@@ -391,28 +410,7 @@ function _enter(self, creating_uid, req, res, match, opts)
                             if (rows.affectedRows!==1)
                                 return he.internal_server_error(res);
                             self.us.send('updated_invitation');
-                            /* set uid in cookie or make token */
-                            if (opts && opts.no_cookie) {
-                                function finish() {
-                                    res.send(JSON.stringify(resultset));
-                                    res.end();
-                                    }
-                                if (!req.body.return_token)
-                                    return finish();
-                                var token = crypto.randomBytes(30).toString('base64').replace(/[^A-Za-z0-9]/g,'J');
-                                self.db.query("INSERT INTO tokens (template,link_key,created_at,updated_at,user_id) VALUES (?,?,NOW(),NOW(),?)", ['ephemeral_once',token,uid], function(err, rows, fields){
-                                    if (err) return he.db_error(res, err);
-                                    if (rows.affectedRows!==1)
-                                        return he.internal_server_error(res);
-                                    resultset['token'] = uid+','+token;
-                                    finish();
-                                    });
-                                }
-                            else {
-                                if (!self.sessionManager.set_rails_uid(res, uid))
-                                    return he.internal_server_error(res);
-                                return he.ok(req, res, resultset);
-                                }
+                            return _enter_finish(self, uid, req, res, opts, resultset);
                             });
 //                        });
                     });
@@ -425,13 +423,14 @@ function _enter(self, creating_uid, req, res, match, opts)
             self.db.query(sql, [uid,req.body.avatar_url], function(err, rows, fields){
                 if (err) return he.db_error(res, err);
                 if (!rows.insertId) return he.internal_server_error(res);
-                create_invitation(uid);
+                return create_invitation(uid);
                 });
             }
 
         if (creating_uid && !(opts && opts.create_separate_user))
             return continue_with_user(creating_uid);
         /* else */
+
         /* conference needs to be public in order for non-owner & non-host to add self .... TODO tmp */
         /* insert user */
         /* check arguments */
@@ -440,8 +439,8 @@ function _enter(self, creating_uid, req, res, match, opts)
             u = {};
         if (!u.name && req.body.name)   /* why allow either name or user.name? I know there was a good reason for this but I've forgotten ... */
             u.name = req.body.name;
-        sql = "INSERT INTO users (`created_at`,`updated_at`";
-        var vals = ") VALUES (NOW(),NOW()";
+        sql = "INSERT INTO users (`created_at`,`updated_at`, `ephemeral_context`";
+        var vals = ") VALUES (NOW(),NOW(),"+'"conference::id:'+cid+'"';
         for(var i in u)
             if (u.hasOwnProperty(i)) {
                 if (i in {name:1,last_name:1,email:1,phone:1,origin_data:1,origin_id:1}) {
@@ -466,10 +465,34 @@ function _enter(self, creating_uid, req, res, match, opts)
             });
         });
 }
+function _authorize_ephemeral_if_exists(self, uid, req, res, match, opts, fn_continue)
+{
+    if (!/^(?:i|byid)\/(\d+)$/.exec(match[1]))
+        return fn_continue();   /* this would be usual, but continue to _enter and do error handling there */
+    var cid = RegExp.$1
+        , sql = "SELECT u.id, u.name FROM users u WHERE email_address IS NULL AND u.origin_id=? AND u.origin_data=? AND u.ephemeral_context=?"
+        , u = req.body.user;
+    self.db.query(sql, [u.origin_id, u.origin_data, "conference::id:"+cid], function(err, rows, fields){
+        if (err) return he.db_error(res, err);
+        if (rows.length===0)
+            return fn_continue();
+        if (rows.length!==1)
+            return he.internal_server_error(res);
+        var resultset = {user: {id:rows[0].id, name:rows[0].name}};
+        return _enter_finish(self, rows[0].id, req, res, opts, resultset);
+        });
+}
+// ... ephemeral must be locked-in at the conference level ... (figured it out already ...)
 function enter(self, req, res, match, opts)
 {
     self.sessionManager.uid_from_req2(req,function(uid,code){
-        _enter(self, uid>0?uid:0, req, res, match, opts);
+        if (uid<0)
+            uid = 0;
+        function do_enter() { return _enter(self, uid, req, res, match, opts); }
+        if (opts && opts.create_separate_user)  /* reuse user record if it already exists */
+            return _authorize_ephemeral_if_exists(self, uid, req, res, match, opts, do_enter);
+        else
+            return do_enter();
         });
 }
 

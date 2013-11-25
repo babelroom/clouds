@@ -4,14 +4,14 @@ echo 'Nginx...'
  
 which nginx >/dev/null && echo 'Already installed!' && exit 0;
 
-cat <<'EOT' >/tmp/br/nginx.repo
+cat <<'EOT' >/home/br/tmp/nginx.repo
 [nginx]
 name=nginx repo
 baseurl=http://nginx.org/packages/centos/6/x86_64/
 gpgcheck=0
 enabled=1
 EOT
-sudo cp /tmp/br/nginx.repo /etc/yum.repos.d/
+sudo cp /home/br/tmp/nginx.repo /etc/yum.repos.d/
 
 REQUIRED_PACKAGES="\
     nginx-1.2.5-1.el6.ngx                       \
@@ -23,7 +23,7 @@ sudo chkconfig nginx off
 sudo mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf-orig
 
 # because that nginx bundles isn't quite right ...
-cat <<'EOT' >/tmp/br/mime.types
+cat <<'EOT' >/home/br/tmp/mime.types
 types {
     text/html                             html htm shtml;
     text/css                              css;
@@ -109,8 +109,8 @@ types {
     video/x-msvideo                       avi;
 }
 EOT
-sudo install -m 644 /tmp/br/mime.types /etc/nginx/mime.types
-rm -f /tmp/br/mime.types
+sudo install -m 644 /home/br/tmp/mime.types /etc/nginx/mime.types
+rm -f /home/br/tmp/mime.types
 
 exit 0
 

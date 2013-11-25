@@ -1,9 +1,10 @@
 var he = require('./http_errors')
     , routes = require('./AUTO_routes')
 
-var AutoAPI = function(sessionManager, dbManager) {
+var AutoAPI = function(sessionManager, dbManager, udpSender) {
     this.sessionManager = sessionManager;
     this.db = dbManager;
+    this.us = udpSender;
 }
 
 /* --- utils --- */
@@ -88,6 +89,11 @@ function _perm_conference_owner_or_participant(f,mustBeHost) {
 }
 function perm_conference_owner_or_participant(f) { return _perm_conference_owner_or_participant(f, false); }
 function perm_conference_owner_or_host(f) { return _perm_conference_owner_or_participant(f, true); }
+function do_end(f) {
+    if (f.rec.flags.udpmsg && f.self.us)
+        f.self.us.send(f.rec.flags.udpmsg);
+    f.res.end()
+}
 
 /* --- db queries --- */
 function db_1_by_pk(f)
@@ -111,7 +117,7 @@ function db_1_by_pk(f)
                 }
             }
         f.res.send(JSON.stringify({data: data}));
-        f.res.end()
+        do_end(f);
         });
 }
 
@@ -181,7 +187,7 @@ undefined
         f.res.setHeader('Location', '/' + f.rest.model + '/' + rows.insertId);  // need absolute?
         f.res.statusCode = 201;     /* created */
         f.res.send(JSON.stringify({data: {id: rows.insertId}}));
-        f.res.end();
+        do_end(f);
         });
 }
 
@@ -224,7 +230,7 @@ null { fieldCount: 0,
   changedRows: 0 } undefined
 */
         f.res.send({});
-        f.res.end()
+        do_end(f);
         });
 }
 
@@ -247,7 +253,7 @@ null { fieldCount: 0,
   changedRows: 1 } undefined
 */
         f.res.send({});
-        f.res.end()
+        do_end(f);
         });
 }
 
@@ -258,7 +264,7 @@ var _default_rgx_key = {verb: 1, model: 2, id: 3};
 {rgx: /(GET):\/(users)\/(\d+)$/i, rgx_key: _default_rgx_key, permfn: perm_the_same_user, dbfn: db_1_by_pk, cols: ["name"] },
 {rgx: /(GET):\/(conferences)\/(\d+)$/i, rgx_key: _default_rgx_key, permfn: perm_conference_owner_or_host, dbfn: db_1_by_pk, cols: ["name","access_config"] },
 ]*/
-/* now fixup those routes... */
+/* now fixup those routes... (convert js string into js code) */
 for(var r in routes)
     for(var idx in routes[r])
         if (routes[r].hasOwnProperty(idx)) {

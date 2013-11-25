@@ -18,7 +18,7 @@ prog="./init.pl"
 
 # Some things to make the below more readable
 NETOPS_DIR=/home/br/gits/clouds/netops
-DB_SYSCFG=/tmp/br/netops_db_syscfg
+DB_SYSCFG=/home/br/tmp/prime/netops_db_syscfg
 
 # BTW -- this is useful
 #ps -eo pid,pgid,args | grep pl

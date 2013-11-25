@@ -15,8 +15,8 @@ select( ( select(SOCKET), $|=1 )[0] ); # no from buffering
 my $broadcastAddr = sockaddr_in(6668, INADDR_BROADCAST );
 setsockopt( SOCKET, SOL_SOCKET, SO_BROADCAST, 1 );
 
-send( SOCKET, "foo", 0,  $broadcastAddr )
-    or die "Error at sendding: $!\n";
+send( SOCKET, "no_assigned", 0,  $broadcastAddr )
+    or die "Error sending: $!\n";
 
 close SOCKET;
 

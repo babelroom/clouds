@@ -152,7 +152,7 @@ var BRParticipants =  {
                         }
                     else {
 //alert("ADD ROW!!!! attr=" + attr + ", value=" + value);
-                        grid.jqGrid('addRowData',idx,{icon: '<img src="'+BR.api.v1.get_host('cdn')+'/cdn/v1/c/img/blank.png" />'});
+                        grid.jqGrid('addRowData',idx,{icon: '<img src="'+BR._api.get_host('cdn')+'/cdn/v1/c/img/blank.png" />'});
                         }
                     break;
                 case 'name':
@@ -207,7 +207,7 @@ var BRParticipants =  {
                 field_str = row.name;
                 }
             if (value==undefined) {
-                grid.jqGrid('setRowData',idx,{icon: '<img src="'+BR.api.v1.get_host('cdn')+'/cdn/v1/c/img/blank.png">'});
+                grid.jqGrid('setRowData',idx,{icon: '<img src="'+BR._api.get_host('cdn')+'/cdn/v1/c/img/blank.png">'});
                 if (speaker_field.length && speaker_field.innerHTML==field_str) {
                     speaker_field.innerHTML = '';
                     }
@@ -215,7 +215,7 @@ var BRParticipants =  {
                     speaker_table.style.borderColor = '#fff';
                 }
             else {
-                grid.jqGrid('setRowData',idx,{icon: '<img src="'+BR.api.v1.get_host('cdn')+'/cdn/v1/c/img/mic-talking.png" alt="T">'});
+                grid.jqGrid('setRowData',idx,{icon: '<img src="'+BR._api.get_host('cdn')+'/cdn/v1/c/img/mic-talking.png" alt="T">'});
                 if (speaker_field.length) {
                     speaker_field.innerHTML = field_str;
                     }

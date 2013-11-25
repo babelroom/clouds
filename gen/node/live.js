@@ -193,12 +193,14 @@ io.configure(function (){
                     fn({'foo':1});
                     return ;
                     }
-                /* TODO -- marshall the login_tokin to the api call: data.token */
-                var data = {
+                var path = data.path;
+                if (data.token)
+                    path += '?t='+data.token;
+                var call_data = {
                     verb: 'GET',
-                    path: '/api/v1/invitation'+data.path,
+                    path: '/api/v1/invitation'+path,
                     };
-                br_api_call(api_host, socket, data, function(e,d){
+                br_api_call(api_host, socket, call_data, function(e,d){
                     if (e || !d) return fn(null);
                     try { d = JSON.parse(d); }
                     catch(e) {
@@ -206,30 +208,11 @@ io.configure(function (){
                         fn(null);
                         }
                     if (!d.data) return fn(null);
+                    if (!d.data.user_id) return fn({error: 'unauthorized'});
                     set(socket, 'access_'+d.data.conference_estream_id, d.data.is_host);
                     fn(d);
                     });
                 });
-/*
-            socket.on('br_old_put', function (data) {
-                try { data = JSON.parse(data); }
-                catch(e) {
-                    console.log('JSON.parse exception: ['+e+'], ['+data+']');
-                    return ;
-                    }
-                var admin = undefined;
-                if (data && data.queue && /(\d+)$/.exec(data.queue))
-                    admin = get(socket, 'access_'+RegExp.$1);
-                if (typeof(admin)!=='undefined') {
-                    try { estream_put(es, socket, data); }
-                    catch(e) {
-                        console.log('estream exception: ['+e+'], ['+data+']');
-                        }
-                    }
-                else
-                    console.log('(old) put request access denied',data);
-                });
-*/
             socket.on('br_put', function (data) {
                 try { data = JSON.parse(data); }
                 catch(e) {

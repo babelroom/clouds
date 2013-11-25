@@ -2,6 +2,7 @@
 var crypto = require('crypto')
     , he = require('./http_errors')
     , CryptUtils = require('./crypt_utils')
+    , util = require('util')
     ;
 
 var SessionManager = function(config, dbManager) {
@@ -92,12 +93,14 @@ SessionManager.prototype = {
         },
 
     _uid_from_qs_or_cookie: function(req) {
-        /* easter */ 
+        /* (was) easter */ 
+        /*
         if ('u' in req.query) {
             if (req.query.u.match(/^[1-9]\d*$/))
                 return parseInt(req.query.u, 10) || -1;
             return -1;
             }
+        */
         /* egg */
         return this._uid_from_rails(req.cookies);
         },
@@ -200,6 +203,11 @@ SessionManager.prototype = {
         if (!api_key)
             return fn(-32,401);
         this._db_confirm_api_key(id, api_key, fn);
+        },
+
+    md5_token: function(id1, id2, id3) {
+        var plain = new Buffer(util.format("%s:%s:%s", id1, id2, id3));
+        return this.cu.md5(plain);
         },
 }
 

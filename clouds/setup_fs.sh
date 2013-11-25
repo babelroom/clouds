@@ -65,7 +65,7 @@ rm -rf sounds
 
 echo "Conference recordings base setup..."
 sudo mkdir -p /br_media/conf_recordings
-cat <<'EOT' >/tmp/br/xfercron
+cat <<'EOT' >/home/br/tmp/xfercron
 # .---------------- minute (0 - 59)
 # |   .------------- hour (0 - 23)
 # |   |   .---------- day of month (1 - 31)
@@ -75,7 +75,7 @@ cat <<'EOT' >/tmp/br/xfercron
 # *   *   *   *  *  user command to be executed
 *     *   *   *  *  root /usr/local/freeswitch/scripts/xfercron.sh
 EOT
-sudo install -o root -m 644 /tmp/br/xfercron /etc/cron.d/xfercron
+sudo install -o root -m 644 /home/br/tmp/xfercron /etc/cron.d/xfercron
 
 cd $SAVE
 

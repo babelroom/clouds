@@ -7,7 +7,7 @@
 RETVAL=0
 BR=/home/br
 CL=$BR/gits/clouds/clouds
-TMPDIR=/tmp/br
+TMPDIR=/home/br/tmp/prime
 
 # See how we were called.
 case "$1" in

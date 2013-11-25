@@ -48,7 +48,7 @@ conference-key: $r->{conference_key}
 conference-recording-root: $recording_root
 __EOT__
 ;
-        $client->POST($url, $data) or die "failed to POST to [$url]\n";
+        $client->POST($url, $data) or die "failed to PUT to [$url]\n";
         die "bad response from [$url]\n" if $client->responseCode() ne '200';
         db_exec($dbh,"UPDATE conferences SET state='deployed', updated_at=NOW() WHERE id=$r->{id}",_rows);
         if ($_rows>0) {
@@ -136,7 +136,7 @@ for(my $it=0; $it<$ENV{BR_ITERATIONS}; $it++)
 
     # ---
 #    sleep $ENV{BR_SLEEP_SHORT} if not $did_something;
-    ($udp->recv('no_assigned', $ENV{BR_SLEEP_SHORT}) or die) if not $did_something; 
+    ($udp->recv('no_conference:ready_to_deploy', $ENV{BR_SLEEP_SHORT}) or die) if not $did_something; 
 }
 
 # ---

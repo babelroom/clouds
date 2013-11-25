@@ -207,13 +207,12 @@ input.br-phone-display {
 
 
 <!-- PRODUCTION -->
-<script type="text/javascript" src="/cdn/v1/c/gen.min.js?2013062300"> </script>
-<script type='text/javascript' src="/cdn/v1/br_api.full.min.js?2013062300"></script>
 <!--
+<script type="text/javascript" src="/cdn/v1/c/gen.min.js?2013112300"> </script>
+<script type="text/javascript" src="/cdn/v1/br_api.full.min.js?2013112300"></script>
 -->
 
 <!-- DEVEL everything that follows is devel -->
-<!--
 <script type='text/javascript' src='/cdn/v1/src/js_fixups.js'></script>
 <script type='text/javascript' src='/cdn/v1/c/wraprtc/wraprtc.js'></script>
 <script type='text/javascript' src="/cdn/v1/c/jquery/js/jquery-1.9.1.js"></script>
@@ -225,8 +224,10 @@ input.br-phone-display {
 <script type="text/javascript" src="/cdn/v1/c/flash/swfobject.js"></script>
 <script type="text/javascript" src="/cdn/v1/c/ws_js/br_content.js"></script>
 <script type="text/javascript" src="/cdn/v1/c/ws_js/br_participants.js"></script>
+<!--
 <script type="text/javascript" src="/cdn/v1/c/ws_js/br_dashboard.js"></script>
 <script type="text/javascript" src="/cdn/v1/c/ws_js/br_commands.js"></script>
+-->
 <script type="text/javascript" src="/cdn/v1/c/ws_js/br_utils.js"></script>
 <script type="text/javascript" src="/cdn/v1/c/ws_js/br_invitees.js"></script>
 <script type="text/javascript" src="/cdn/v1/c/ws_js/br_widgets.js"></script>
@@ -237,16 +238,20 @@ input.br-phone-display {
 <script type="text/javascript" src="/cdn/v1/AUTO/conference_options.js"></script>
 <script type='text/javascript' src="/cdn/v1/src/br_api.js"></script>
 <script type='text/javascript' src="/cdn/v1/src/br_api.streaming.js"></script>
+<script type='text/javascript' src="/cdn/v1/src/br_api.logic.js"></script>
+<script type='text/javascript' src="/cdn/v1/src/br_api.controllers.js"></script>
 <script type='text/javascript' src="/cdn/v1/src/socket.io.min.js"></script>
+<!--
 -->
 
 <script type="text/javascript">
 
 /* --- globals (soon...) --- */
-var a = BR.api.v1;
-var myhost = '//' + location.hostname + ':3001';
+var a = BR.v1.api;
+//var myhost = '//' + location.hostname + ':3001';
+var myhost = '//' + location.hostname + ':8889';
 var thishost = '';   /* '' means same address as page */
-a.init({
+BR._api = BR.v1.api.create({
     query_string:window.location.search,
     hosts: {
         api:    thishost,
@@ -258,11 +263,13 @@ a.init({
         home:   thishost,
         video:  thishost + ':1936'
     },
-    _dynamic_form_id:'_ie_dynform'
+    chatController: BRWidgets.chatController,
+    _dynamic_form_id: '_ie_dynform',
 });
+BRDashboard = BR._api.notify;
+BRCommands = BR._api.commands;
 BR.room = {
-    countries: null,
-    context: {}
+    countries: null//, context: {}
 }
 var menuOn, menuOff;    /* will assign function to this in ready() */
 
@@ -372,13 +379,13 @@ function br_v1_c_ready() {
 function br_v1_c_connect(loginTokenOrNull) {
 
     /* now populate */
-    a.get_countries(function(err, list) {
+    BR._api.get_countries(function(err, list) {
         if (err)
             return BRToolbar.door('fatal');
         BR.room.countries = list;
         var uri = BRUtils.conferencePath();
         if (uri) {
-            a.addStreamCredential(uri, loginTokenOrNull, function(err, data) {
+            BR._api.addStreamCredential(uri, loginTokenOrNull, function(err, data) {
                 if (err)
                     return BRToolbar.door('fatal');
                 BRToolbar.door('invitation', data);

@@ -13,9 +13,9 @@ mysql -uroot <$HOME/gits/clouds/prime/create_dbs.sql
 
 # 3. rails migrate DBs
 cd $HOME/gits/clouds/gen/rails/my
-./install.sh 2>>/tmp/br/my.err
+./install.sh 2>>/home/br/tmp/my.err
 cd $HOME/gits/clouds/gen/rails/netops
-./install.sh 2>>/tmp/br/netops.err
+./install.sh 2>>/home/br/tmp/netops.err
 
 # 4. prime to populate
 /usr/bin/mysql -uroot my <$HOME/gits/clouds/prime/my_prime.sql

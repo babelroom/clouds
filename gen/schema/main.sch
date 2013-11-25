@@ -58,6 +58,7 @@
         {_:#email, type:$col_string, rest:[#pk], api_doc:{sample:"mail@example.com"}},   # free of extra hobo **** semantics
         {_:#origin_data, type:$col_string, rest:[#pk], api_doc:{sample:"Origin System (optional)"}},
         {_:#origin_id, type:$col_id, rest:[#pk], api_doc:{sample:37}},
+        {_:#ephemeral_context, type:$col_string},
         ],
     rails_extra: @schema/my/user.rb.sch,
     },
@@ -66,9 +67,9 @@
     generators: [#rails_model,#rest_routes,#rest_apiary],
     rest_routes: [
         {_:#pk, pattern: "rgx: /(GET):\\/(conferences)\\/(\\d+)$/i, rgx_key: '_default_rgx_key', permfn: 'perm_conference_owner_or_participant', dbfn: 'db_1_by_pk'", flags:{not_deleted:true}, api_doc: {signature:"GET conferences/3", description:"Get conference data"}},
-        {_:#cr, pattern: "rgx: /(POST):\\/(conferences)\\/?$/i, rgx_key: '_default_rgx_key', permfn: 'perm_valid_user', dbfn: 'db_create'", flags:{insert_uid_as:#owner_id}, api_doc: {signature:"POST conferences", description:"Create a new conference"}},
-        {_:#up, pattern: "rgx: /(PUT):\\/(conferences)\\/(\\d+)$/i, rgx_key: '_default_rgx_key', permfn: 'perm_conference_owner_or_host', dbfn: 'db_update_by_pk'", flags:{not_deleted:true}, api_doc: {signature:"PUT /conferences/3", description:"Update an existing conference"}},
-        {_:#dl, pattern: "rgx: /(DELETE):\\/(conferences)\\/(\\d+)$/i, rgx_key: '_default_rgx_key', permfn: 'perm_conference_owner_or_host', dbfn: 'db_set_deleted_flag_by_pk'", api_doc: {signature:"DELETE conferences/3", description:"Delete a conference"}},
+        {_:#cr, pattern: "rgx: /(POST):\\/(conferences)\\/?$/i, rgx_key: '_default_rgx_key', permfn: 'perm_valid_user', dbfn: 'db_create'", flags:{insert_uid_as:#owner_id, udpmsg:'created_conference'}, api_doc: {signature:"POST conferences", description:"Create a new conference"}},
+        {_:#up, pattern: "rgx: /(PUT):\\/(conferences)\\/(\\d+)$/i, rgx_key: '_default_rgx_key', permfn: 'perm_conference_owner_or_host', dbfn: 'db_update_by_pk'", flags:{not_deleted:true, udpmsg:'updated_conference'}, api_doc: {signature:"PUT /conferences/3", description:"Update an existing conference"}},
+        {_:#dl, pattern: "rgx: /(DELETE):\\/(conferences)\\/(\\d+)$/i, rgx_key: '_default_rgx_key', permfn: 'perm_conference_owner_or_host', dbfn: 'db_set_deleted_flag_by_pk'", flags:{udpmsg:'deleted_conference'}, api_doc: {signature:"DELETE conferences/3", description:"Delete a conference"}},
         ],
     columns: [
         {_:#name, rest:[#pk,#cr,#up], api_doc:{sample:"My Conference"}},

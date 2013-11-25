@@ -30,7 +30,7 @@ var BRConference = {
     },
 
     demoHostTest: function() {
-        if (BR.room.context.is_host)
+        if (BR._api.context.is_host)
             return true;
         alert('This host-only feature is shown for demonstration purposeses only.\n\nOnly hosts may change conference level settings.');
         return false;
@@ -41,7 +41,7 @@ var BRConference = {
     },
 
     conference_settings_html: function(id) {
-        var cxt = BR.room.context;
+        var cxt = BR._api.context;
         return '\
 <div id="'+id+'_tabs" style="width: 500px; border: none;">\
 <ul>\
@@ -52,11 +52,11 @@ var BRConference = {
 </ul>\
     <div id="'+id+'_uri">\
         <label>Current URL<div>\
-            <span class="secure-green"><i class="icon2-lock"></i> https:</span>'+BR.api.v1.get_host('page')+'/<span style="color: #999;" id="'+id+'_current_uri"></span></div></label>\
+            <span class="secure-green"><i class="icon2-lock"></i> https:</span>'+BR._api.get_host('page')+'/<span style="color: #999;" id="'+id+'_current_uri"></span></div></label>\
         <br>\
         <label>Enter new URL<br><input id="'+id+'_uri_delete_me" name="conference[uri]" type="text" /><span id="'+id+'_uri_msg" class="fieldWithErrors"></span></label>\
         <div>\
-            <span class="secure-green"><i class="icon2-lock"></i> https:</span>'+BR.api.v1.get_host('page')+'/<span style="color: #999;" id="'+id+'_uri_echo"></span></div>\
+            <span class="secure-green"><i class="icon2-lock"></i> https:</span>'+BR._api.get_host('page')+'/<span style="color: #999;" id="'+id+'_uri_echo"></span></div>\
         <br>\
         <center><button id="'+id+'_save_uri"><i class="icon2-save pull-left"></i> &nbsp; Save</button></center>\
     </div>\
@@ -111,7 +111,7 @@ this works really well -- but unused for now as it doesn't allow us to return a 
 */
     conference_settings_logic: function(o) {
         var $j = jQuery;
-        var cxt = BR.room.context;
+        var cxt = BR._api.context;
         var h = $j.extend({
             }, o);
         $j('#'+h.id+'_tabs').tabs();
@@ -220,7 +220,7 @@ this works really well -- but unused for now as it doesn't allow us to return a 
         var access_tree = o.access_tree;
         var access_tree_orig_data = null;
         BRDynamic.addLogic(o.access_tree);
-        BR.api.v1.conferences(cxt.conference_id, function(e,conf){
+        BR._api.conferences(cxt.conference_id, function(e,conf){
 //console.log(BR.room);
             if (e) return;
             try { access_tree_orig_data=jQuery.parseJSON(conf.access_config||'{}'); }
@@ -250,7 +250,7 @@ this works really well -- but unused for now as it doesn't allow us to return a 
                 conf.access_config = JSON.stringify(new_data);
                 BRConference.statusOn(h,'Saving...',f_save_access);
 //console.log('conf',conf);
-                BR.api.v1.update(conf, function(e,d){
+                BR._api.update(conf, function(e,d){
                     BRConference.statusOff(h,f_save_access);
                     if (e) {
                         BRConference.api_error(e);

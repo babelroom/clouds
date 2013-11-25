@@ -1,7 +1,6 @@
 (function() {
     /* --- */
-    if (typeof window.BR == "undefined")
-        window.BR = {};
+    typeof window.BR==="undefined"?window.BR={v1:{}}:typeof window.BR.v1==="undefined"&&(window.BR.v1={});
 })();
 
 
@@ -121,7 +120,7 @@
         }
 
     /* --- */
-    window.BR.XHR = function(){return new XHR();}
+    window.BR.v1.XHR = function(){return new XHR();}
 })();
 
 
@@ -183,11 +182,14 @@
         };
 
     function API() {
+        /* this.defaults: intentionally omitted */
         this.options = null;
-//        this.config = null;
         this.hosts = null;
         this.stream_channel = undefined;
         this.xhr_channel = undefined;
+        this.commands = null;
+        this.notify = null;
+        this.context = {};
         }
 
     /* --- utils --- */
@@ -204,7 +206,7 @@
 
     function _non_stream_call(verb, path, data, fn) {
         if (typeof(this.xhr_channel)==="undefined")
-            this.xhr_channel = BR.XHR();
+            this.xhr_channel = BR.v1.XHR();
         if (!this.xhr_channel)
             return fn('No communication channel');
         return this.xhr_channel.request(verb, _get_host.call(this, 'api')+path, data, fn);
@@ -298,19 +300,18 @@
         return this.hosts[name];
         }
 
-    function _addStreamCredential(path, token, fn) {
+    function _addStreamCredential(_this, path, token, fn) {
+        /*_initControllers(_this); -- we'd do this here if we wanted to kick init right before stream start ... */
         /* connect stream */
-        var _this = this;
         function stream_authenticate() {
             _this.stream_channel.add_conference_credential(path, token, function(e,d){
-//console.log(e,d);
                 if (e || !d) return fn(e || 'unexpected response');
                 fn(e,d);
                 });
             }
-        if (this.stream_channel)
+        if (_this.stream_channel)
             stream_authenticate();
-        else return _open_stream.call(this, function(error) {
+        else return _open_stream.call(_this, function(error) {
                 if (error) return fn(error);
                 stream_authenticate();
             });
@@ -345,10 +346,8 @@
         }
 */
     function _update(obj, fn) {
-//console.log('obj',obj);
         if (typeof(obj)!=="object" || !obj._ || !obj._.id || !obj._.model || !obj._.orig)
             return fn('corrupt API record',null);
-//console.log('obj',obj);
         var to_save = {};
         var found = false;
         for(var i in obj)
@@ -356,8 +355,6 @@
                 to_save[i] = obj[i];
                 found = true;
                 }
-//console.log('to_save',to_save);
-//console.log('found',found);
         if (!found)
             return fn(null,{});
         else
@@ -367,23 +364,62 @@
                 });
         }
 
-    /* init */
-    API.prototype.init = function(args) {
+    function _streamStart(self) {
+        var o = self.options;
+        _addStreamCredential(self, "/i/"+o.conference_id, o.authentication.token, function(e,d){
+            if (e || !d) return o.onError(e || 'Error authorizing stream');
+            self.context = d;
+            self.commands.start(self, o.onError);
+            });
+        }
+
+    function _topLevelCopy(o,n) {
+        for(var v in o) 
+            if (o.hasOwnProperty(v))
+                if (typeof n[v]==="undefined")
+                    n[v] = o[v];
+        }
+
+    function _initControllers(self) {
+        /* --- */
+        var controllers = [];
+        if (BR.v1.controllers)
+            for(var c in BR.v1.controllers)
+                if (BR.v1.controllers.hasOwnProperty(c)) {
+                    controllers.push(c);
+                    if (self.options[c]) {
+                        self.options[c]._default = BR.v1.controllers[c];
+                        _topLevelCopy(BR.v1.controllers[c], self.options[c]);
+                        }
+                    else
+                        self.options[c] = BR.v1.controllers[c];
+                    self.options[c]._api = self;
+                    }
+        for(var i=0; i<controllers.length; i++) 
+            self.options[controllers[i]].onInit();
+        }
+
+    function _init(self, args) {
         /* this next line is practically a work of art .. but unnecessary here
         var subdomain = src_of_this_src.match(/^(?:http:|https:)\/\/([a-z0-9]+(?:-[a-z0-9]+)*)(\.[a-z0-9]+(-[a-z0-9]+)*)/i); */
         var subdomain = src_of_this_src.match(/^(?:http:|https:)\/\/([a-z0-9]+(?:-[a-z0-9]+)*)\.babelroom.com\//i);
         var _config = (subdomain && subdomain[1].match('dev')) ? config_map.dev : config_map.prod;
         var hosts = null;
-        this.options = {
-            /* defaults */
-            streamFactory: window.BR.SIO
+        self.defaults = {
+            onError: function(msg)  { console && console.log && console.log(msg); },
+            streamFactory: window.BR.v1.SIO,
+            _: 0    /* last */
             }
+        self.options = {}
+        var logicContainer = window.BR.v1.logic && window.BR.v1.logic.create();
+        if (logicContainer) {
+            self.commands = logicContainer.commands;
+            self.notify = logicContainer.notify;
+            }
+        _topLevelCopy(self.defaults, self.options);
         if (typeof(args)==='object') {
-            if (typeof(args['query_string'])==='string') {
-                var d = _parseQueryString(args['query_string']);
-                for(v in d) 
-                    if (d.hasOwnProperty(v))
-                        args[v] = d[v];
+            if (typeof(args['query_string'])==='string') {  /* where is this query string injection used? (i.e. depreciate) */
+                _topLevelCopy(_parseQueryString(args['query_string']), args);
                 /* then remove query string */
                 delete args['query_string'];
                 }
@@ -394,14 +430,18 @@
                         case 'env': _config = config_map[val]; break;
                         case 'hosts': hosts = val; break;  /* either a hash of alternate hosts, or a string specifying a single host to override them all */
                         default:
-                            this.options[key] = val;
+                            self.options[key] = val;
                     }
                 }
             }
-        this.hosts = {};
+        self.hosts = {};
         for(var i in _config.hosts)
             if (_config.hosts.hasOwnProperty(i))
-                this.hosts[i] = (hosts!==null) ? (typeof(hosts)==='object'? (typeof(hosts[i])!=="undefined"?hosts[i]:_config.hosts[i]) :hosts) : _config.hosts[i];
+                self.hosts[i] = (hosts!==null) ? (typeof(hosts)==='object'? (typeof(hosts[i])!=="undefined"?hosts[i]:_config.hosts[i]) :hosts) : _config.hosts[i];
+
+        _initControllers(self);
+
+        return self;
         };
 
     /* return static data */
@@ -416,12 +456,17 @@
         if (typeof(get_or_set_stream)==="undefined") /* get */
             return this.stream_channel;
         this.stream_channel = get_or_set_stream;
+        return this.stream_channel;
         }
     
     API.prototype.addStreamCredential = function(path, token, fn) {
-        return _addStreamCredential.call(this, path, token, fn);
+        return _addStreamCredential(this, path, token, fn);
         }
 
+    API.prototype.start = function() {
+        _streamStart(this);
+        return this;
+        }
 
 
     /* API calls which may set cookies and redirect */
@@ -467,8 +512,6 @@
         }
 
     /* --- */
-    if (typeof window.BR.api == "undefined")
-        window.BR.api = {};
-    window.BR.api.v1 = new API();
+    window.BR.v1.api = {create: function(opts) { return _init(new API(), opts); }};
 })();
 

@@ -1,10 +1,14 @@
 
-var http = require('http');
-var https = require('https');
-var fs = require('fs');
-var Live = require('./live');
-var API = require('./api');
-var Mini = require('./mini');
+var     http = require('http')
+    ,   https = require('https')
+    ,   SessionManager = require('./session_manager')
+    ,   AutoAPI = require('./auto_api')
+    ,   DBManager = require('./db_manager')
+    ,   fs = require('fs')
+    ,   Live = require('./live')
+    ,   API = require('./api')
+    ,   Mini = require('./mini')
+    ,   FileUploader = require('./file_uploader')
 
 /*
 ** Read configuration 
@@ -28,8 +32,11 @@ var protocol_factory = {
 for(var i=0; i<config.groups.length; i++) {
     var g = config.groups[i];
     var servers = {};
+    var db = new DBManager(g);
+    var sessionManager = new SessionManager(g, db);
     var io = new Live(g);
-    var api = new API(g);
+    var api = new API(g, db, sessionManager);
+    var fu = new FileUploader(g, db, sessionManager);
     var mini = new Mini(g);
     var express = require('express');
     var app = express();
@@ -52,6 +59,9 @@ for(var i=0; i<config.groups.length; i++) {
             case 'mini':
                 mini.addUseHandlers(express, app, g);
                 break;
+            case 'file_uploader':
+                fu.addUseHandlers(express, app, g);
+                break;
             }
     for(var j=0; j<g.apps.length; j++)
         switch(g.apps[j]) {
@@ -63,6 +73,9 @@ for(var i=0; i<config.groups.length; i++) {
                 break;
             case 'mini':
                 mini.addHandlers(express, app, g);
+                break;
+            case 'file_uploader':
+                fu.addHandlers(express, app, g);
                 break;
             }
 }

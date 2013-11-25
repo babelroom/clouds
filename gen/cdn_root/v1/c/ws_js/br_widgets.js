@@ -1,5 +1,6 @@
 var BRWidgets = {
     id: 1,
+    chatController: {},
 
     _crop: function(name,len) {
         var pres_max = (len?len:30);
@@ -9,7 +10,7 @@ var BRWidgets = {
     },
 
     _modified: function(h3tag) {
-        if (!BR.room.context.is_live)
+        if (!BR._api.context.is_live)
             return;
         if (h3tag.hasClass('ui-state-active') && !h3tag.hasClass('ui-state-highlight'))
             return;
@@ -35,16 +36,20 @@ var BRWidgets = {
 
     _upload: function() {
         var $j = jQuery;
+/* 
+what was this?
         function upload() {
             return false;
             }
+*/
         BROverlays.generic({
             content: function(id) {
-                var url = BR.api.v1.get_host('cdn') + '/cdn/v1/c/ws_js/fileuploader/index.html?url='
-                    + escape(BR.api.v1.get_host('myapi')+'/plugin/0/upload.js')
+                var url = BR._api.get_host('cdn') + '/cdn/v1/c/ws_js/fileuploader/index.html?url='
+                    + escape(BR._api.get_host('myapi')+'/plugin/0/upload.js')
                     + '&ts=' + new Date().getTime()
-                    + '&conference_id=' + BR.room.context.conference_id
-                    + '&user_id=' + BR.room.context.user_id;
+                    + '&csrf_token=' + BR._api.context.csrf_token
+                    + '&conference_id=' + BR._api.context.conference_id
+                    + '&user_id=' + BR._api.context.user_id;
                 return '<iframe src="'+url+'" width="780" height="360" frameborder="0"></iframe>';
                 },
             logic:      function(id,selector) { 
@@ -705,16 +710,16 @@ console.log( $j('#tile',sel) );
 </div>\
 ');
                 var flashvars = {
-                    'csMediaServerURI':  BR.room.context.media_server_uri,
+                    'csMediaServerURI':  BR._api.context.media_server_uri,
 //'csMediaServerURI':  'rtmp%3A%2F%2Fvideo.babelroom.com%3A1936%2FoflaDemo',
-//console.log('TDBR', BR.room.context);
+//console.log('TDBR', BR._api.context);
                     'csStreamId': stream_salt
                     };
                 var params = {
                     //bgcolor: '#282828'
                     };
                 var attributes = {};
-                swfobject.embedSWF( BR.api.v1.get_host('cdn') + "/cdn/v1/c/flash/" + (broadcast ? "brBroadcast.swf" : "brViewer.swf"),
+                swfobject.embedSWF( BR._api.get_host('cdn') + "/cdn/v1/c/flash/" + (broadcast ? "brBroadcast.swf" : "brViewer.swf"),
                     //flash_id, "214", "160", "8.0.0", "expressInstall.swf", flashvars, params, attributes);  /* returns 'undefined' */
                     flash_id, "100%", "100%", "8.0.0", "expressInstall.swf", flashvars, params, attributes);  /* returns 'undefined' */
                 opts.showBackground(false);
@@ -1130,14 +1135,14 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                     if (nc.length) b.find('#talking i').addClass(nc);
                     var sel = b.find('#mute');
                     if (lmut_store.mute) sel = sel.next();
-                    sel.show().button((BR.room.context.user_id==user_id || lmut_store.is_host) ? "enable" : "disable");
+                    sel.show().button((BR._api.context.user_id==user_id || lmut_store.is_host) ? "enable" : "disable");
                     }
                 }
             BRDashboard.subscribe(function(o){
                 if (o.updated.is_host)
-                    lmut(undefined, undefined, undefined, BR.room.context.is_host);
+                    lmut(undefined, undefined, undefined, BR._api.context.is_host);
                 },'room_context');
-            lmut(false, false, false, BR.room.context.is_host); /* initial setup */
+            lmut(false, false, false, BR._api.context.is_host); /* initial setup */
             b.data('lmut',lmut);
             /* === end of somewhat complex interplay ... */
 
@@ -1224,7 +1229,7 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                                 vc.setMe();
                                 }
 /*
-                            var salt = (BRDashboard.connection_id in o.data.connection_ids) ? BR.room.context.connection_salt : null;
+                            var salt = (BRDashboard.connection_id in o.data.connection_ids) ? BR._api.context.connection_salt : null;
                             if (salt!==my_broadcastable_stream_id) {
                                 my_broadcastable_stream_id = salt;
                                 update_webcam_buttons();
@@ -1370,7 +1375,7 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
         $j('#make_me_button')
             .button({ text: true, no_icons: { primary: "ui-icon-pencil" }})
             .click(function(){
-                BRCommands.slideAction('presenter', BR.room.context.user_id + ':' + BR.room.context.user_name);
+                BRCommands.slideAction('presenter', BR._api.context.user_id + ':' + BR._api.context.user_name);
             })
           /*  .tooltip(); */
             ;
@@ -1677,7 +1682,7 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                         if (arr && arr.length==3) {
                             //$j('#presenter').text(' Presenter: ' + arr[2] + ' '); -- try the look below for a while ...
                             $j('#presenter').html(' <em>Presenter:</em> ' + arr[2] + ' ');
-                            if (arr[1] == BR.room.context.user_id) {    /* we are presenting */
+                            if (arr[1] == BR._api.context.user_id) {    /* we are presenting */
                                 $j('.not_presenting').css('display','none');
                                 $j('.presenting').css('display','inline');
                                 }
@@ -1836,9 +1841,9 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                     }
                 $j('#'+id+'_delete').button("disable");
                 jQuery.ajax({
-                    url: BR.api.v1.get_host('myapi')+'/plugin/0/media_files/' + rowid + ".js",
+                    url: BR._api.get_host('myapi')+'/plugin/0/media_files/' + rowid + ".js",
                     type: "DELETE",
-// BRInvitees.aj("/invitations/add_guest.js", {invitation:{conference_id:BR.room.context.conference_id}, user:{}, auth: BR.room.context.authen}, function(data, textStatus, jqXHR){
+// BRInvitees.aj("/invitations/add_guest.js", {invitation:{conference_id:BR._api.context.conference_id}, user:{}, auth: BR._api.context.authen}, function(data, textStatus, jqXHR){
                     //data: un,
                     success: done,
                     xhrFields: {
@@ -1914,7 +1919,7 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                     case 'slideshow_pages':
                         switch(h.value) {
                             case undefined: tmp = '???'; break;
-                            case '-1': tmp = '<img src="'+BR.api.v1.get_host('cdn')+'/cdn/v1/c/img/arrows_spinner.gif" alt="Loading...">'; break;
+                            case '-1': tmp = '<img src="'+BR._api.get_host('cdn')+'/cdn/v1/c/img/arrows_spinner.gif" alt="Loading...">'; break;
                             case '0': tmp = '<em>None</em>'; break;
                             default: tmp = h.value;
                             };
@@ -2070,7 +2075,7 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
             ;
         function dial() {
             var num = '+'+ip.val();
-            BR.api.v1.addParticipant(BRUtils.conferencePath(), {name: num}, function(e,d){
+            BR._api.addParticipant(BRUtils.conferencePath(), {name: num}, function(e,d){
 //console.log(e,d);
                 if (e || !d || !d.user || !d.user.id || !d.user.name)
                     return alert(e || 'Error creating user for dialout');
@@ -2131,7 +2136,7 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
         BRWidgets.dialerMonitor(selector,'#call_monitor');
         function updateDialpadAccess() {
             var verb = "disable", json = null;
-            if (BR.room.context.is_host) {
+            if (BR._api.context.is_host) {
                 verb = "enable";
                 }
             else {
@@ -2142,7 +2147,7 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
             $j('#'+id+'_talk').button(verb);
             }
         BRDashboard.subscribe(function(o) {
-            if (o.idx!==/*intentional*/BR.room.context.conference_id || o.attr!=="access_config")
+            if (o.idx!==/*intentional*/BR._api.context.conference_id || o.attr!=="access_config")
                 return;
             updateDialpadAccess();
             }, 'conferences');
@@ -2528,10 +2533,13 @@ if needed use the enableSelect() instead
             });
         var input = $j('#'+id+'_input');
         input.keydown(function(e){
-            if (e.keyCode==13) BRCommands.sendChat(BR.room.context.user_id, BR.room.context.user_name, id+'_input');
+            if (e.keyCode==13) BRCommands.sendChat(BR._api.context.user_id, BR._api.context.user_name, id+'_input');
             });
-        var month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        BRDashboard.subscribe(function(o){
+        /* this code now duplicated in br_api.controllers */
+//        var month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        BRWidgets.chatController.onMessage = function(msg) {
+//        BRDashboard.subscribe(function(o){
+/*
             var user_id = null, user = '', msg = o.data;
             if (msg.match(/^(\d+)-([^:]*):(.*)$/)) {
                 user_id = RegExp.$1;
@@ -2545,8 +2553,10 @@ if needed use the enableSelect() instead
             var avatar = null;
             if (user_id && BRDashboard.user_map && BRDashboard.user_map[user_id] && BRDashboard.user_map[user_id].avatar_small)
                 avatar = BRDashboard.user_map[user_id].avatar_small;
+*/
             var msg_top = '<div style="color: #bbb; border: 0; border-top: 1px solid #ddd;">';
-            msg_top += '<div style="float: left; font-weight: bold;">'+user+'</div><div style="float: right;">';
+            msg_top += '<div style="float: left; font-weight: bold;">'+msg.user+'</div><div style="float: right;">';
+/*
             var time = '';
             if (o.ts!==undefined) {
                 var d = new Date;
@@ -2558,38 +2568,35 @@ if needed use the enableSelect() instead
                 var tsm = time_since_midnight(d);
                 d.setTime(o.ts);
                 if (dmy(d)!==today) {
-                    if ((time_now - tme(d))<(86400000/* 1000*60*60*12 */+tsm))
+                    if ((time_now - tme(d))<(86400000/* 1000*60*60*12 *./+tsm))
                         time += 'Yesterday ';
                     else 
                         time += month_names[d.getMonth()] + ' ' + d.getDate() + ' ';
                     }
                 time += d.getHours() + ':' + (d.getMinutes()<10 ? '0' : '') + d.getMinutes();
                 }
-            msg_top += time + '</div><div style="clear: both;"></div></div>';
+*/
+            msg_top += msg.time + '</div><div style="clear: both;"></div></div>';
             var left_width = 50;
             var sb_width = 28;
-            if (avatar)
-                content.append('<div style="float: left; width: '+left_width+'px;"><img src="'+avatar+'" alt="'+user+'" title="'+user+'"></div>')
+            if (msg.avatar)
+                content.append('<div style="float: left; width: '+left_width+'px;"><img src="'+msg.avatar+'" alt="'+msg.user+'" title="'+msg.user+'"></div>')
             else
-                content.append('<div style="float: left; width: '+left_width+'px; font-weight: bold; overflow: hidden; padding: 2px;">'+user+'</div>')
+                content.append('<div style="float: left; width: '+left_width+'px; font-weight: bold; overflow: hidden; padding: 2px;">'+msg.user+'</div>')
             content
                 .append(
                     '<div style="float: right; width: '+(chat_width-(left_width+sb_width))+'px; padding: 0px;">'+msg_top+
-                    '<div style="padding: 2px;">'+msg+'</div></div>')
+                    '<div style="padding: 2px;">'+msg.text+'</div></div>')
                 .append('<div style="clear: both; height: 20px;"></div>');
             if (!content.is(":visible"))
                 BRDashboard.notify(notify_key, notify_fn);
             //if (!content.is(":visible") && !h3tag.hasClass('ui-state-highlight'))
             //    h3tag.addClass('ui-state-highlight');
             scrollToEnd();
-            },'chat');
-        BRDashboard.subscribe(function(o){
-            switch(o.command) {
-                case 'clearChat':
-                    content.empty();
-                    break;
-                }
-            },'command');
+//            },'chat');
+        /* end of code duplication to controllers */
+            }
+        BRWidgets.chatController.onClear = function() { content.empty(); }
         },
 
     version: function(id) {
@@ -2598,7 +2605,7 @@ if needed use the enableSelect() instead
         var selector = '#' + id + '_version';
         BRDashboard.subscribe(function(o){if(o.updated.is_live){        /* aiming for ugliest js award */
                 var sv = null;
-                try { sv = JSON.parse(BR.room.context.server_version); } catch(e){};
+                try { sv = JSON.parse(BR._api.context.server_version); } catch(e){};
                 $j(selector).html(''+(sv?(sv.stamp):'<2.37.193'));
             };},'room_context');
         }

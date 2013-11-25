@@ -22,7 +22,7 @@ setsockopt( UDPSOCK, SOL_SOCKET, SO_REUSEADDR, 1 )
 my $broadcastAddr = sockaddr_in( $udp_port, INADDR_ANY );
 bind( UDPSOCK, $broadcastAddr ) or die "bind failed: $!\n";
 
-my $timeout = 10;
+my $timeout = 10000;
 my $input;
 while(1) {
     my $rin = '';

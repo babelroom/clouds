@@ -17,6 +17,8 @@ set et
 autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 EOT
 
+mkdir tmp
+
 echo "Get BR sources .."
 mkdir gits
 cd gits

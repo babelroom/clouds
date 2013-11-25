@@ -8,8 +8,9 @@
 
 # ---
 $|++;
-use BRDB;
 use REST::Client;
+use BRDB;
+use BRUDP;
 
 # ---
 sub get_assigned_conferences
@@ -22,6 +23,8 @@ sub get_assigned_conferences
 # ---
 sub prep_conferences
 {
+    my $did_something = 0;
+
     # ---
     foreach my $r(@{$conferences}) {
         die if not defined $r->{fs_server};
@@ -34,6 +37,9 @@ sub prep_conferences
 LConference queue $r->{id} created
 __EOT__
 ;
+# purge this out ...
+# XXXXX
+$data = '';
         $client->POST($url, $data) or die "failed to POST to [$url]\n";
         die "bad response from [$url]\n" if $client->responseCode() ne '200';
         db_exec($dbh,"UPDATE conferences SET state='queue_created', updated_at=NOW() WHERE id=$r->{id}",_rows);
@@ -42,12 +48,15 @@ __EOT__
             print "================================================================================\n";
             print "$data";
             print "================================================================================\n";
+            $did_something = 1;
             }
         }
+    return $did_something;
 }
 
 # ---
 $dbh = db_quick_connect();
+$udp = BRUDP->new(Port=>$ENV{BR_UDPPORT}) or die;
 
 # ---
 for(my $it=0; $it<$ENV{BR_ITERATIONS}; $it++) 
@@ -62,7 +71,13 @@ for(my $it=0; $it<$ENV{BR_ITERATIONS}; $it++)
         }
 
     # ---
-    sleep $ENV{BR_SLEEP_SHORT} if not $did_something;
+#    sleep $ENV{BR_SLEEP_SHORT} if not $did_something;
+    if ($did_something) {
+        $udp->send('no_conference:queue_created') or die;
+        }
+    else {
+        $udp->recv('no_conference:conference_assigned', $ENV{BR_SLEEP_SHORT}) or die;
+        }
 }
 
 # ---

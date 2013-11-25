@@ -32,7 +32,7 @@ var BRToolbar = {
     login_by_token: function(fnerror) {
         var dict = BRToolbar._getQueryString();
         var success_url = BRToolbar._frankenURL({search:null});  /* drop query string */
-        BR.api.v1.login({token: dict.t}, {success_url:success_url, fnerror:fnerror});
+        BR._api.login({token: dict.t}, {success_url:success_url, fnerror:fnerror});
         },
 
     update_viz: function(selector, show) {
@@ -71,7 +71,7 @@ var BRToolbar = {
         menu_button.bind('dblclick',function(e) {   /* don't leave this + click in at same time: http://api.jquery.com/bind/ */
             if (e.clientX>15 || e.altKey || !e.shiftKey || !e.ctrlKey) 
                 return;
-            BRDashboard.updateRoomContext('is_host',!BR.room.context.is_host);
+            BRDashboard.updateRoomContext('is_host',!BR._api.context.is_host);
             function easter(on) {   /* actually change the css rule for current elements in the DOM *and elements created in the future* */
                 for(var s = 0; s < document.styleSheets.length; s++) {
                     var ss = document.styleSheets[s];
@@ -88,7 +88,7 @@ var BRToolbar = {
                         }
                     }
                 }
-            easter(BR.room.context.is_host);
+            easter(BR._api.context.is_host);
             });
 
         var my_user_id = null;
@@ -96,7 +96,7 @@ var BRToolbar = {
         var my_label = null;
         function contextUpdated(o) {
             if (!o || o.updated.is_host) {
-                if (BR.room.context.is_host) {
+                if (BR._api.context.is_host) {
                     $j('.participant-only').hide();
                     BRToolbar.update_viz('.host-only', true);
                     menu.find('.host-only-menuitem').removeClass('ui-state-disabled');
@@ -113,13 +113,15 @@ var BRToolbar = {
                 $j('#people_toolbar').find('#list').button(BRDashboard.conference_access_config.peer_to_peer?'disable':'enable');
                 }
             if (!o || o.updated.email_address) {
-                if (BR.room.context.email_address) menu.find('.non-ephemeral-only-menuitem').removeClass('ui-state-disabled');
+                if (BR._api.context.email_address) menu.find('.non-ephemeral-only-menuitem').removeClass('ui-state-disabled');
                 else menu.find('.non-ephemeral-only-menuitem').addClass('ui-state-disabled');
                 }
+            if (o && o.updated.is_live && o.new.is_live===true)
+                BRToolbar.door('loaded');
             updateLabel();
             }
         function updateLabel() {
-            var new_label = '<i class="'+(BR.room.context.is_host?'icon2-magic':'icon2-user')+' pull-left"></i>';
+            var new_label = '<i class="'+(BR._api.context.is_host?'icon2-magic':'icon2-user')+' pull-left"></i>';
             new_label += (my_user_id && BRWidgets.full_name(my_user_id)) || 'Loading...';
             if (my_label!==new_label) {
                 my_label = new_label;
@@ -131,14 +133,14 @@ var BRToolbar = {
 //            if (o.data && o.data.connection_id && o.data.connection_id==/*deliberate==*/BRDashboard.connection_id) {
             if (o.data && BRDashboard.connection_id && (BRDashboard.connection_id in o.data.connection_ids)) {
                 /* this might be a little too complex ... tmp TODO
-                consider: BR.room.context.invitation_id, BR.room.context.user_id */
+                consider: BR._api.context.invitation_id, BR._api.context.user_id */
                 if (!my_user_id && o.data.user_id) my_user_id = o.data.user_id;
                 if (!my_invitee_id && o.data.invitee_id) my_invitee_id = o.data.invitee_id;
                 updateLabel();
                 }
             },'box');
 //        BRDashboard.subscribe(function(o){ if (my_invitee_id && o.data && o.data.id===my_invitee_id) checkLabel(); }, 'invitee'); -- box might be all we need ...
-//console.log(BR.room.context.is_host);
+//console.log(BR._api.context.is_host);
         BRDashboard.subscribe(contextUpdated, 'room_context');
         contextUpdated(null);     /* setup once to initial value */
     },
@@ -146,7 +148,7 @@ var BRToolbar = {
     menuAction: function(item) {
         var $j = jQuery;
         function make_webcall_url() {
-            var url = BR.api.v1.get_host('cdn')+'/cdn/v1/c/flash/flash.html?url='+encodeURIComponent('rtmp:'+BR.api.v1.get_host('live')+'/phone')+'&pin='+BR.room.context.pin;
+            var url = BR._api.get_host('cdn')+'/cdn/v1/c/flash/flash.html?url='+encodeURIComponent('rtmp:'+BR._api.get_host('live')+'/phone')+'&pin='+BR._api.context.pin;
             return url;
             }
         $j('#menu').hide();
@@ -155,26 +157,26 @@ var BRToolbar = {
                 BROverlays.connect({webcall_url: make_webcall_url()});
                 break;
             case 'b':
-                if (!BR.room.context.is_host) return false;
+                if (!BR._api.context.is_host) return false;
                 BROverlays.guests();
                 break;
             case 'c':
-                if (!BR.room.context.email_address) return false;
-                window.open(BR.api.v1.get_host('my'), '_blank');
+                if (!BR._api.context.email_address) return false;
+                window.open(BR._api.get_host('my'), '_blank');
                 break;
             case 'd':
-                if (!BR.room.context.is_host) return false;
+                if (!BR._api.context.is_host) return false;
                 BROverlays.conference_settings();
                 break;
             case 'e':
-                if (!BR.room.context.is_host) return false;
+                if (!BR._api.context.is_host) return false;
                 BRToolbar.resetDialog();
                 break;
             case 'f':
-                BR.api.v1.logout();
+                BR._api.logout();
                 break;
             case 'g':
-                window.open(BR.api.v1.get_host('home'), '_blank');
+                window.open(BR._api.get_host('home'), '_blank');
                 break;
             }
         return false;
@@ -289,7 +291,7 @@ var BRToolbar = {
             if (c) {
                 if (msg) c+= '<br><p>['+msg+']</p>';
                 c = '<div style="text-align: center;"><p>'+c+'</p>\
-<p>Support information is available from the <a href="'+BR.api.v1.get_host('home')+'/faq/" style="font-weight: bold; color: black;">FAQ</a></p>\
+<p>Support information is available from the <a href="'+BR._api.get_host('home')+'/faq/" style="font-weight: bold; color: black;">FAQ</a></p>\
 </div>';
                 $j('#'+id+'_error',pdlg).html(c).show();
                 $j('#'+id+'_content',pdlg).find('i.icon2-chat').hide(); /* hide icon if it's still visible (i.e. no content has been added) */
@@ -345,15 +347,15 @@ if (qs && qs['e']) {
                 /* this is actually (almost) overkill ... */
                 html += ''
                     +'<p>Signup to reserve it now!</p>'
-                    +'<a class="br-d-button" target="_blank" href="'+BR.api.v1.get_host('home')+'/signup/?room_url='+ruri+'"><i class="icon2-ok pull-left"></i> Reserve '
+                    +'<a class="br-d-button" target="_blank" href="'+BR._api.get_host('home')+'/signup/?room_url='+ruri+'"><i class="icon2-ok pull-left"></i> Reserve '
                     +((proto==='https')?'<span class="secure-bright-green"><i class="icon2-lock"></i> https</span>':'http')+'://'+dn+'/<strong>'+ruri+'</strong></a>';
                 }
             html += '</div>';
             html += '<div id="d_set_unknown"'+hs+'>This is not a known conference</div>';
             html += '<div id="d_set_nick_intro"'+hs+'><p>Participants need to be identified in this room. You may enter a nickname or login if you have an account.</p></div>';
             html += '<div id="d_set_nick"'+hs+'><p style="text-align: center;"><label>Enter a Nickname<input id="d_input_nick" spellcheck="false" type="text" size="20" /></label><br>Have an account? <a href="#" class="br-blue br-d-login">Login</a><p></div>';
-            html += '<div id="d_set_login"'+hs+'><center><table wdth="100%"><tr><td><label>Email<br><input id="d_input_email" style="margin-left:0;" type="text" size="20" spellcheck="false" /></label></td><td rowspan="2" width="10%"></td><td><label>Password<br><input id="d_input_password" style="margin-left:0;" type="password" size="20" spellcheck="false" /></label></td></tr><tr><td>Just use a <a href="#" id="d_link_nick" class="br-blue">Nickname</a></td><td><a href="'+BR.api.v1.get_host('my')+'/login?reset" class="br-blue" target="_blank">Forgot</a> password?</td></tr></table></center></div>';
-            html += '<div id="d_set_wait"'+hs+'><center>Waiting for host to enter conference...<br><img src="'+BR.api.v1.get_host('cdn')+'/cdn/v1/c/img/bar-spinner.gif"></center></div>';
+            html += '<div id="d_set_login"'+hs+'><center><table wdth="100%"><tr><td><label>Email<br><input id="d_input_email" style="margin-left:0;" type="text" size="20" spellcheck="false" /></label></td><td rowspan="2" width="10%"></td><td><label>Password<br><input id="d_input_password" style="margin-left:0;" type="password" size="20" spellcheck="false" /></label></td></tr><tr><td>Just use a <a href="#" id="d_link_nick" class="br-blue">Nickname</a></td><td><a href="'+BR._api.get_host('my')+'/login?reset" class="br-blue" target="_blank">Forgot</a> password?</td></tr></table></center></div>';
+            html += '<div id="d_set_wait"'+hs+'><center>Waiting for host to enter conference...<br><img src="'+BR._api.get_host('cdn')+'/cdn/v1/c/img/bar-spinner.gif"></center></div>';
             html += '<p></p>';
 
             $j('#'+id+'_content').html(html).find('a.br-d-button').button();
@@ -362,7 +364,7 @@ if (qs && qs['e']) {
                 defaultButton = jQuery('#d_set_nick, #d_butt_start').show().last();
                 //defaultButton  = jQuery('#d_butt_start');
                 startFn = function() {
-                    BR.api.v1.addSelf('/'+uri, {name: jQuery('#d_input_nick').val()}, {
+                    BR._api.addSelf('/'+uri, {name: jQuery('#d_input_nick').val()}, {
                         fnerror: function(e){
                             set_error(pdlg,'<strong>Error setting nickname</strong>');
                             },
@@ -378,7 +380,7 @@ if (qs && qs['e']) {
                 }
             $j('.br-d-login',pdlg).click(function(){ show_login(); return false; });
             $j('#d_link_nick',pdlg).click(function(){ show_nick(); return false; });
-            $j('#d_link_logout',pdlg).click(function(){ BR.api.v1.logout(); return false;});
+            $j('#d_link_logout',pdlg).click(function(){ BR._api.logout(); return false;});
 /*
             // -- don't ask
             var tmp=$j('#d_link_nick').prop('tabindex');
@@ -443,12 +445,12 @@ if (qs && qs['e']) {
                     return ;
                     }
                 /* actually start */
-                BR.room.context = d;
+                BR._api.context = d;
                 BRToolbar.setup();
-        /*      BR.room.skin.id = BR.room.context.conference_skin_id; */
-                BR.room.context.media_server_uri = encodeURIComponent('rtmp:' + BR.api.v1.get_host('video') + '/oflaDemo');   // yes, this is what is intended
+        /*      BR.room.skin.id = BR._api.context.conference_skin_id; */
+                BR._api.context.media_server_uri = encodeURIComponent('rtmp:' + BR._api.get_host('video') + '/oflaDemo');   // yes, this is what is intended
                 statusOn(id, 'Loading room...');
-                BRCommands.start(BR.room.context.conference_estream_id, function(error){
+                BRCommands.start(BR._api, function(error){
                     /* only called on error */
                     BRToolbar._doorAction('fatal');
                     });
@@ -480,7 +482,7 @@ if (qs && qs['e']) {
                     /* enable start button with associated action to self add invitation */
                     startFn = function() {
                         var success_url = BRToolbar._frankenURL({search:null});  /* drop query string */
-                        BR.api.v1.addSelf('/'+uri, null, {success_url: success_url, failure_url: success_url+'?e='+encodeURIComponent('Error creating invitation')});
+                        BR._api.addSelf('/'+uri, null, {success_url: success_url, failure_url: success_url+'?e='+encodeURIComponent('Error creating invitation')});
                         }
                     defaultButton = jQuery('#d_butt_start').button('enable');
                     }
@@ -498,7 +500,7 @@ if (qs && qs['e']) {
                         }
                     else {
                         /* go right in ... */
-                        BR.api.v1.addSelf('/'+uri, null, {failure_url: uri+'?e='+encodeURIComponent('Error entering conference')});
+                        BR._api.addSelf('/'+uri, null, {failure_url: uri+'?e='+encodeURIComponent('Error entering conference')});
                         }
                     }
                 else {
@@ -522,15 +524,15 @@ if (qs && qs['e']) {
 </div>\
 <div id="'+id+'_footer">\
 <center><table width="80%" height="30"><tr><td width="50%"><div id="'+id+'_status" style=""></div></td><td width="50%"><div id="'+id+'_progress" style="height: 5px; display: none;"></div></td></tr></table>\
-<span><a href="'+BR.api.v1.get_host('home')+'/home/" class="br-blue">Home</a>\
+<span><a href="'+BR._api.get_host('home')+'/home/" class="br-blue">Home</a>\
  &nbsp; &bull; &nbsp; </span>\
 <span class="br-d-no-login"><a href="#" class="br-d-login br-blue">Login</a>\
  &nbsp; &bull; &nbsp; </span>\
-<span class="br-d-no-login"><a href="'+BR.api.v1.get_host('home')+'/signup/" class="br-blue">Signup</a>\
+<span class="br-d-no-login"><a href="'+BR._api.get_host('home')+'/signup/" class="br-blue">Signup</a>\
  &nbsp; &bull; &nbsp; </span>\
-<span class="br-d-non-ephemeral-logged-in"><a href="'+BR.api.v1.get_host('my')+'/" class="br-blue">Account</a>\
+<span class="br-d-non-ephemeral-logged-in"><a href="'+BR._api.get_host('my')+'/" class="br-blue">Account</a>\
  &nbsp; &bull; &nbsp; </span>\
-<span><a href="'+BR.api.v1.get_host('home')+'/faq/" class="br-blue">Help</a>\
+<span><a href="'+BR._api.get_host('home')+'/faq/" class="br-blue">Help</a>\
  &nbsp; </span>\
 </center>\
 </div>\
@@ -551,7 +553,7 @@ if (qs && qs['e']) {
                 var lb = $j('#'+id+'_butt_login');
                 lb.button({disabled: true}).hide().click(function(){
                     set_error(pdlg,'');
-                    BR.api.v1.login({login: jQuery('#d_input_email').val(), password: jQuery('#d_input_password').val()}, {
+                    BR._api.login({login: jQuery('#d_input_email').val(), password: jQuery('#d_input_password').val()}, {
                         fnerror:function(e){
                             if (e) set_error(pdlg,'Error logging in.',e);
                             else set_error(pdlg,'<strong>Login failed</strong>');

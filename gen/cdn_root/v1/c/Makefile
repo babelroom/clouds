@@ -16,7 +16,7 @@ DEP_gen_jquery_min_js=jquery/js/jquery.jqGrid.min.js jquery/js/jquery-ui-1.10.1.
 DEP_gen_other2_js=jquery/js/jquery.placeholder.js flash/swfobject.js
 # changed ws_js/comet.js to ws_js/br_comet_sio.js in order to enable comet
 #DEP_gen_ws_js=ws_js/br_comet_sio.js ws_js/br_dashboard.js ws_js/br_commands.js ws_js/br_utils.js ws_js/br_invitees.js ws_js/br_overlays.js 
-DEP_gen_ws_js=ws_js/br_dashboard.js ws_js/br_commands.js ws_js/br_utils.js ws_js/br_invitees.js ws_js/br_overlays.js \
+DEP_gen_ws_js=ws_js/br_utils.js ws_js/br_invitees.js ws_js/br_overlays.js \
     ws_js/br_widgets.js ws_js/br_conference.js ws_js/br_content.js ws_js/br_participants.js ws_js/br_dynamic.js ws_js/br_toolbar.js \
 	 ../AUTO/conference_options.js
 #    ws_js/br_widgets.js ws_js/br_conference.js ws_js/javascripts/prototype.js ws_js/javascripts/window.js ws_js/application.js

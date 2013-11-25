@@ -89,6 +89,7 @@
         }
 
     /* --- */
-    window.BR.SIO = function(){return (typeof(io['connect'])==="undefined") ?/* no socket.io */null : new SIO();}
+    typeof window.BR==="undefined"?window.BR={v1:{}}:typeof window.BR.v1==="undefined"&&(window.BR.v1={});
+    window.BR.v1.SIO = function(){return (typeof(io['connect'])==="undefined") ?/* no socket.io */null : new SIO();}
 })();
 

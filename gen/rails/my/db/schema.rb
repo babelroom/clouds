@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130427061723) do
+ActiveRecord::Schema.define(:version => 20131119052752) do
 
   create_table "accounts", :force => true do |t|
     t.string   "name"
@@ -221,6 +221,16 @@ ActiveRecord::Schema.define(:version => 20130427061723) do
     t.string   "preview_url"
   end
 
+  create_table "stream_refs", :force => true do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "streams", :force => true do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "tokens", :force => true do |t|
     t.string   "template"
     t.string   "link_key"
@@ -263,6 +273,7 @@ ActiveRecord::Schema.define(:version => 20130427061723) do
     t.string   "email"
     t.string   "origin_data"
     t.integer  "origin_id"
+    t.string   "ephemeral_context"
   end
 
   add_index "users", ["email_address"], :name => "index_users_on_email_address"

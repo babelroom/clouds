@@ -16,8 +16,8 @@ function create_dir {
 function write_kv {
     KEY=$1
     VALUE=$2
-    echo -n "$VALUE" > "/tmp/br/avi.$KEY"
-    runuser -l br -c "cp /tmp/br/avi.$KEY $IK/$KEY"
+    echo -n "$VALUE" > "/home/br/tmp/prime/avi.$KEY"
+    runuser -l br -c "cp /home/br/tmp/prime/avi.$KEY $IK/$KEY"
     cat << EOT >> "$BR/ikeys.txt"
 $KEY: $VALUE
 EOT

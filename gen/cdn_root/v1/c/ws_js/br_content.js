@@ -66,22 +66,22 @@ var BRContent = {
                     <table cellpadding="4" cellspacing="0" border="0" width="100%">\
                         <tr>\
                             <td><b>Access Number</b></td>\
-                            <!--<td><textarea rows="5" cols="40" disabled>' + BR.room.context.myAccessInfo + '</textarea></td>-->\
-                            <td>' + BR.room.context.myAccessInfo + '</td>\
+                            <!--<td><textarea rows="5" cols="40" disabled>' + BR._api.context.myAccessInfo + '</textarea></td>-->\
+                            <td>' + BR._api.context.myAccessInfo + '</td>\
                         </tr>\
                         <tr>\
                             <td colspan="2">&nbsp;</td>\
                         </tr>\
                         <tr>\
                             <td><b>PIN code</b></td>\
-                            <td>' + BR.room.context.pin + '</td>\
+                            <td>' + BR._api.context.pin + '</td>\
                         </tr>\
                         <tr>\
                             <td colspan="2">&nbsp;</td>\
                         </tr>\
                         <tr>\
                             <td><b>SIP (VoIP)</b></td>\
-                            <td>' + BR.room.context.pin + '@sip.babelroom.com</td>\
+                            <td>' + BR._api.context.pin + '@sip.babelroom.com</td>\
                         </tr>\
                     </table>\
                 </div>\
@@ -252,7 +252,7 @@ console.log( $j(tab3sel).offset() ); */
             update();
             if (save) {
                 text('Saving...');
-                BRUtils.aq(3, {f:{phone:full_number},id:BR.room.context.user_id}, function (data, textStatus) {
+                BRUtils.aq(3, {f:{phone:full_number},id:BR._api.context.user_id}, function (data, textStatus) {
                         if (textStatus=='success') {
                             jQuery('#'+id+'_saved').css('display','block');
                             update();
@@ -260,7 +260,7 @@ console.log( $j(tab3sel).offset() ); */
                     });
                 }
             text('Dialing...');
-            var pin = BR.room.context.pin;
+            var pin = BR._api.context.pin;
             var pin_val = jQuery('#'+id+'_pin').val();
             if (pin_val && pin_val.length>0) {
                 pin = pin_val;
@@ -272,7 +272,7 @@ console.log( $j(tab3sel).offset() ); */
             $j('#'+id+'_overlay').dialog('close');
             }
         $j('#'+id+'_dial').button().click(fn_dial);
-        var spin = function(do_spin) { jQuery('#'+id+'_callme_spinner').html(do_spin ?  "<img src='"+BR.api.v1.get_host('cdn')+"/cdn/v1/c/img/arrows_spinner.gif' alt='' />" : ""); }
+        var spin = function(do_spin) { jQuery('#'+id+'_callme_spinner').html(do_spin ?  "<img src='"+BR._api.get_host('cdn')+"/cdn/v1/c/img/arrows_spinner.gif' alt='' />" : ""); }
         var text = function(text, bgcolor) {
             jQuery('#'+id+'_callme_status').html(text);
             if (bgcolor!=undefined) {
@@ -283,7 +283,7 @@ console.log( $j(tab3sel).offset() ); */
         spin(true);
         text('Loading...');
 //        Application.replayData(win);
-        BRUtils.aq(1, {ah:[BR.room.context.user_id]}, function (data, textStatus) {
+        BRUtils.aq(1, {ah:[BR._api.context.user_id]}, function (data, textStatus) {
                 spin(false);
                 text('');
                 if (textStatus=='success') {

@@ -16,7 +16,7 @@ sudo yum install -y $REQUIRED_PACKAGES || exit -1
 LOGDIR=/var/log/br/mysql
 sudo mkdir $LOGDIR && sudo chown mysql:mysql $LOGDIR
 
-cat <<EOT >/tmp/br/my.cnf
+cat <<EOT >/home/br/tmp/my.cnf
 # default BR configuration, may be replaced by version from primer
 [mysqld]
 bind-address=127.0.0.1
@@ -50,7 +50,7 @@ pid-file=$LOGDIR/mysqld.pid
 EOT
 
 sudo cp -a /etc/my.cnf /etc/my.cnf-orig
-sudo cp /tmp/br/my.cnf /etc/my.cnf
+sudo cp /home/br/tmp/my.cnf /etc/my.cnf
 
 exit 0
 

@@ -10,17 +10,17 @@ var BRUtils = {
         },
 
     aq: function(action,args,done) {
-        BR.api.v1._aq({ act: action, args: args, auth: BR.room.context.authen }, function(e,d){
+        BR._api._aq({ act: action, args: args, auth: BR._api.context.authen }, function(e,d){
             if (e) done(e, "error");
             //else done(JSON.stringify(d) /* bit of a hack -- TMP TODO -- not needed TG */, "success");
             else done(d, "success");
             });
 /*
         var result = jQuery.ajax({
-            url: BR.api.v1.get_host('api') + "/api/v1/aq",
+            url: BR._api.get_host('api') + "/api/v1/aq",
             type: "POST",
 /*            contentType: 'application/json; charset=UTF-8', -- leave it urlencoded *./
-            data: { act: action, args: args, auth: BR.room.context.authen },
+            data: { act: action, args: args, auth: BR._api.context.authen },
             dataType: 'json',
             xhrFields: { withCredentials: true },
             success: done,
@@ -31,11 +31,11 @@ var BRUtils = {
         },
 
     conferencePath: function() {
-        if (BR && BR.room && BR.room.context) {
-            if (BR.room.context.conference_uri)
-                return '/'+BR.room.context.conference_uri;
-            else  if (BR.room.context.conference_id)
-                return '/i/'+BR.room.context.conference_id;
+        if (BR && BR.room && BR._api.context) {
+            if (BR._api.context.conference_uri)
+                return '/'+BR._api.context.conference_uri;
+            else  if (BR._api.context.conference_id)
+                return '/i/'+BR._api.context.conference_id;
             }
         if (/^(?:http|https):\/\/(?:[^\/]+)(\/[^\?|#]*)\??.*$/.exec(document.URL))
             return RegExp.$1;
