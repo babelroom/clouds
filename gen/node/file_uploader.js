@@ -2,10 +2,11 @@
 
 var he = require('./http_errors');
 
-var FileUploader = function(config, dbManager, sessionManager) {
+var FileUploader = function(config, dbManager, sessionManager, us) {
 //var FileUploader = function(config) {
     this.db = dbManager;
     this.sessionManager = sessionManager;
+    this.us = us;
     this.options = {
             tmpdir: __dirname + '/home/br/tmp',
             publicDir: '/home/br/tmp/files',
@@ -283,12 +284,26 @@ JR 11/2013: The following code is derived as noted below. Modified, errors/uglin
         var user_id, conference_id, csrf_token;
         form.on('fileBegin', function (name, file) {
             try {
+/* for reference:
+console.log([name,file]);
+[ 'media_file[upload]',
+  { domain: null,
+    _events: null,
+    _maxListeners: 10,
+    size: 0,
+    path: '/home/br/tmp/upl/9c36a3690ec100e424501f6fce71e334',
+    name: 'Example.png',
+    type: 'image/png',
+    hash: null,
+    lastModifiedDate: null,
+    _writeStream: null } ]
+*/
                 var check_csrf_token = fu.sessionManager.md5_token(conference_id, user_id, 0);
                 //if (true) {
-                if (false) {
+                if (check_csrf_token!==csrf_token) {
                     he.forbidden(handler.res);
-console.log('FORbidden');
-handler.req.connection.destroy();
+//console.log('FORbidden');
+handler.req.connection.destroy(); // ... test this again ...
                     }
 //                if (check_csrf_token===csrf_token) {
 //                    md_map[path.basename(file.path)] = fileInfo;
@@ -301,7 +316,7 @@ handler.req.connection.destroy();
             catch(e) { console.log(e.stack); }
         }).on('field', function (name, value) {
             try {
-console.log(['Field',name,value]);
+//console.log(['Field',name,value]);
                 switch(name) {
                     case 'redirect': redirect = value; break;
                     case 'media_file[csrf_token]': csrf_token = value; break;
@@ -323,7 +338,8 @@ console.log([file.path, fu.options.uploadDir + '/' + fileInfo.name]);
                 /* NB: if this has to copy across devices we'll have a real big problem (read: temporary system outage) *./
                 fs.renameSync(file.path, fu.options.uploadDir + '/' + fileInfo.name);
 */
-                fs.symlinkSync(file.path, fu.options.uploadDir + '/' + fileInfo.name);
+//                fs.symlinkSync(file.path, fu.options.uploadDir + '/' + fileInfo.name); -- may make things easier, but seems to have some problems ...
+// aaaaaahhh original file removed, link remains, test doesn't see old file => uses same name, then create fails as symlink exists ...
 /* JR
                 if (fu.options.imageTypes.test(fileInfo.name)) {
                     Object.keys(fu.options.imageVersions).forEach(function (version) {
@@ -339,6 +355,20 @@ console.log([file.path, fu.options.uploadDir + '/' + fileInfo.name]);
                     });
                     }
 */
+                /* NB: conference_id, user_id field here are temporary, pending reference counting implementation */
+                var sql = "INSERT INTO media_files(conference_id,user_id,name,content_type,size,url,created_at,updated_at,driver) VALUES (?,?,?,?,?,?,NOW(),NOW(),'fs');";
+                fu.db.query(sql, [conference_id,user_id,file.name,file.type,file.size,file.path], function(err, rows, fields){
+                    if (err) return he.db_error(handler.res, err);
+                    if (!rows.insertId)
+                        return he.internal_server_error(handler.res);
+                    sql = "INSERT INTO file_refs(ref_table,ref_id,created_at,updated_at,media_file_id) VALUES (?,?,NOW(),NOW(),?),(?,?,NOW(),NOW(),?);";
+                    fu.db.query(sql, ['conferences',conference_id,rows.insertId,'users',user_id,rows.insertId], function(err, rows, fields){
+                        if (err) return he.db_error(handler.res, err);
+                        if (rows.affectedRows!==2)
+                            return he.internal_server_error(handler.res);
+                        fu.us.send('new_upload');
+                        });
+                    });
                 }
             catch(e) { console.log(e.stack); }
         }).on('aborted', function () {

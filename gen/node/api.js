@@ -6,10 +6,10 @@ var     AutoAPI = require('./auto_api')
     ,   UDPSender = require('./udpsender')
     ;
 
-var API = function(config, db, sessionManager) {
+var API = function(config, db, sessionManager, us) {
     this.db = db;
     this.sessionManager = sessionManager;
-    this.us = new UDPSender(config);
+    this.us = us;
     this.autoAPI = new AutoAPI(sessionManager, db, this.us);
 }
 

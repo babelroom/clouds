@@ -62,7 +62,7 @@ INSERT INTO `scripts` (id,name,description,created_at,updated_at,startup) VALUES
 -- INSERT INTO `scripts` (id,name,description,created_at,updated_at,startup) VALUES (21,'webhooks.pl','Process incoming webhook requests',NOW(),NOW(),'running=always');
 INSERT INTO `scripts` (id,name,description,created_at,updated_at,startup) VALUES (23,'conference_close.pl','Remove or delete conference artifacts from a server and otherwise close out',NOW(),NOW(),'running=always');
 INSERT INTO `scripts` (id,name,description,created_at,updated_at,startup) VALUES (24,'save_recording.pl','Program to migrate media from a FS server once conference has completed',NOW(),NOW(),'running=manual');
-INSERT INTO `scripts` (id,name,description,created_at,updated_at,startup) VALUES (26,'make_slideshows.pl','Create slideshows from other file formats on provisioning systems',NOW(),NOW(),'foreach_provisioning=always');
+INSERT INTO `scripts` (id,name,description,created_at,updated_at,startup) VALUES (26,'process_uploads.pl','Process uploaded files',NOW(),NOW(),'foreach_provisioning=always');
 INSERT INTO `scripts` (id,name,description,created_at,updated_at,startup) VALUES (27,'binlog.pl','Replicate from binlogs into message streams',NOW(),NOW(),'foreach_provisioning=always');
 INSERT INTO `scripts` (id,name,description,created_at,updated_at,startup) VALUES (28,'calls.pl','Update call information - info and accounting',NOW(),NOW(),'foreach_provisioning=always');
 INSERT INTO `scripts` (id,name,description,created_at,updated_at,startup) VALUES (29,'freeswitch_undeploy.pl','Undeploy a conference from a server',NOW(),NOW(),'running=always');

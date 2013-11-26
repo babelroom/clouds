@@ -1,9 +1,10 @@
 
 var     http = require('http')
     ,   https = require('https')
-    ,   SessionManager = require('./session_manager')
-    ,   AutoAPI = require('./auto_api')
     ,   DBManager = require('./db_manager')
+    ,   SessionManager = require('./session_manager')
+    ,   UDPSender = require('./udpsender')
+    ,   AutoAPI = require('./auto_api')
     ,   fs = require('fs')
     ,   Live = require('./live')
     ,   API = require('./api')
@@ -34,9 +35,10 @@ for(var i=0; i<config.groups.length; i++) {
     var servers = {};
     var db = new DBManager(g);
     var sessionManager = new SessionManager(g, db);
+    var us = new UDPSender(config);
     var io = new Live(g);
-    var api = new API(g, db, sessionManager);
-    var fu = new FileUploader(g, db, sessionManager);
+    var api = new API(g, db, sessionManager, us);
+    var fu = new FileUploader(g, db, sessionManager, us);
     var mini = new Mini(g);
     var express = require('express');
     var app = express();

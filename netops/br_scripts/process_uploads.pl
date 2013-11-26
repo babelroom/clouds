@@ -1,7 +1,5 @@
 #!/usr/bin/perl
 
-# possibly rename away from make slideshows to something more generally about processing files
-
 # ---
 #BR_description: Create slideshows from other file formats on provisioning systems
 #BR_startup: foreach_provisioning=always
@@ -11,11 +9,16 @@
 # ---
 $|++;
 use BRDB;
+use BRUDP;
 use Amazon::S3;
 use String::Random;
 use Data::Dumper;   # tmp;
 
 # ---
+$TMPDIR = '/home/br/tmp';
+$BUPLOADS = 'bblr-uploads';
+$BAVATARS = 'bblr-avatars';
+$verbose = 0; # extra logging
 $pat = new String::Random or die;
 $wget = "/usr/bin/wget";
 $file = "/usr/bin/file";
@@ -62,6 +65,9 @@ sub s3_up
 }
 
 # ---
+sub rand_filekey { return $pat->randregex("[0-9a-z]{20}"); }
+
+# ---
 sub get_unprocessed_media
 {
     my $file_ref = shift;
@@ -78,7 +84,7 @@ sub convert_a_page
     my $page = shift;
     my $tmpfile = shift;
     
-    print "convert_a_page: master_url=$master_url, page=$page, tmpfile=$tmpfile\n";
+    print "convert_a_page: master_url=$master_url, page=$page, tmpfile=$tmpfile\n" if $verbose;
 #    # tmp. (to throttle conversion)
 #    if ($page>4) {
 #        print "convert_a_page: no page $page => file conversion is done\n";
@@ -89,36 +95,36 @@ sub convert_a_page
     my $url = $master_url;
     $url =~ s/\?(\d+)$//;
     #$url = uri_escape($url); # TODO use URI::Escape if needed, apparently not needed for now
-    print "convert_a_page: url=[$url]\n";
+    print "convert_a_page: url=[$url]\n" if $verbose;
     #my $cmd = "$wget -qO $tmpfile 'http://docs.google.com/viewer?url=" . $url . "&a=bi&pagenumber=$page&w=600'";
     my $cmd = "$wget -qO $tmpfile 'http://docs.google.com/viewer?url=" . $url . "&a=bi&pagenumber=$page&w=800'";
-    print "convert_a_page: cmd=[$cmd]\n";
+    print "convert_a_page: cmd=[$cmd]\n" if $verbose;
 
     # $rc==-2, non-fatal error, can retry this document
     # $rc==-3, non-fatal error, don't retry this document (treat as unconvertible, i.e. converted 0 pages)
 
     my $rc = system($cmd);
-    print "convert_a_page: rc=[$rc]\n";
+    print "convert_a_page: rc=[$rc]\n" if $verbose;
 # this is what happens when the document is done, therefore return 0 (at least for the present) TODO (re-evaluate)
     return 0 if $rc; # I've seen rc 256 and 2048 here to indicate EOF
 
     return -3 if $rc;
 
-    print "convert_a_page: converted rc=[$rc]\n";
+    print "convert_a_page: converted rc=[$rc]\n" if $verbose;
     if (not -f $tmpfile) {
-        print "convert_a_page: internal error, $tmpfile not a regular file\n";
+        print "convert_a_page: internal error, $tmpfile not a regular file\n" if $verbose;
         return -3;
         }
 
-    print "convert_a_page: determining file type of result\n";
+    print "convert_a_page: determining file type of result\n" if $verbose;
     my $type = `$file -b $tmpfile`;
-    print "convert_a_page: result=[$type]\n";
+    print "convert_a_page: result=[$type]\n" if $verbose;
     if ($type =~ /^PNG/) {
-        print "convert_a_page: $tmpfile has type PNG - good!\n";
+        print "convert_a_page: $tmpfile has type PNG - good!\n" if $verbose;
         return 1;
         }
 
-    print "convert_a_page: Unexpected result file type [$tmpfile]\n";
+    print "convert_a_page: Unexpected result file type [$tmpfile]\n" if $verbose;
     return 0;
 }
 
@@ -142,49 +148,49 @@ sub upload_file
     my $key = shift;
     my $bucket = shift;
     my $file = shift;
-    print "upload_page: key=$key\n";
+    my $mime_type = shift;
+    print "upload_page: key=$key\n" if $verbose;
 
     # --- get s3 configuration
     if (not defined $g_s3) {
         return -1 if not s3_up();
         die if not defined %g_s3_vars;
-        print "upload_page: connecting to s3\n";
+        print "upload_page: connecting to s3\n" if $verbose;
         $g_s3 = Amazon::S3->new({
             aws_access_key_id     => $g_s3_vars{AWSAccessKeyId},
             aws_secret_access_key => $g_s3_vars{AWSSecretAccessKey}
             });
         return s3_err(undef) if not defined $g_s3;
-        print "upload_page: connected to s3\n";
+        print "upload_page: connected to s3\n" if $verbose;
         }
     die if not defined $g_s3;
-    print "upload_page: opening bucket: $bucket\n";
+    print "upload_page: opening bucket: $bucket\n" if $verbose;
     my $b = $g_s3->bucket($bucket);
     return s3_err($b) if not defined $b;
-    print "upload_page: opened bucket: $bucket\n";
+    print "upload_page: opened bucket: $bucket\n" if $verbose;
 #$fullpath = $vars{Path};
 #$fullpath .= '/' . $vars{File};
-    print "upload_page: add_key_filename(key => $key, file => $file)\n";
+    print "upload_page: add_key_filename(key => $key, file => $file)\n" if $verbose;
     my $result = $b->add_key_filename(
         $key, $file,{
-            content_type => 'image/png',
+            content_type => $mime_type
             });
     return s3_err($b) if not defined $result;
-    print "upload_page: add_key_filename: done!\n";
+    print "upload_page: add_key_filename: done!\n" if $verbose;
     $result = $b->set_acl({
         key => $key,
         acl_short => 'public-read',
         });
     return s3_err($b) if not defined $result;
-    print "upload_page: set_acl: done!\n";
+    print "upload_page: set_acl: done!\n" if $verbose;
 
-#err if not defined $result;
-#$result = $b->head_key($vars{Key});
-$result = $b->head_key($key);
-#err if not defined $result;
-print "2=============: K/V Pairs from s3\n";
-foreach my $k (keys %$result) {
-    print "$k: $result->{$k}\n";
-}
+    if ($verbose) {
+        $result = $b->head_key($key);
+        print "2=============: K/V Pairs from s3\n" if $verbose;
+        foreach my $k (keys %$result) {
+            print "$k: $result->{$k}\n";
+            }
+        }
 
     return 1;
 }
@@ -204,16 +210,16 @@ sub upload_page
     $key =~ tr/./_/;
     $key .= "-${page}.png";
 
-    return upload_file($key, 'bblr-uploads', $tmpfile);
+    return upload_file($key, $BUPLOADS, $tmpfile, 'image/png');
 }
 
 # ---
 sub convert_compound_file
 {
     my $f = shift;
-    print "convert_compound_file: entering with file [$f->{id}, $f->{name}]\n";
+    print "convert_compound_file: entering with file [$f->{id}, $f->{name}]\n" if $verbose;
     my $page = 1;
-    my $tmpfile = "/tmp/make_slideshow.$$.tmp";
+    my $tmpfile = "$TMPDIR/process_uploads.$$.tmp";
     my $rc=undef;
     my $converted = 0;
     for(;;) {
@@ -229,9 +235,9 @@ sub convert_compound_file
         $f->{multipage} = 1;
         }
     else {
-        print "convert_compound_file: not converted\n";
+        print "convert_compound_file: not converted\n" if $verbose;
         if ($f->{content_type} =~ /^image\/(.*)$/) {
-            print "convert_compound_file: setting as single image of type [$1]\n";
+            print "convert_compound_file: setting as single image of type [$1]\n" if $verbose;
             $page = 1;
             }
         }
@@ -239,7 +245,7 @@ sub convert_compound_file
     unlink($tmpfile);
     %g_s3_vars = ();
     $g_s3 = undef;
-    print "convert_compound_file: returning with rc=$rc\n";
+    print "convert_compound_file: returning with rc=$rc\n" if $verbose;
     return $rc if $rc;
     if (!$page) {
         }
@@ -259,7 +265,7 @@ sub file_info
         $key =~ s/^(\s*)(\S.*)$/$2/;
         $hash{$key} = $value;
         }
-print Dumper(%hash);
+    print Dumper(%hash) if $verbose;
     return %hash;
 }
 
@@ -272,7 +278,7 @@ sub generate_avatar
     my $rc = system($cmd);
     print "generate_avatar: cmd=[$cmd], rc=[$rc]\n";
     return -3 if $rc;
-    my ($key, $subdir) = ($pat->randregex("[0-9a-z]{20}"), 'bblr-avatars');
+    my ($key, $subdir) = (rand_filekey(), $BAVATARS);
     my %info = file_info($subtmp);
     if (defined $info{'Format'}) {
         $key .= '.'.(split /\s+/, lc($info{'Format'}))[0];
@@ -350,9 +356,11 @@ sub process_file
     my $f = shift;
     my %hash = %$f;
 
-    print "Processing the following file:\n";
-    foreach my $k (keys %hash) {
-        print "\t$k => [$hash{$k}]\n";
+    if ($verbose) {
+        print "Processing the following file:\n";
+        foreach my $k (keys %hash) {
+            print "\t$k => [$hash{$k}]\n";
+            }
         }
 
     # marking conversion as in progress (-1)
@@ -372,13 +380,57 @@ sub process_file
         }
 
     # $rc < 0 serious error h
-    # $rc == 0 .. no error, but documented converko 
+    # $rc == 0 .. no error, but documented converko  (???)
     return update_file_record($f,$rc);
+}
+
+# ---
+sub upload_local_file
+{
+    my $f = shift;
+
+    # ignore all but local files
+    return 0 if ($f->{driver} ne 'fs');
+    my ($file_path, $extension) = ($f->{url}, $f->{name});
+    $extension = '' if (not $extension=~s/^.*(\.[^\.]*)$/$1/);
+
+    if ($verbose) {
+        print "Processing the following local file:\n";
+        my %hash = %$f;
+        foreach my $k (keys %hash) {
+            print "\t$k => [$hash{$k}]\n";
+            }
+        }
+
+    die if not update_file_record($f,-1);   # conversion in progress
+    my $key = rand_filekey() . $extension;
+    # --- return 1==OK, -1 error
+    my $rc = upload_file($key, $BUPLOADS, $file_path, undef);
+    if ($rc<0) {
+        update_file_record($f,0);
+        return 0;   # errored, nothing further to do (no retries?)
+        }
+    return 0 if (!$rc); # leave file in errored state
+    my ($rows,$url) = (undef, $dbrh->quote("$g_s3_vars{URLPrefix}/$BUPLOADS/$key"));
+    BRDB::db_exec2($dbrh, "UPDATE media_files SET slideshow_pages=NULL, url=$url, driver='s3', updated_at=NOW() WHERE id=$f->{id}", \$rows) or die;
+    if ($rows!=1) {
+        print STDERR "Bad row update count after uploading local file [$file_name]";
+        }
+    if (!unlink($file_path)) {
+        print STDERR "Error deleting local file [$file_name]: $!";
+        }
+    return 1;
+#    return ($rows==1);
+#...
+#driver
+#url
+#    return 0;    # TMP
 }
 
 # ---
 db_remote_connect() or die;
 db_local_connect() or die;
+$udp = BRUDP->new(Port=>$ENV{BR_UDPPORT}) or die;
 
 # ---
 for(my $it=0; $it<$ENV{BR_ITERATIONS}; $it++) 
@@ -388,12 +440,18 @@ for(my $it=0; $it<$ENV{BR_ITERATIONS}; $it++)
     # --- 
     my $file = undef;
     if (get_unprocessed_media(\$file)) {
-        process_file($file);
+        if (!upload_local_file($file)) {
+            process_file($file);
+            }
+        # else: we've uploaded the local file to s3. the next loop iteration will process it as usual
         $did_something = 1;
         }
 
     # --
-    sleep $ENV{BR_SLEEP_SHORT} if not $did_something;
+#        $udp->send("no_conference:conference_assigned|$c->{id}") or die;
+    if (!$did_something) {
+        $udp->recv('new_upload', $ENV{BR_SLEEP_SHORT}) or die;
+        }
 }
 
 # ---
