@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131119052752) do
+ActiveRecord::Schema.define(:version => 20131126021255) do
 
   create_table "accounts", :force => true do |t|
     t.string   "name"
@@ -136,6 +136,16 @@ ActiveRecord::Schema.define(:version => 20131119052752) do
 
   add_index "emails", ["owner_id"], :name => "index_emails_on_owner_id"
 
+  create_table "file_refs", :force => true do |t|
+    t.string   "ref_table"
+    t.integer  "ref_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "media_file_id"
+  end
+
+  add_index "file_refs", ["media_file_id"], :name => "index_file_refs_on_media_file_id"
+
   create_table "invitations", :force => true do |t|
     t.string   "pin"
     t.string   "role"
@@ -171,6 +181,8 @@ ActiveRecord::Schema.define(:version => 20131119052752) do
     t.string   "length"
     t.integer  "multipage"
     t.string   "upload_url"
+    t.string   "driver"
+    t.text     "driver_params"
   end
 
   add_index "media_files", ["conference_id"], :name => "index_media_files_on_conference_id"
@@ -219,16 +231,6 @@ ActiveRecord::Schema.define(:version => 20131119052752) do
     t.string   "name"
     t.boolean  "immutable",   :default => false
     t.string   "preview_url"
-  end
-
-  create_table "stream_refs", :force => true do |t|
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  create_table "streams", :force => true do |t|
-    t.datetime "created_at"
-    t.datetime "updated_at"
   end
 
   create_table "tokens", :force => true do |t|

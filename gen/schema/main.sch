@@ -202,17 +202,19 @@
         {_:#size, type:$col_integer},
         #url,
         {_:#multipage, type:$col_integer},
-        #upload_file_name,
-        #upload_content_type,
-        {_:#upload_file_size, type:$col_integer},
-        {_:#upload_updated_at, type:$col_datetime},
+        #upload_file_name,                          # want to depreciate
+        #upload_content_type,                       # want to depreciate
+        {_:#upload_file_size, type:$col_integer},   # want to depreciate
+        {_:#upload_updated_at, type:$col_datetime}, # want to depreciate
         {_:#slideshow_pages, type:$col_integer},    # for netops
-        #bucket,
-        #length,
+        #bucket,                                    # depreciate also?? (seems specific to s3), or more generally allowed like "class/category?"
+        #length,                                    # text description of length
         $col_timestamps,
         {_:#upload_url, type:$col_string, rest:[#av], api_doc:{sample:"http://files.example.com/file/my_master_avatar.png"}},
+        #driver,
+        {_:#driver_params, type:$col_text},
         ],
-    rails_extra: @schema/my/media_file.rb.sch,
+    rails_extra: @schema/my/media_file.rb.sch,      # we are going to depreciate the user_id and conference_id fields out of here ...
     },
     { _: #phone,
     generators: [#rails_model],
@@ -301,19 +303,14 @@
         $col_timestamps,
         ],
     },
-    { _: #stream,
+    { _: #file_ref,
     generators: [#rails_model],
     columns: [
+        #ref_table,
+        {_:#ref_id, type:$col_id},
         $col_timestamps,
         ],
-    src: @schema/my/stream.rb.sch,
-    },
-    { _: #stream_ref,
-    generators: [#rails_model],
-    columns: [
-        $col_timestamps,
-        ],
-    src: @schema/my/stream_ref.rb.sch,
+    rails_extra: @schema/my/file_ref.rb.sch,
     },
 ]
 }

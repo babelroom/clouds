@@ -318,9 +318,12 @@ console.log(['Field',name,value]);
                     fs.unlink(file.path);
                     return;
                 }
+/*
 console.log([file.path, fu.options.uploadDir + '/' + fileInfo.name]);
-                /* NB: if this has to copy across devices we'll have a real big problem (read: temporary system outage) */
+                /* NB: if this has to copy across devices we'll have a real big problem (read: temporary system outage) *./
                 fs.renameSync(file.path, fu.options.uploadDir + '/' + fileInfo.name);
+*/
+                fs.symlinkSync(file.path, fu.options.uploadDir + '/' + fileInfo.name);
 /* JR
                 if (fu.options.imageTypes.test(fileInfo.name)) {
                     Object.keys(fu.options.imageVersions).forEach(function (version) {

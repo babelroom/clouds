@@ -1,7 +1,10 @@
 <<__
+
   belongs_to :conference
   belongs_to :user, :creator => true
 #  belongs_to    :owner, :class_name => "User", :creator => true
+
+  has_many :media_file_refs, :dependent => :destroy
 
   # when changing this to use the correct directories, then also 
   # enhance thumbnails -- for file / presentation preview?
