@@ -23,6 +23,7 @@ DEP_gen_ws_js=ws_js/br_utils.js ws_js/br_invitees.js ws_js/br_overlays.js \
 
 
 all: $(2gen)
+	$(MAKE) -C ./ws_js/fileuploader
 
 wraprtc/wraprtc.js:
 	git clone https://github.com/babelroom/wraprtc.git
@@ -51,4 +52,5 @@ gen.min.js: $(DEP_gen_jquery_base_min_js) gen-other1.min.js $(DEP_gen_jquery_min
 
 clean:
 	rm -f $(2gen)
+	$(MAKE) -C ./ws_js/fileuploader clean
 
