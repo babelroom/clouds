@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131126021255) do
+ActiveRecord::Schema.define(:version => 20131126173730) do
 
   create_table "accounts", :force => true do |t|
     t.string   "name"
@@ -183,6 +183,7 @@ ActiveRecord::Schema.define(:version => 20131126021255) do
     t.string   "upload_url"
     t.string   "driver"
     t.text     "driver_params"
+    t.integer  "progress",            :default => 10000
   end
 
   add_index "media_files", ["conference_id"], :name => "index_media_files_on_conference_id"

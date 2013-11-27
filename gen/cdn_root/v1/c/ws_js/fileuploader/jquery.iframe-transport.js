@@ -1,79 +1,47 @@
 /*
- * jQuery Iframe Transport Plugin 1.8.1
+ * jQuery Iframe Transport Plugin 1.2.2
  * https://github.com/blueimp/jQuery-File-Upload
  *
  * Copyright 2011, Sebastian Tschan
  * https://blueimp.net
  *
  * Licensed under the MIT license:
- * http://www.opensource.org/licenses/MIT
+ * http://creativecommons.org/licenses/MIT/
  */
 
-/*jslint unparam: true, nomen: true */
-/*global define, window, document */
+/*jslint unparam: true */
+/*global jQuery */
 
-(function (factory) {
-    'use strict';
-    if (typeof define === 'function' && define.amd) {
-        // Register as an anonymous AMD module:
-        define(['jquery'], factory);
-    } else {
-        // Browser globals:
-        factory(window.jQuery);
-    }
-}(function ($) {
+(function ($) {
     'use strict';
 
     // Helper variable to create unique names for the transport iframes:
     var counter = 0;
 
-    // The iframe transport accepts four additional options:
+    // The iframe transport accepts three additional options:
     // options.fileInput: a jQuery collection of file input fields
     // options.paramName: the parameter name for the file form data,
-    //  overrides the name property of the file input field(s),
-    //  can be a string or an array of strings.
+    //  overrides the name property of the file input field(s)
     // options.formData: an array of objects with name and value properties,
     //  equivalent to the return data of .serializeArray(), e.g.:
-    //  [{name: 'a', value: 1}, {name: 'b', value: 2}]
-    // options.initialIframeSrc: the URL of the initial iframe src,
-    //  by default set to "javascript:false;"
-    $.ajaxTransport('iframe', function (options) {
-        if (options.async) {
-            // javascript:false as initial iframe src
-            // prevents warning popups on HTTPS in IE6:
-            /*jshint scripturl: true */
-            var initialIframeSrc = options.initialIframeSrc || 'javascript:false;',
-            /*jshint scripturl: false */
-                form,
-                iframe,
-                addParamChar;
+    //  [{name: a, value: 1}, {name: b, value: 2}]
+    $.ajaxTransport('iframe', function (options, originalOptions, jqXHR) {
+        if (options.type === 'POST' || options.type === 'GET') {
+            var form,
+                iframe;
             return {
-                send: function (_, completeCallback) {
+                send: function (headers, completeCallback) {
                     form = $('<form style="display:none;"></form>');
-                    form.attr('accept-charset', options.formAcceptCharset);
-                    addParamChar = /\?/.test(options.url) ? '&' : '?';
-                    // XDomainRequest only supports GET and POST:
-                    if (options.type === 'DELETE') {
-                        options.url = options.url + addParamChar + '_method=DELETE';
-                        options.type = 'POST';
-                    } else if (options.type === 'PUT') {
-                        options.url = options.url + addParamChar + '_method=PUT';
-                        options.type = 'POST';
-                    } else if (options.type === 'PATCH') {
-                        options.url = options.url + addParamChar + '_method=PATCH';
-                        options.type = 'POST';
-                    }
+                    // javascript:false as initial iframe src
+                    // prevents warning popups on HTTPS in IE6.
                     // IE versions below IE8 cannot set the name property of
                     // elements that have already been added to the DOM,
                     // so we set the name along with the iframe HTML markup:
-                    counter += 1;
                     iframe = $(
-                        '<iframe src="' + initialIframeSrc +
-                            '" name="iframe-transport-' + counter + '"></iframe>'
+                        '<iframe src="javascript:false;" name="iframe-transport-' +
+                            (counter += 1) + '"></iframe>'
                     ).bind('load', function () {
-                        var fileInputClones,
-                            paramNames = $.isArray(options.paramName) ?
-                                    options.paramName : [options.paramName];
+                        var fileInputClones;
                         iframe
                             .unbind('load')
                             .bind('load', function () {
@@ -100,14 +68,9 @@
                                 );
                                 // Fix for IE endless progress bar activity bug
                                 // (happens on form submits to iframe targets):
-                                $('<iframe src="' + initialIframeSrc + '"></iframe>')
+                                $('<iframe src="javascript:false;"></iframe>')
                                     .appendTo(form);
-                                window.setTimeout(function () {
-                                    // Removing the form in a setTimeout call
-                                    // allows Chrome's developer tools to display
-                                    // the response result
-                                    form.remove();
-                                }, 0);
+                                form.remove();
                             });
                         form
                             .prop('target', iframe.prop('name'))
@@ -129,11 +92,8 @@
                                 return fileInputClones[index];
                             });
                             if (options.paramName) {
-                                options.fileInput.each(function (index) {
-                                    $(this).prop(
-                                        'name',
-                                        paramNames[index] || options.paramName
-                                    );
+                                options.fileInput.each(function () {
+                                    $(this).prop('name', options.paramName);
                                 });
                             }
                             // Appending the file input fields to the hidden form
@@ -155,7 +115,7 @@
                             });
                         }
                     });
-                    form.append(iframe).appendTo(document.body);
+                    form.append(iframe).appendTo('body');
                 },
                 abort: function () {
                     if (iframe) {
@@ -164,7 +124,7 @@
                         // concat is used to avoid the "Script URL" JSLint error:
                         iframe
                             .unbind('load')
-                            .prop('src', initialIframeSrc);
+                            .prop('src', 'javascript'.concat(':false;'));
                     }
                     if (form) {
                         form.remove();
@@ -175,36 +135,22 @@
     });
 
     // The iframe transport returns the iframe content document as response.
-    // The following adds converters from iframe to text, json, html, xml
-    // and script.
-    // Please note that the Content-Type for JSON responses has to be text/plain
-    // or text/html, if the browser doesn't include application/json in the
-    // Accept header, else IE will show a download dialog.
-    // The Content-Type for XML responses on the other hand has to be always
-    // application/xml or text/xml, so IE properly parses the XML response.
-    // See also
-    // https://github.com/blueimp/jQuery-File-Upload/wiki/Setup#content-type-negotiation
+    // The following adds converters from iframe to text, json, html, and script:
     $.ajaxSetup({
         converters: {
             'iframe text': function (iframe) {
-                return iframe && $(iframe[0].body).text();
+                return iframe.text();
             },
             'iframe json': function (iframe) {
-                return iframe && $.parseJSON($(iframe[0].body).text());
+                return $.parseJSON(iframe.text());
             },
             'iframe html': function (iframe) {
-                return iframe && $(iframe[0].body).html();
-            },
-            'iframe xml': function (iframe) {
-                var xmlDoc = iframe && iframe[0];
-                return xmlDoc && $.isXMLDoc(xmlDoc) ? xmlDoc :
-                        $.parseXML((xmlDoc.XMLDocument && xmlDoc.XMLDocument.xml) ||
-                            $(xmlDoc.body).html());
+                return iframe.find('body').html();
             },
             'iframe script': function (iframe) {
-                return iframe && $.globalEval($(iframe[0].body).text());
+                return $.globalEval(iframe.text());
             }
         }
     });
 
-}));
+}(jQuery));

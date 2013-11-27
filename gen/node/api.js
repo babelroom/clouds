@@ -631,6 +631,36 @@ function get_version(self, req, res, match, opts)
     res.end();
 }
 
+/*++apiary--
+Remove files
+DELETE files
+< 200
+< Content-Type: application/json; charset=utf-8
+{}
+
+++apiary--*/
+function files_delete(self, req, res, match, opts)
+{
+    self.sessionManager.uid_from_req2(req,function(uid,code){
+        if (uid<=0) {
+            console.log("403 reason: ", uid);
+            return he.code(f.res, code);
+            }
+        /* this is the former, non-reference counted solution -- for the present ... */
+        var sql = "SELECT f.id FROM media_files f WHERE f.id=? AND (f.user_id=? OR f.conference_id IN (SELECT i.conference_id FROM invitations i WHERE i.user_id=? AND i.is_deleted IS NULL AND i.role='Host'))";
+        self.db.query(sql, [match[1],uid,uid], function(err, rows, fields){
+            if (err) return he.db_error(res, err);
+            if (rows.length!==1) return he.forbidden(res);
+            sql = "DELETE FROM media_files WHERE id=?"
+            self.db.query(sql, [match[1]], function(err, rows, fields){
+                if (err) return he.db_error(res, err);
+                if (rows.affectedRows!==1) return he.internal_server_error(res);
+                return he.ok(req, res, {});
+                });
+            });
+        });
+}
+
 var routes = [
 [/GET:\/status$/i, get_status],
 [/GET:\/version$/i, get_version],
@@ -639,13 +669,14 @@ var routes = [
 [/GET:\/login$/i, get_current_user],
 [/POST:\/login$/i, login],
 [/DELETE:\/login$/i, logout],
-[/POST:\/logout$/i, logout],    /* synomym for delete login, easier to read/debug in form */
+[/POST:\/logout$/i, logout],    /* synonym for delete login, easier to read/debug in form */
 // -- [/GET:\/country$/i, country],
 [/GET:\/invitation\/(.*)$/i, invitation],
 [/POST:\/_aq$/i, aq],           /* depreciate soon in preference to specific, secure functions */
 // -- [/GET:\/conference_access\/(.*)$/i, conference_access],
 [/POST:\/add_self\/(.*)$/i, enter],
 [/POST:\/add_participant\/(.*)$/i, enter, {no_cookie: true, create_separate_user:true}],
+[/DELETE:\/files\/(\d+)$/i, files_delete],
 ];
 
 

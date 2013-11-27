@@ -86,12 +86,14 @@ sub db_exec2
     my $handle = shift;
     my $sql = shift;
     my $rows_var = shift;
+    my $insertid_var = shift;
     print tme()."SQL{$handhash{$handle}}: [$sql]\n";
     my $stmt = $handle->prepare($sql);
     if ($stmt->execute()) {
         my $cnt = $stmt->rows;
         print tme()."SQL{$handhash{$handle}}: OK [$cnt rows affected]\n";
         $$rows_var = $cnt if defined $rows_var;
+        $$insertid_var = $stmt->{mysql_insertid} if defined $insertid_var;
         $stmt->finish();
         return 1;
         }

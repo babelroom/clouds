@@ -10,11 +10,12 @@ var FileUploader = function(config, dbManager, sessionManager, us) {
     this.options = {
             tmpdir: __dirname + '/home/br/tmp',
             publicDir: '/home/br/tmp/files',
-            uploadDir: '/home/br/tmp/upl',
-            uploadUrl: '/files/',
+            uploadDir: '/home/br/tmp/files',
+            uploadUrl: '/files/',   // ??
             maxPostSize: 11000000000, // 11 GB
             minFileSize: 1,
-            maxFileSize: 10000000000, // 10 GB
+            //maxFileSize: 10000000000, // 10 GB
+            maxFileSize: 2000000, // 2MB
             acceptFileTypes: /.+/i,
             // Files not matched by this regular expression force a download dialog,
             // to prevent executing any scripts in the context of the service domain:
@@ -37,9 +38,11 @@ var FileUploader = function(config, dbManager, sessionManager, us) {
                 cert: fs.readFileSync('/Applications/XAMPP/etc/ssl.crt/server.crt')
             },
             */
+/*
             nodeStatic: {
                 cache: 3600 // seconds to cache served files
             }
+*/
         };
         var co = config.file_uploader || {};
         for(var o in co)
@@ -49,7 +52,7 @@ var FileUploader = function(config, dbManager, sessionManager, us) {
 
 FileUploader.prototype = {
     addUseHandlers: function(express, app, options) {
-//        app.use('/upl/', express.logger('short'));
+        app.use('/upl/', express.logger('short'));
         },
 
     addHandlers: function(express, app, options) {
@@ -112,9 +115,6 @@ JR 11/2013: The following code is derived as noted below. Modified, errors/uglin
             this.res = res;
             this.callback = callback;
         },
-
-
-
 
         serve = function (req, res) {
             var fu = req._fu;
@@ -186,9 +186,6 @@ JR 11/2013: The following code is derived as noted below. Modified, errors/uglin
                 res.end();
             }
         };
-
-
-
 
 /*
     fileServer.respond = function (pathname, status, _headers, files, stat, req, res, finish) {
@@ -299,14 +296,13 @@ console.log([name,file]);
     _writeStream: null } ]
 */
                 var check_csrf_token = fu.sessionManager.md5_token(conference_id, user_id, 0);
-                //if (true) {
+                /* note we can't check file size at this point as we have to wait for upload */
                 if (check_csrf_token!==csrf_token) {
                     he.forbidden(handler.res);
-//console.log('FORbidden');
-handler.req.connection.destroy(); // ... test this again ...
+                    console.log('csrf token mismatch');
+                    handler.req.connection.destroy();   /* seems this doesn't actually do much ... */
+                    return ;
                     }
-//                if (check_csrf_token===csrf_token) {
-//                    md_map[path.basename(file.path)] = fileInfo;
                 tmpFiles.push(file.path);
                 var fileInfo = new FileInfo(file, handler.req, true);
                 fileInfo.safeName(fu);
@@ -328,6 +324,8 @@ handler.req.connection.destroy(); // ... test this again ...
         }).on('file', function (name, file) {
             try {
                 var fileInfo = map[path.basename(file.path)];
+                if (!fileInfo)
+                    return;
                 fileInfo.size = file.size;
                 if (!fileInfo.validate(fu)) {
                     fs.unlink(file.path);
@@ -357,10 +355,14 @@ console.log([file.path, fu.options.uploadDir + '/' + fileInfo.name]);
 */
                 /* NB: conference_id, user_id field here are temporary, pending reference counting implementation */
                 var sql = "INSERT INTO media_files(conference_id,user_id,name,content_type,size,url,created_at,updated_at,driver) VALUES (?,?,?,?,?,?,NOW(),NOW(),'fs');";
-                fu.db.query(sql, [conference_id,user_id,file.name,file.type,file.size,file.path], function(err, rows, fields){
+                fu.db.query(sql, [conference_id,user_id,fileInfo.name,fileInfo.type,fileInfo.size,file.path], function(err, rows, fields){
                     if (err) return he.db_error(handler.res, err);
                     if (!rows.insertId)
                         return he.internal_server_error(handler.res);
+                    /* --- 
+                    even though row id of file is now available we likely can't send it as part of the response to the client. the client
+                    has likely gotten the HTTP response before this DB response handler was invoked
+                    --- */
                     sql = "INSERT INTO file_refs(ref_table,ref_id,created_at,updated_at,media_file_id) VALUES (?,?,NOW(),NOW(),?),(?,?,NOW(),NOW(),?);";
                     fu.db.query(sql, ['conferences',conference_id,rows.insertId,'users',user_id,rows.insertId], function(err, rows, fields){
                         if (err) return he.db_error(handler.res, err);

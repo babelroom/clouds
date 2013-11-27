@@ -1841,7 +1841,8 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                     }
                 $j('#'+id+'_delete').button("disable");
                 jQuery.ajax({
-                    url: BR._api.get_host('myapi')+'/plugin/0/media_files/' + rowid + ".js",
+                    // url: BR._api.get_host('myapi')+'/plugin/0/media_files/' + rowid + ".js", -- history (yes!)
+                    url: BR._api.get_host('api')+'/api/v1/files/' + rowid,
                     type: "DELETE",
 // BRInvitees.aj("/invitations/add_guest.js", {invitation:{conference_id:BR._api.context.conference_id}, user:{}, auth: BR._api.context.authen}, function(data, textStatus, jqXHR){
                     //data: un,

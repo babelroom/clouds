@@ -18,7 +18,7 @@ use Data::Dumper;   # tmp;
 $TMPDIR = '/home/br/tmp';
 $BUPLOADS = 'bblr-uploads';
 $BAVATARS = 'bblr-avatars';
-$verbose = 0; # extra logging
+$verbose = 1; # extra logging
 $pat = new String::Random or die;
 $wget = "/usr/bin/wget";
 $file = "/usr/bin/file";
@@ -65,6 +65,13 @@ sub s3_up
 }
 
 # ---
+sub s3_url_from_key
+{
+    my $key = shift;
+    return "$g_s3_vars{URLPrefix}/$BUPLOADS/$key?".scalar(time());    # scalar(time()) here for compat. suggest depreciate
+}
+
+# ---
 sub rand_filekey { return $pat->randregex("[0-9a-z]{20}"); }
 
 # ---
@@ -72,7 +79,7 @@ sub get_unprocessed_media
 {
     my $file_ref = shift;
     my $data;
-    BRDB::db_select2("SELECT * FROM media_files WHERE slideshow_pages IS NULL ORDER BY updated_at LIMIT 1", \$data, $dbrh) or die;
+    BRDB::db_select2("SELECT * FROM media_files WHERE slideshow_pages IS NULL AND progress=10000 ORDER BY updated_at LIMIT 1", \$data, $dbrh) or die;
     return undef if $#{$data};  # should get 1 row
     return $$file_ref = ${$data}[0];
 }
@@ -174,7 +181,7 @@ sub upload_file
     my $result = $b->add_key_filename(
         $key, $file,{
             content_type => $mime_type
-            });
+            }); 
     return s3_err($b) if not defined $result;
     print "upload_page: add_key_filename: done!\n" if $verbose;
     $result = $b->set_acl({
@@ -196,11 +203,30 @@ sub upload_file
 }
 
 # ---
+sub add_dependent_file_record
+{
+    my ($subdir, $key, $master_file_id) = @_;
+    my ($rows, $ii, $url, $s3_params) = (undef, undef, $dbrh->quote(s3_url_from_key($key)), $dbrh->quote($g_s3_vars{URLPrefix}));
+    my $sql = "INSERT INTO media_files (url,created_at,updated_at,slideshow_pages,driver,driver_params) VALUES($url,NOW(),NOW(),0,'s3',$s3_params);";
+    BRDB::db_exec2($dbrh, $sql, \$rows, \$ii) or die;
+    if ($ii) {
+        $sql = "INSERT INTO file_refs(ref_table,ref_id,created_at,updated_at,media_file_id) VALUES ('media_files',$ii,NOW(),NOW(),$master_file_id);";
+        BRDB::db_exec2($dbrh, $sql, \$rows) or die;
+        return ($rows==1) ? 1 : 0;
+        }
+    else {
+        print STDERR "Bad insertId after query [$sql]";
+        return 0;
+        }
+}
+
+# ---
 sub upload_page
 {
     my $master_url = shift;
     my $page = shift;
     my $tmpfile = shift;
+    my $master_file_id = shift;
 
     # ---
     print "upload_page: master_url=$master_url, page=$page, tmpfile=$tmpfile\n";
@@ -210,7 +236,11 @@ sub upload_page
     $key =~ tr/./_/;
     $key .= "-${page}.png";
 
-    return upload_file($key, $BUPLOADS, $tmpfile, 'image/png');
+    my $rc = upload_file($key, $BUPLOADS, $tmpfile, 'image/png');
+    if ($rc>0) {
+        add_dependent_file_record($BUPLOADS, $key, $master_file_id);
+        }
+    return $rc;
 }
 
 # ---
@@ -226,7 +256,7 @@ sub convert_compound_file
         $rc =  convert_a_page($f->{url}, $page, $tmpfile);
         last if $rc != 1;
         $converted = 1;
-        $rc = upload_page($f->{url}, $page, $tmpfile);
+        $rc = upload_page($f->{url}, $page, $tmpfile, $f->{id});
         last if $rc != 1;
         $page++;
         }
@@ -286,6 +316,9 @@ sub generate_avatar
     $rc = upload_file($key,$subdir,$subtmp);   # returns 1 on success
     unlink($subtmp);
     return -1 if ($rc<0);
+    
+    # keep a reference to the file
+    return 0 if not add_dependent_file_record($subdir, $key, $f->{id});
 
     my ($rows,$url) = (undef, $dbrh->quote("//$subdir.s3.amazonaws.com/$key"),);
     BRDB::db_exec2($dbrh, "UPDATE users SET `$field`=$url, updated_at=NOW() WHERE id=$f->{user_id}", \$rows) or die;
@@ -403,7 +436,7 @@ sub upload_local_file
         }
 
     die if not update_file_record($f,-1);   # conversion in progress
-    my $key = rand_filekey() . $extension;
+    my $key = rand_filekey() . "_$f->{id}$extension";
     # --- return 1==OK, -1 error
     my $rc = upload_file($key, $BUPLOADS, $file_path, undef);
     if ($rc<0) {
@@ -411,7 +444,7 @@ sub upload_local_file
         return 0;   # errored, nothing further to do (no retries?)
         }
     return 0 if (!$rc); # leave file in errored state
-    my ($rows,$url) = (undef, $dbrh->quote("$g_s3_vars{URLPrefix}/$BUPLOADS/$key"));
+    my ($rows,$url) = (undef, $dbrh->quote(s3_url_from_key($key)));    # scalar(time()) here for compat. suggest depreciate
     BRDB::db_exec2($dbrh, "UPDATE media_files SET slideshow_pages=NULL, url=$url, driver='s3', updated_at=NOW() WHERE id=$f->{id}", \$rows) or die;
     if ($rows!=1) {
         print STDERR "Bad row update count after uploading local file [$file_name]";

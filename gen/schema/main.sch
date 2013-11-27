@@ -213,6 +213,8 @@
         {_:#upload_url, type:$col_string, rest:[#av], api_doc:{sample:"http://files.example.com/file/my_master_avatar.png"}},
         #driver,
         {_:#driver_params, type:$col_text},
+        {_:#progress, type:$col_integer},
+        {_:#progress, type:$col_integer, rails_map:{default:10000}},
         ],
     rails_extra: @schema/my/media_file.rb.sch,      # we are going to depreciate the user_id and conference_id fields out of here ...
     },
