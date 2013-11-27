@@ -34,7 +34,10 @@ var config = {
             index: '/home/br/index.html',
             },
         file_uploader: {
-            tmpdir: '/home/br/tmp/upl',
+            tmpdir: '/home/br/tmp/files',
+            uploadDir: '/home/br/tmp/files',
+            maxPostSize: 1100000000,                /* 1.1 GB */
+            maxFileSize: 1000000000,                /* 1.0 GB */
             },
         mysql: {
             poolsize: 20,

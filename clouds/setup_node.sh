@@ -26,8 +26,8 @@ cd $HOME/gits/clouds/clouds || exit -1
 # copy index.html (landing page for single IP deploy)
 cp /home/br/gits/clouds/clouds/misc/index.html ~/.
 
-# make directory for file uploads
-mkdir /home/br/tmp/upl
+# make directories
+mkdir -p /home/br/tmp/files
 
 exit 0
 

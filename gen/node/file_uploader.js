@@ -3,19 +3,20 @@
 var he = require('./http_errors');
 
 var FileUploader = function(config, dbManager, sessionManager, us) {
-//var FileUploader = function(config) {
     this.db = dbManager;
     this.sessionManager = sessionManager;
     this.us = us;
     this.options = {
-            tmpdir: __dirname + '/home/br/tmp',
-            publicDir: '/home/br/tmp/files',
+            tmpdir: __dirname + '/home/br/tmp/files',
+//            publicDir: '/home/br/tmp/files',
             uploadDir: '/home/br/tmp/files',
-            uploadUrl: '/files/',   // ??
+//            uploadUrl: '/files/',   // ??
             maxPostSize: 11000000000, // 11 GB
             minFileSize: 1,
-            //maxFileSize: 10000000000, // 10 GB
-            maxFileSize: 2000000, // 2MB
+            maxFileSize: 10000000000, // 10 GB
+            //maxFileSize: 2000000, // 2MB
+
+/* the next few options are not used */
             acceptFileTypes: /.+/i,
             // Files not matched by this regular expression force a download dialog,
             // to prevent executing any scripts in the context of the service domain:
@@ -27,17 +28,12 @@ var FileUploader = function(config, dbManager, sessionManager, us) {
                     height: 80
                 }
             },
+/* but this is ... */
             accessControl: {
                 allowOrigin: '*',
                 allowMethods: 'OPTIONS, HEAD, GET, POST, PUT, DELETE',
                 allowHeaders: 'Content-Type, Content-Range, Content-Disposition'
             },
-            /* Uncomment and edit this section to provide the service via HTTPS:
-            ssl: {
-                key: fs.readFileSync('/Applications/XAMPP/etc/ssl.key/server.key'),
-                cert: fs.readFileSync('/Applications/XAMPP/etc/ssl.crt/server.crt')
-            },
-            */
 /*
             nodeStatic: {
                 cache: 3600 // seconds to cache served files
@@ -222,6 +218,7 @@ JR 11/2013: The following code is derived as noted below. Modified, errors/uglin
     };
     FileInfo.prototype.initUrls = function (req) {
         var options = req._fu.options;
+/* not used
         if (!this.error) {
             var that = this,
                 baseUrl = (options.ssl ? 'https:' : 'http:') +
@@ -236,8 +233,10 @@ JR 11/2013: The following code is derived as noted below. Modified, errors/uglin
                 }
             });
         }
+*/
     };
     UploadHandler.prototype.get = function (fu) {
+/* not used
         var handler = this,
             files = [];
         fs.readdir(fu.options.uploadDir, function (err, list) {
@@ -255,6 +254,7 @@ JR 11/2013: The following code is derived as noted below. Modified, errors/uglin
             });
             handler.callback({files: files});
         });
+*/
     };
     UploadHandler.prototype.post = function (fu) {
         var handler = this,

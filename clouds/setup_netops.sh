@@ -36,8 +36,7 @@ cat <<'EOT' >/tmp/br/clean_netops_logs
 EOT
 sudo install -o root -m 644 /tmp/br/clean_netops_logs /etc/cron.d/clean_netops_logs
 
-# make directory for files
-mkdir /home/br/tmp/files
+mkdir -p /home/br/tmp/files
 
 exit 0
 

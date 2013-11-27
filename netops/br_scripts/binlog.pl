@@ -633,14 +633,9 @@ sub do_log
 # ---
 db_remote_connect() or die;
 
-#%g_rowid_map_users = ( 6 => name, 7 => email_address, 13 => last_name, 14 => timezone, 15 => company, 18 => phone, );
 %g_rowid_map_users = field_hashmap('users',@g_users_columns);
-#print Dumper(%g_rowid_map_users);
-#%g_rowid_map_conferences = ( 2 => name, 16 => uri, 17 => skin_id, 18 => introduction, 19 => access_config, );
 %g_rowid_map_conferences = field_hashmap('conferences', (name, uri, skin_id, introduction, access_config,) );
-#%g_rowid_map_invitations = ( 2 => pin, 3 => role, 7 => user_id, );
 %g_rowid_map_invitations = field_hashmap('invitations', (pin, role, user_id,) );
-#%g_rowid_map_media_files = ( 2 => name, 4 => size, 5 => url, 9 => user_id, 14 => slideshow_pages, 15 => bucket, 16 => 'length', 17 => multipage );
 %g_rowid_map_media_files = field_hashmap('media_files',(name, size, url, user_id, slideshow_pages, bucket, 'length', multipage,) );
 
 db_local_connect() or die;

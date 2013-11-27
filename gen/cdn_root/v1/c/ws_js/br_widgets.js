@@ -45,7 +45,7 @@ what was this?
         BROverlays.generic({
             content: function(id) {
                 var url = BR._api.get_host('cdn') + '/cdn/v1/c/ws_js/fileuploader/index.html?url='
-                    + escape(BR._api.get_host('myapi')+'/plugin/0/upload.js')
+                    + escape(BR._api.get_host('api')+'/upl/')
                     + '&ts=' + new Date().getTime()
                     + '&csrf_token=' + BR._api.context.csrf_token
                     + '&conference_id=' + BR._api.context.conference_id
