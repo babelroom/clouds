@@ -1,4 +1,11 @@
-2gen=css/gen_workspace.css ws_js/gen.min.js gen-other1.min.js gen-other2.min.js gen.min.js
+
+DEP_indexes=index_dev.html index_vm.html index.html
+2gen=css/gen_workspace.css ws_js/gen.min.js gen-other1.min.js gen-other2.min.js gen.min.js $(DEP_indexes)
+
+DEP_index=index.part.top index.part.css_prod index.part.style index.part.html index.part.js_prod index.part.init_prod index.part.logic index.part.bottom_prod
+DEP_index_vm=index.part.top index.part.css_prod index.part.style index.part.html index.part.js_prod index.part.init_vm index.part.logic index.part.bottom_prod
+DEP_index_dev=index.part.top index.part.css_dev index.part.style index.part.html index.part.js_dev index.part.init_vm index.part.logic index.part.bottom_vm
+
 #2gen=css/gen_lobby.css css/gen_lobby_old_ie.css css/gen_workspace.css ws_js/gen.min.js gen-other1.min.js gen-other2.min.js gen.min.js
 DEP_gen_lobby=lobby/customized.css lobby/br_override.css css/widget.css recurly-js/recurly-customized.css
 DEP_gen_lobby_old_ie=lobby/app.css lobby/br_override.css css/widget.css recurly-js/recurly-customized.css
@@ -10,7 +17,7 @@ DEP_gen_preminified=css/jquery-ui-1.10.1.custom.min.css
 
 # in order of inclusion ... but pre-minified are separated out
 DEP_gen_jquery_base_min_js=
-DEP_gen_other1_js=wraprtc/wraprtc.js jquery/js/jquery-1.9.1.js jquery/js/i18n/grid.locale-en.js
+DEP_gen_other1_js=jquery/js/jquery-1.9.1.js jquery/js/i18n/grid.locale-en.js
 #DEP_gen_jquery_min_js=jquery/js/jquery.jqGrid.min.js jquery/js/jquery.tools.min.js jquery/js/jquery-ui-1.8.23.custom.min.js
 DEP_gen_jquery_min_js=jquery/js/jquery.jqGrid.min.js jquery/js/jquery-ui-1.10.1.custom.min.js jquery/js/query.tools.scrollable-1.2.7.min.js
 DEP_gen_other2_js=jquery/js/jquery.placeholder.js flash/swfobject.js
@@ -25,8 +32,10 @@ DEP_gen_ws_js=ws_js/br_utils.js ws_js/br_invitees.js ws_js/br_overlays.js \
 all: $(2gen)
 	$(MAKE) -C ./ws_js/fileuploader
 
-wraprtc/wraprtc.js:
-	git clone https://github.com/babelroom/wraprtc.git
+$(DEP_indexes): $(DEP_index) $(DEP_index_vm) $(DEP_index_dev)
+	/bin/cat $(DEP_index) > index.html
+	/bin/cat $(DEP_index_vm) > index_vm.html
+	/bin/cat $(DEP_index_dev) > index_dev.html
 
 css/gen_lobby.css: $(DEP_gen_lobby)
 	/bin/cat $^ > $@

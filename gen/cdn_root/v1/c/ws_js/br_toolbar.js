@@ -215,7 +215,8 @@ var BRToolbar = {
                 e('_btn_close').click(function(){dlg.dialog('close');});
                 e('_btn_reset').click(function(){
                     if (e('_cb_chat').prop('checked'))
-                        BRCommands.commandAction('clearChat');
+                        //BRCommands.commandAction('clearChat'); -- depreciate
+                        BRCommands.clearAction('chat');
                     if (e('_cb_slides').prop('checked'))
                         BRCommands.slideAction(undefined,undefined);
                     if (e('_cb_call').prop('checked')) {

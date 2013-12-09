@@ -2,6 +2,7 @@
 /* --- */
 
 var http = require('http')
+    ,   crypto = require('crypto')
     ;
 
 var put_templates = {
@@ -12,7 +13,7 @@ var put_templates = {
     move: {q: 'fs', fmt: function(d){return 'Fbgapi conference '+d.cid+' group '+d.args[0]+' '+d.args[1];}},
 
     /* everybody */
-    chat: {q: 'conference', fmt: function(d){return "C"+d.args;}, nonpriv: true},
+    chat: {q: 'conference', fmt: function(d){return "Kchat-"+chat_key()+":"+d.args;}, nonpriv: true},
     video: {q: 'conference', fmt: function(d){return "K_-"+d.args.connection_id+"-video-"+d.args.uid+d.args.cmd;}, nonpriv: true},
     slide: {q: 'conference', fmt: function(d){return "Kslide"+d.args;}, nonpriv: true},
     conferenceIdsAction: {q: 'fs', fmt: function(d){return 'M'+d.args[0]+' bgapi conference '+d.cid+' '+d.args[1];}, nonpriv: true},   /*temporarily allowed by non-admins (mute)*/
@@ -152,6 +153,12 @@ function br_api_call(api_host, socket, data, fn)
     request.end();
 }
 
+/* --- utils --- */
+function chat_key() {
+    var d = new Date();
+    return d.getUTCDate() + '-' + d.getUTCHours() + '-' + ((d.getUTCMinutes()*60)+d.getUTCSeconds()) + '-' + crypto.randomBytes(4).toString('hex');
+}
+
 /* --- */
 Live.prototype = {
     addServer: function(sr,se) {
@@ -260,16 +267,13 @@ io.configure(function (){
     addUseHandlers: function(_, _, _) {;},
     addHandlers: function(_, app, _) {
         this.listen();
-/*        app.use(function(req, res, next){
-            console.log('%s %s', req.method, req.url);
-            next();
-            }); */
         app.get('/', function (req, res) {
             res.sendfile(__dirname + '/index.html');
             });
+/*
         app.get('/ssl', function (req, res) {
             res.sendfile(__dirname + '/index_ssl.html');
-            });
+            }); */
         }
 }
 

@@ -1,0 +1,66 @@
+</head> 
+<body id="dashboard_body" class="jquery-ui bg"> 
+<div style="min-width: 800px; display: none;">
+
+<!-- right -->
+<div><!-- got to move this elsewhere -->
+    <img style="right: 210px; position: absolute; top: 2px; margin: 4px;" src="/cdn/v1/c/img/logo_18.png" alt="" class="br-z-index-logo">
+</div>
+<div id="right_column" class="br-z-index-panels"></div> 
+ 
+<!-- left -->
+<div id="main">
+    <h3 style="height: 2.85em;">
+        <div style="float: right; border: none;" class="ui-state-active">
+            <button id="user_button" class="menubar-button" style="display: none;">User</button>
+            <input type="checkbox" id="right_panels"><label for="right_panels" class="br-z-index-panels"></label>
+        </div>
+        <button id="menu_button" class="menubar-button br-z-index-menu">Menu</button>
+    </h3>
+
+<!-- depreciate this ... -->
+        <!-- now retaining only this as example -->
+        <!--<button name="ui-icon-help" onClick="Zenbox.show(event);">Help...</button>--> 
+ 
+<!-- tabs -->
+<div id="top-tabs" style="position: absolute; top: 1px; left: 128px;"><h3 class="ui-accordion-header ui-helper-reset" style="border: none;">
+    <button id="view_people" title="Switch to Participant Webcam View" class="top-tab">People</button> 
+    <button id="view_slides" title="Switch to Presentation Mode" class="top-tab">Slides</button> 
+</h3></div>
+
+<div>
+        <ul id="menu" class="br-z-index-menu" style="display: none;">
+            <li class="not-p2p"><a href="#" onClick="return m('a');" title="Manage Audio Connection"><span class="ui-icon ui-icon-transferthick-e-w"></span>Connect...</a></li>
+            <li class="not-p2p"></li>
+            <!--<li class="host-only-menuitem"><a href="#" onClick="return m('b');"><span class="ui-icon ui-icon-plusthick"></span>Add People...</a></li>-->
+            <li class="host-only-menuitem"><a href="#" onClick="return m('d');"><span class="ui-icon ui-icon-gear"></span>Settings...</a></li>
+            <li class="host-only-menuitem"><a href="#" onClick="return m('e');"><span class="ui-icon ui-icon-refresh"></span>Reset...</a></li>
+            <li></li>
+            <li><a href="#"><span class="ui-icon ui-icon-link"></span>Links</a>
+                <ul>
+                    <li class="non-ephemeral-only-menuitem"><a href="#" onClick="return m('c');"><span class="ui-icon ui-icon-calculator"></span> Account...</a></li>
+                    <li><a href="#" onClick="return m('g');"><span class="ui-icon ui-icon-home"></span>Home...</a></li>
+                </ul>
+            </li>
+            <li></li>
+            <li><a href="#" onClick="return m('f');"><span class="ui-icon ui-icon-extlink"></span>Logout</a></li>
+        </ul>
+</div>
+
+<!-- center -->
+<div id="center_area" style="position: absolute; top: 0px; width: 100%;"> 
+</div> 
+
+</div><!-- main -->
+
+</div>
+<div style="
+    font-size: 300%;
+    font-weight: bold;
+    color: #5174a4;
+    position: absolute;
+    left: 0;
+    top: 40%;
+    width: 100%;
+    text-align: center;
+"><!--<i class="icon-comments"></i>-->Loading...</div>

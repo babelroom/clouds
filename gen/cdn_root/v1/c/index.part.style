@@ -1,0 +1,114 @@
+<style> 
+<!--
+.bg {
+    background-color: transparent;
+    background-image: 'none';
+/*
+    background-color: #f7f7f7;  /* this color is white, just off by 1 to make it stick out in file *./
+    background: url("//s3-us-west-1.amazonaws.com/bblr-assets/landscape.jpg") 0 100%;
+    overflow: hidden;
+    background-attachment: fixed;
+*/
+    font-size: 10px;
+    overflow-x: hidden;
+    margin: 0;
+    font-family: Tahoma, Geneva, sans-serif;
+}
+.chat_position {position:absolute; left:0px; bottom:0px; margin-left:0px; margin-bottom:0px; }
+.version_position {position:absolute; right:0px; bottom:0px; margin-right:0px; margin-bottom:0px; }
+.bold-text { font-weight: bold; }
+.secure-green { color: #22aa22; }
+.secure-bright-green { color: #33ff33; }
+label.fieldWithErrors, span.fieldWithErrors {
+    color: red;
+    font-weight: bold;
+}
+input.fieldWithErrors {
+    border-color: red;
+    border-style: solid;
+    outline: none;
+}
+.top-tab {
+    border-bottom: 4px solid #f7f7f7;
+    border-left: none;
+    border-right: none;
+    padding-bottom: 4px;
+    margin-top: 2px;
+    margin-bottom: 0;
+}
+.top-tab.ui-state-disabled {
+    background: #f7f7f7;
+    opacity: 1.0;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+}
+.menubar-button {
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+.br-icon-rp-width {
+    width: 16px;
+}
+.br-z-index-logo { z-index: 50; }
+.br-z-index-toolbar { z-index: 60; }
+.br-z-index-panels { z-index: 70; }
+.br-z-index-tabs { z-index: 80; }
+.br-z-index-menu { z-index: 90; }
+/* jquery overlay uses z-index 100 */
+.br-z-index-slide, .br-z-index-boxes-container { z-index: 400; }
+.br-z-index-ptr { z-index: 500; }
+.ui-menu { width: 114px; }
+/* TMP todo - because current custom jquery-ui theme is broken */
+.ui-state-error {
+    background: #FEF1EC !important;
+    color: #CD0A0A !important;
+}
+a.ui-state-error {
+    color: #CD0A0A !important;
+}
+/* TMP todo - because current custom jquery-ui theme is broken */
+#menu_button { width: 120px; }
+select.br-select {
+    height: 23px;
+    font-size: 11px;
+}
+a:link, a:visited, a:active { text-decoration:none; }
+a:hover { text-decoration:underline; }
+a.br-blue {
+    color: #5174a4;
+    font-weight: bold;
+}
+table.br-dyn { width: 100%; }
+/*tr.br-dyn:nth-child(odd) { background: #f8fafe; }*/
+td.br-dyn:nth-child(even) { text-align: right; }
+fieldset.br-dyn { margin: 10px; }
+i.br-mini-button
+{
+    margin: 0 2px 0 2px;
+    cursor: pointer;
+}
+.dtmftable {
+    width: 100%;
+}
+.dtmfrow {
+    text-align: center;
+}
+.dtmfcell {
+    width: 33%;
+}
+.dtmfkey {
+    width: 95%;
+}
+.f6wn { /* not so sure this works... */
+    font-size: 0.6em;
+    font-weight: normal;
+}
+input.br-phone-display {
+    border: solid 1px #ccc;
+    font-size: 1.5em;
+    font-weight: bold;
+    outline: none;
+}
+-->
+</style> 

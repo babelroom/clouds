@@ -1,0 +1,22 @@
+<script type="text/javascript">
+
+/* --- globals (soon...) --- */
+var a = BR.v1.api;
+//var myhost = '//' + location.hostname + ':3001';
+var myhost = '//' + location.hostname + ':8889';
+var thishost = '';   /* '' means same address as page */
+BR._api = BR.v1.api.create({
+    query_string:window.location.search,
+    hosts: {
+        api:    thishost,
+        my:     myhost,
+        myapi:  myhost,
+        live:   thishost,
+        page:   thishost,
+        cdn:    thishost,
+        home:   thishost,
+        video:  thishost + ':1936'
+    },
+    controllers: [BRWidgets.chatController],
+    _dynamic_form_id: '_ie_dynform',
+});

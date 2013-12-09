@@ -1,0 +1,133 @@
+BRDashboard = BR._api.notify;
+BRCommands = BR._api.commands;
+BR.room = {
+    countries: null//, context: {}
+}
+var menuOn, menuOff;    /* will assign function to this in ready() */
+
+function switch_view(view) {
+    BRWidgets.changeCenterView(view);
+    var $j = jQuery;
+    $j('.top-tab').button('enable').addClass('ui-state-default');
+    $j('#view_'+view).button('disable').removeClass('ui-state-default');
+}
+function m(item) { return BRToolbar.menuAction(item); }
+
+function br_v1_c_loaded() {
+    /* --- soonest possible --- */
+}
+
+function br_v1_c_ready() {
+    /* --- DOM has been loaded --- */
+    var $j = jQuery;
+
+    BRToolbar.door('open');
+
+    var loginTokenOrNull =  BRToolbar.login_token();
+    if (loginTokenOrNull) {
+        BRToolbar.login_by_token(function(msg){
+            return BRToolbar.door('fatal',msg);                 /* at least throw up the error message */
+            });
+        }
+
+//    if (window!=window.top) // in an iframe (so there is an exit/logout link in parent frame) --- depreciate (or revive)
+//        $j('.logout_link').css('display','none');
+ 
+    /* --- center area --- */
+    BRWidgets.centerArea('#center_area');
+
+    /* --- top tab --- */
+    $j('#main > h3').addClass('ui-accordion-header ui-helper-reset ui-state-default ui-state-active');
+    $j('.top-tab').each(function(){
+        var b = $j(this);
+        var id = this.id;
+        var icon_map = {view_people: 'ui-icon-person', view_slides: 'ui-icon-image'};
+        var view_map = {view_people: 'people', view_slides: 'slides'};    // depreciate by using value directly
+        b.button({icons: {primary: icon_map[id]}})
+            .removeClass('ui-corner-all')
+            .addClass('ui-corner-top');
+        b.click(function(){
+            switch_view(view_map[id]);
+            /* $j('.top-tab').addClass('ui-state-default');
+            b.removeClass('ui-state-default'); */
+            });
+        b.children('span:first-child').css({
+            top: 'auto',
+            'margin-top': '2px'
+            });
+        b.addClass('br-z-index-tabs');
+        });
+    switch_view('people');
+
+    /* ---  right panels --- */
+    var pos = {position: 'absolute', wdth: '202px', top: '1px', right: '0px'};
+    var extra_foo = false;
+    if (extra_foo) {
+        $j('#user_button').button().show()
+            .button('option', 'icons', {prmary: 'ui-icon-triangle-1-s', secondry: 'ui-icon-gear'}).button('option','label','Username')
+            .removeClass('ui-corner-all').addClass('menubar-button ui-corner-left').css($j.extend(pos, {right: '202px'}));
+        }
+    var rp = $j('#right_panels').button();
+    var rl = rp.next().addClass('menubar-button')
+        .css($j.extend(pos,{width: '202px', right: '0px'}));    // the label following the input checkbox is actually the parent object to be styled
+    if (extra_foo) rl.removeClass('ui-corner-all').addClass('ui-corner-right');
+    var rp_icons = ' <i class="icon-cogs pull-right br-icon-rp-width" style="text-align: right;"></i>';
+    var rp_icons_hide = ' <i class="icon-resize-small pull-right br-icon-rp-width" style="text-align: right;"></i>';
+    var rc = $j('#right_column');
+    function rp_update() {
+        if (rp.is(':checked')) {
+            rc.show();
+            rp.button('option', 'icons', {primary: 'ui-icon-triangle-1-s', secondry: 'ui-icon-gear'}).button('option','label','Hide Panels'+rp_icons_hide);
+            }
+        else  {
+            rc.hide();
+            rp.button('option', 'icons', {primary: 'ui-icon-triangle-1-e', secondry: 'ui-icon-gear'}).button('option','label','Show Panels'+rp_icons);
+            }
+        rl.find('span.ui-button-text').css('text-align', 'left');
+        }
+    rp.click(rp_update);
+    rc.css($j.extend(pos,{'width': '205px', 'top': '2.8em'}));
+
+    /* --- at this point we need the right column, and the right column (apparently) needs the main div visible --- */ 
+    $j(".bg > div:first").show();
+    BRWidgets.rightMenu('#right_column');
+    rp_update();
+    rc.hide();
+
+    /* --- */
+    $j('#menu_button').button({ icons: {secondary: 'ui-icon-triangle-1-s'}, label: '<i class=""></i> Loading...' });
+
+    /* align some heights TODO tmp. think this is going away ... -- delete next time you see this */
+//    var pos = $j('#top-tabs').height();
+
+    /* --- display (rest of) dashboard --- */
+    $j(".bg > div:first").next().hide();
+    
+    /* --- connect --- */
+    if (!loginTokenOrNull)  /* this logic may seem strange, but it's staged for case of leaving login token on room URL */
+        br_v1_c_connect(loginTokenOrNull);
+}
+
+function br_v1_c_connect(loginTokenOrNull) {
+
+    /* now populate */
+    BR._api.get_countries(function(err, list) {
+        if (err)
+            return BRToolbar.door('fatal');
+        BR.room.countries = list;
+        var uri = BRUtils.conferencePath();
+        if (uri) {
+            BR._api.addStreamCredential(uri, loginTokenOrNull, function(err, data) {
+                if (err)
+                    return BRToolbar.door('fatal');
+                BRToolbar.door('invitation', data);
+                });
+            }
+        else
+            BRToolbar.door('fatal');  /* at least throw up the error message */
+        });
+}
+
+jQuery(document).ready(function(){ br_v1_c_ready(); });
+br_v1_c_loaded();
+</script>

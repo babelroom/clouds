@@ -1,6 +1,6 @@
 var BRWidgets = {
     id: 1,
-    chatController: {},
+    chatController: {type: 'chat'},
 
     _crop: function(name,len) {
         var pres_max = (len?len:30);
@@ -2534,7 +2534,7 @@ if needed use the enableSelect() instead
             });
         var input = $j('#'+id+'_input');
         input.keydown(function(e){
-            if (e.keyCode==13) BRCommands.sendChat(BR._api.context.user_id, BR._api.context.user_name, id+'_input');
+            if (e.keyCode==13) BRWidgets.chatController.sendElement(id+'_input');
             });
         /* this code now duplicated in br_api.controllers */
 //        var month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

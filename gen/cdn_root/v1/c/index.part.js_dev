@@ -1,0 +1,29 @@
+<!-- DEVEL everything that follows is devel -->
+<script type='text/javascript' src='/cdn/v1/src/js_fixups.js'></script>
+<script type='text/javascript' src="/cdn/v1/c/jquery/js/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="/cdn/v1/c/jquery/js/i18n/grid.locale-en.js"></script>
+<script type="text/javascript" src="/cdn/v1/c/jquery/js/jquery.jqGrid.min.js"></script>
+<script type="text/javascript" src="/cdn/v1/c/jquery/js/query.tools.scrollable-1.2.7.min.js"></script>
+<script type="text/javascript" src="/cdn/v1/c/jquery/js/jquery-ui-1.10.1.custom.min.js"></script>
+<script type="text/javascript" src="/cdn/v1/c/jquery/js/jquery.placeholder.js"></script> 
+<script type="text/javascript" src="/cdn/v1/c/flash/swfobject.js"></script>
+<script type="text/javascript" src="/cdn/v1/c/ws_js/br_content.js"></script>
+<script type="text/javascript" src="/cdn/v1/c/ws_js/br_participants.js"></script>
+<!--
+<script type="text/javascript" src="/cdn/v1/c/ws_js/br_dashboard.js"></script>
+<script type="text/javascript" src="/cdn/v1/c/ws_js/br_commands.js"></script>
+-->
+<script type="text/javascript" src="/cdn/v1/c/ws_js/br_utils.js"></script>
+<script type="text/javascript" src="/cdn/v1/c/ws_js/br_invitees.js"></script>
+<script type="text/javascript" src="/cdn/v1/c/ws_js/br_widgets.js"></script>
+<script type="text/javascript" src="/cdn/v1/c/ws_js/br_overlays.js"></script>
+<script type="text/javascript" src="/cdn/v1/c/ws_js/br_conference.js"></script>
+<script type="text/javascript" src="/cdn/v1/c/ws_js/br_dynamic.js"></script>
+<script type="text/javascript" src="/cdn/v1/c/ws_js/br_toolbar.js"></script>
+<script type="text/javascript" src="/cdn/v1/AUTO/conference_options.js"></script>
+<script type='text/javascript' src="/cdn/v1/src/br_api.js"></script>
+<script type='text/javascript' src="/cdn/v1/src/br_api.streaming.js"></script>
+<script type='text/javascript' src="/cdn/v1/src/br_api.logic.js"></script>
+<script type='text/javascript' src="/cdn/v1/src/br_api.controllers.js"></script>
+<script type='text/javascript' src='/cdn/v1/src/wraprtc/wraprtc.js'></script>
+<script type='text/javascript' src="/cdn/v1/src/socket.io.min.js"></script>

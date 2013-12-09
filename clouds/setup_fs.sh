@@ -38,10 +38,13 @@ test -d FS && echo "FS directory already exists -- cleanup (rm -rf FS) then rest
 # get files to build
 git clone https://github.com/babelroom/FS.git || exit -1
 cd FS
-git clone -b v1.2.stable git://git.freeswitch.org/freeswitch.git
+#git clone -b v1.2.stable git://git.freeswitch.org/freeswitch.git
+git clone git://git.freeswitch.org/freeswitch.git
 
 cd freeswitch
-git checkout 38e3f5fe1655336f9fc807e62f877ed8f932b8a0   # get back to source as of 08/08/2011 (TMP TODO)
+#git checkout 38e3f5fe1655336f9fc807e62f877ed8f932b8a0   # get back to source as of 08/08/2011 (TMP TODO)
+git checkout ac2bf8a4058cb3df40e79f89276eab4847f59ae3   # 12/7/2013 (master)
+#git checkout 043b0667a5c148bdc54e354173f1bfb3e0ac91d4   # 12/8/2013 (v1.2.stable)
 cp -a ../br_src_overlay/* .
 ./bootstrap.sh
 ./configure --without-pgsql

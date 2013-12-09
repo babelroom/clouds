@@ -301,7 +301,7 @@
         }
 
     function _addStreamCredential(_this, path, token, fn) {
-        /*_initControllers(_this); -- we'd do this here if we wanted to kick init right before stream start ... */
+        _initControllers(_this);
         /* connect stream */
         function stream_authenticate() {
             _this.stream_channel.add_conference_credential(path, token, function(e,d){
@@ -382,21 +382,19 @@
 
     function _initControllers(self) {
         /* --- */
-        var controllers = [];
-        if (BR.v1.controllers)
-            for(var c in BR.v1.controllers)
-                if (BR.v1.controllers.hasOwnProperty(c)) {
-                    controllers.push(c);
-                    if (self.options[c]) {
-                        self.options[c]._default = BR.v1.controllers[c];
-                        _topLevelCopy(BR.v1.controllers[c], self.options[c]);
-                        }
-                    else
-                        self.options[c] = BR.v1.controllers[c];
-                    self.options[c]._api = self;
-                    }
-        for(var i=0; i<controllers.length; i++) 
-            self.options[controllers[i]].onInit();
+        var oc = self.options.controllers;
+        if (!oc)
+            return;
+        for(var i=0; i<oc.length; i++) {
+            var c=oc[i], dc = BR.v1.controllers[c.type];
+            if (!dc)
+                continue;
+            c._default = dc;
+            _topLevelCopy(dc, c);
+            c._api = self;
+            c._onInit && c._onInit();
+            c.onInit && c.onInit();
+            }
         }
 
     function _init(self, args) {
@@ -406,11 +404,12 @@
         var _config = (subdomain && subdomain[1].match('dev')) ? config_map.dev : config_map.prod;
         var hosts = null;
         self.defaults = {
+            controllers: [],
             onError: function(msg)  { console && console.log && console.log(msg); },
             streamFactory: window.BR.v1.SIO,
             _: 0    /* last */
             }
-        self.options = {}
+        self.options = {};
         var logicContainer = window.BR.v1.logic && window.BR.v1.logic.create();
         if (logicContainer) {
             self.commands = logicContainer.commands;
@@ -439,7 +438,7 @@
             if (_config.hosts.hasOwnProperty(i))
                 self.hosts[i] = (hosts!==null) ? (typeof(hosts)==='object'? (typeof(hosts[i])!=="undefined"?hosts[i]:_config.hosts[i]) :hosts) : _config.hosts[i];
 
-        _initControllers(self);
+//        _initControllers(self);
 
         return self;
         };
@@ -457,6 +456,19 @@
             return this.stream_channel;
         this.stream_channel = get_or_set_stream;
         return this.stream_channel;
+        }
+
+    API.prototype.addControllers = function(arg) {
+        var self=this;
+        function addController(c) {
+            self.options.controllers.push(c);
+            }
+        if (arg instanceof Array) {
+            for(var i=0; i<arg.length; i++)
+                addController(arg[i]);
+            }
+        else
+            addController(arg);
         }
     
     API.prototype.addStreamCredential = function(path, token, fn) {
