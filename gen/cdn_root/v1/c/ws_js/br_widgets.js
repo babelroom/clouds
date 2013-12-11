@@ -1619,7 +1619,8 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
             if ((now - lastPointerSendTime)<200)    // too soon
                 return;
 
-            BRCommands.slideAction('ptr', lastMMEvent.csX + ',' + lastMMEvent.csY);
+            //BRCommands.slideAction('ptr', lastMMEvent.csX + ',' + lastMMEvent.csY);
+            BRWidgets.presentationController.setPointer(lastMMEvent.csX, lastMMEvent.csY);
             lastPointerSendTime = now;
             xyAtLastSend = {x:lastMMEvent.csX,y:lastMMEvent.csY};
             }

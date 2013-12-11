@@ -267,6 +267,9 @@ console.log(['call',uid]);
                 },
             makeMePresenter: function() {
                 BRCommands.slideAction('presenter', BR._api.context.user_id + ':' + BR._api.context.user_name);
+                },
+            setPointer: function(x, y) {
+                BRCommands.slideAction('ptr', x + ',' + y);
                 }
             }
         }
