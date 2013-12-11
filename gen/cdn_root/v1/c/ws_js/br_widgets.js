@@ -1,6 +1,7 @@
 var BRWidgets = {
     id: 1,
     chatController: {type: 'chat'},
+    presentationController: {type: 'presentation'},
 
     _crop: function(name,len) {
         var pres_max = (len?len:30);
@@ -1357,10 +1358,10 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                 presenter_set_page(-1);
                 }).next()
             .button({ text: true, no_icons: { primary: "ui-icon-play" }}).click(function(){
-                BRCommands.slideAction('show', current_page.val());
+                BRWidgets.presentationController.changePage(current_page.val());
                 }).next()
             .button({ text: true, no_icons: { primary: "ui-icon-stop" }}).click(function(){
-                BRCommands.slideAction('show', undefined);
+                BRWidgets.presentationController.changePage(undefined);
                 }).next()
             .button({ text: false, icons: { primary: "ui-icon-seek-next" }}).click(function(){
                 presenter_set_page(0);
@@ -1369,13 +1370,13 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                 presenter_set_page($j('#num_pages').text());
                 }).next()
             .button({ text: false, icons: { primary: "ui-icon-closethick" }}).click(function(){
-                BRCommands.slideAction(undefined, undefined);
+                BRWidgets.presentationController.close();
                 }).next()
             ;
         $j('#make_me_button')
             .button({ text: true, no_icons: { primary: "ui-icon-pencil" }})
             .click(function(){
-                BRCommands.slideAction('presenter', BR._api.context.user_id + ':' + BR._api.context.user_name);
+                BRWidgets.presentationController.makeMePresenter();
             })
           /*  .tooltip(); */
             ;
@@ -1384,7 +1385,7 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
             $j('#make_me_button').css('display','none');
         */
 
-        var presentations = [];
+//        var presentations = [];
         var sel_pr = $j('#presentations');
         BRWidgets.styleSelect(sel_pr);
         BRWidgets.enableSelect(sel_pr,false);
@@ -1406,7 +1407,8 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
             else
                 $j(sel).find("button.page_control").button("disable");
             }
-        function set_presentation(data) {   /* when we get notification of a presentation change, or init, or reset */
+/*
+        function set_presentation(data) {   /* when we get notification of a presentation change, or init, or reset *./
             var arr = data.match(/^([^:]+):([^:]+):([^:]+):(\d):(.+)$/);
             show_page(0);
             current_page.find('option').remove();
@@ -1426,11 +1428,11 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                 $j('#presentation_name').text(BRWidgets._crop(presentation_name));
                 $j('#presentation_name').attr('href',url);
                 $j('#presentation_name').attr('title','Download ' + presentation_name);
-                if (arr[4]==1)     /* multipage */
+                if (arr[4]==1)     /* multipage *./
                     mp_url = url.replace(/\.([^\/]*)\?\d*$/,'_$1');
                 else
                     mp_url = '';
-/*                $j(sel).find("button.page_control").button("enable"); */
+/*                $j(sel).find("button.page_control").button("enable"); *./
                 update_page_controls();
                 }
             else {
@@ -1443,10 +1445,11 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                 sel_pr.val('-1');
                 url = '';
                 mp_url = '';
-/*                $j(sel).find("button.page_control").button("disable"); */
+/*                $j(sel).find("button.page_control").button("disable"); *./
                 update_page_controls();
                 }
             }
+*/
 
         function presenter_set_page(new_page_num) {   /* when presenter changes page */
             if (typeof(new_page_num)== 'string') {
@@ -1471,7 +1474,7 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
             current_page.val(new_page_num);
             update_page_controls();
             if ($j('#show_button').css('display')=='none')
-                BRCommands.slideAction('show', new_page_num);
+                BRWidgets.presentationController.changePage(new_page_num);
             }
 
         var selImg = $j('#slide_img');
@@ -1499,16 +1502,6 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                     });
 */
 
-                /* fetch next slide into cache? */
-/*
--- doesn't seem to work so well ...
-... and now it's quite old also ...
-                var num_pages = $j('#num_pages').text();
-                if (num_pages>page_num) {
-                    surl = url + '-' + (page_num+1) + '.png';
-                    $j('#next_slide').html('<img src="' + surl + '" alt="">');
-                    }
-*/
                 /* move user to slideshow (once only) */
                 if (!presenting() && !have_moved_user_to_slideshows_once) {
                     switch_view('slides');  /* barrowed from workspace */
@@ -1534,34 +1527,17 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
 
         sel_pr.prop('disabled',true).change(function(){
             var selIndex = sel_pr.find(':selected').val();
-            if (selIndex!='') {
-/*
-                var len = presentations.length;
-                var mf = undefined;
-*/
-                var mf = presentations[selIndex].media_file;
-/*
-                for(var i=0; i<len; i++) {
-                    if (presentations[i].media_file.id==selIndex) {
-                        mf = presentations[i].media_file;
-                        break;
-                        }
-                    }
-*/
-                if (mf) {
-                    var last_page = mf.slideshow_pages;
-                    BRCommands.slideAction('presentation', mf.slideshow_pages + ':' + mf.id + ':' + escape(mf.name) + ':' + (mf.multipage?1:0) + ':' + mf.url);
-                    }
-                }
+            BRWidgets.presentationController.changePresentation(selIndex);
             });
         current_page.change(function(){
             presenter_set_page(current_page.val());
             });
-        set_presentation('');
+//        set_presentation('');
+/*
         BRDashboard.subscribe(function(h){
             if (h.attr===undefined && h.value===undefined) {
                 if (presentations[h.idx] !== undefined) {
-                    if (sel_pr.val()==h.idx) /* if currently selected? */
+                    if (sel_pr.val()==h.idx) /* if currently selected? *./
                         set_presentation('');
                     sel_pr.find('option[value="' + h.idx + '"]').remove();
                     delete presentations[h.idx];
@@ -1578,16 +1554,19 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                     }
                 }
             },'media_files');
+*/
 
         var pointerXY = {x:0,y:0};
         var pointing = false;
-        function set_ptr(value) {
-            if (value) {
-                if (!/^(\d+),(\d+)$/.exec(value))
+        function set_ptr(obj) {
+            if (obj) {
+                /*if (!/^(\d+),(\d+)$/.exec(value))
                     return;
                 var x = RegExp.$1;
                 var y = RegExp.$2;
                 pointerXY = adjustOutPtr({x:parseInt(x, 10),y:parseInt(y, 10)});
+                */
+                pointerXY = adjustOutPtr(obj);
                 }
             else
                 selPtr.css('display','none');
@@ -1674,50 +1653,135 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                 }
             }
         
+/*
         BRDashboard.subscribe(function(o){
             switch(o.variable) {
+*/
+/*
                 case 'presenter':
                     if (o.value) {
                         var arr = o.value.match(/^\s*([^:]+):(.*)$/);
                         if (arr && arr.length==3) {
                             //$j('#presenter').text(' Presenter: ' + arr[2] + ' '); -- try the look below for a while ...
                             $j('#presenter').html(' <em>Presenter:</em> ' + arr[2] + ' ');
-                            if (arr[1] == BR._api.context.user_id) {    /* we are presenting */
+                            if (arr[1] == BR._api.context.user_id) {    /* we are presenting *./
                                 $j('.not_presenting').css('display','none');
                                 $j('.presenting').css('display','inline');
                                 }
-                            else {                              /* somebody else presenting */
+                            else {                              /* somebody else presenting *./
                                 $j('.presenting').css('display','none');
                                 $j('.not_presenting').css('display','inline');
                                 }
                             }
                         }
                     break;
-
+*/
+/*
                 case 'presentation':
                     set_presentation(o.value);
                     break;
-
+*/
+/*
                 case 'ptr':
                     set_ptr(o.value);
-                    return;     /* skip startStopPointer() at end */
-
+                    return;     /* skip startStopPointer() at end *./
+*/
+/*
                 case 'show':
                     show_page(o.value);
                     break;
-
+*/
+/*
                 case undefined:
-                    if (o.value==undefined) {   /* reset */ // tmp TODO. working on this ...
+                    if (o.value==undefined) {   /* reset *./ // tmp TODO. working on this ...
+*/
+/*
                         $j('#presenter').text('');
                         $j('.not_presenting').css('display','inline');
                         $j('.presenting').css('display','none');
-                        set_presentation('');
+*/
+//                        set_presentation('');
+/*
                         }
                     break;
                 }
-            startStopPointer();
+//            startStopPointer();
             },'slide');
+*/
         $j('.presenting').css('display','none');
+
+        /* --- using controller --- */
+        BRWidgets.presentationController.onChangePage = function(page_num) {
+            show_page(page_num);
+            }
+        BRWidgets.presentationController.onSlideChange = function(obj) {
+//            var arr = data.match(/^([^:]+):([^:]+):([^:]+):(\d):(.+)$/);
+            show_page(0);
+            current_page.find('option').remove();
+            // the second check here is because this slide may have been deleted
+            if (obj && sel_pr.find('option[value="'+obj.presentationIndex+'"]').length) {
+                var num_pages = obj.numPages;
+                $j('#num_pages').text(num_pages);
+                if (num_pages>0) {
+                    for(var i=1; i<=num_pages; i++) {
+                        current_page.append('<option value="'+i+'">'+i+'</option>');
+                        }
+                    BRWidgets.enableSelect(current_page,true);
+                    }
+                var presentation_name = obj.presentationName;
+                sel_pr.val(obj.presentationIndex);
+                url = obj.url;
+                $j('#presentation_name').text(BRWidgets._crop(presentation_name));
+                $j('#presentation_name').attr('href',url);
+                $j('#presentation_name').attr('title','Download ' + presentation_name);
+                if (obj.multipage)     /* multipage */
+                    mp_url = url.replace(/\.([^\/]*)\?\d*$/,'_$1');
+                else
+                    mp_url = '';
+/*                $j(sel).find("button.page_control").button("enable"); */
+                update_page_controls();
+                }
+            else {
+//console.log('set_presentation(undefined)');
+                $j('#num_pages').text("--");
+                $j('#presentation_name').text(no_pres_text);
+                $j('#page').text('');
+                current_page.append('<option>--</option>');
+                BRWidgets.enableSelect(current_page,false);
+                sel_pr.val('-1');
+                url = '';
+                mp_url = '';
+/*                $j(sel).find("button.page_control").button("disable"); */
+                update_page_controls();
+                }
+            }
+        BRWidgets.presentationController.onPresenterChange = function(name,me) {
+            if (!name.length)
+                $j('#presenter').text('');
+            else
+                $j('#presenter').html(' <em>Presenter:</em> ' + name + ' ');
+            if (name.length && me) {
+                $j('.not_presenting').css('display','none');
+                $j('.presenting').css('display','inline');
+                }
+            else {
+                $j('.not_presenting').css('display','inline');
+                $j('.presenting').css('display','none');
+                }
+            }
+        BRWidgets.presentationController.onAddPresentation = function(idx, name) {
+            sel_pr.append('<option value="'+idx+'">'+BRWidgets._crop(name)+'</option>');
+            BRWidgets.enableSelect(sel_pr,true);
+            }
+        BRWidgets.presentationController.onRemovePresentation = function(idx) {
+            sel_pr.find('option[value="' + idx + '"]').remove();
+            }
+        BRWidgets.presentationController.onSetPointer = function(obj) {
+            set_ptr(obj);
+            }
+        BRWidgets.presentationController.onCheckPointer = function() {
+            startStopPointer();
+            }
     },
 
 /*

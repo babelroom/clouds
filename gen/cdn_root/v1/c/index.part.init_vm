@@ -17,6 +17,6 @@ BR._api = BR.v1.api.create({
         home:   thishost,
         video:  thishost + ':1936'
     },
-    controllers: [BRWidgets.chatController],
+    controllers: [BRWidgets.chatController,BRWidgets.presentationController],
     _dynamic_form_id: '_ie_dynform',
 });
