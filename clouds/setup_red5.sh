@@ -21,7 +21,7 @@ sudo yum install -y $REQUIRED_PACKAGES || exit -1
 SAVE=$PWD
 cd $HOME/gits
 
-git clone http://github.com/babelroom/red5.git || exit -1
+git clone https://github.com/babelroom/red5.git || exit -1
 
 test -L /var/log/br/red5 || ln -s /home/br/gits/red5/red5-1.0.0/log /var/log/br/red5
 
