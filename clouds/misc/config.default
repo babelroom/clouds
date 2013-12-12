@@ -1,8 +1,8 @@
 autoprime:
 prime_mysqld: {script: "my_cnf", server_id: 37}
 prime_freeswitch: {script: "vars_xml", eip: ""}
-node_config_app: {script: "config_js", iface: "eth0", secret: "418fa04bcaa238dea7fb46d3b522a6f75b8df48664f3b3cc39c234960b5c40bdce32a4f0c909589a5211bdb1c8308e1747ff33d6074c62d501dd6b38fa220bb0", key: "", cert: "", cookie_key: "brv1_d30485d8", domain: "", file: "/tmp/br/app_config.js"}
-prime_node_app: {script: "node_rc", file: "/etc/init.d/node_app", path: "/home/br/gits/clouds/gen/node", config_file: "/tmp/br/app_config.js", label: "app", deps: ['node_config_app']}
+node_config_app: {script: "config_js", iface: "eth0", secret: "418fa04bcaa238dea7fb46d3b522a6f75b8df48664f3b3cc39c234960b5c40bdce32a4f0c909589a5211bdb1c8308e1747ff33d6074c62d501dd6b38fa220bb0", key: "", cert: "", cookie_key: "brv1_d30485d8", domain: "", file: "/home/br/tmp/app_config.js"}
+prime_node_app: {script: "node_rc", file: "/etc/init.d/node_app", path: "/home/br/gits/clouds/gen/node", config_file: "/home/br/tmp/app_config.js", label: "app", deps: ['node_config_app']}
 
 my_rails_session_store: {script: "rails_session_store", domain: "", secret: "418fa04bcaa238dea7fb46d3b522a6f75b8df48664f3b3cc39c234960b5c40bdce32a4f0c909589a5211bdb1c8308e1747ff33d6074c62d501dd6b38fa220bb0", file: "/home/br/gits/clouds/gen/rails/my/config/initializers/session_store.rb"}
 my_rails_cookie_verification_secret: {script: "rails_cookie_verification_secret", secret: "61a64eb372b76b362651e343405ae8fd0c8c14c81f3a74c4c6cd891a2d196836a46edb0a419bb38950e512ead74991f793e92d5a400118b182306800ee76efab", file: "/home/br/gits/clouds/gen/rails/my/config/initializers/cookie_verification_secret.rb"}
@@ -12,7 +12,7 @@ mongrel_my: {script: "mongrel_rc", file: "/etc/init.d/mongrel_my", path: "/home/
 prime_my: {script: "noop", deps: ['mongrel_my','my_rails_session_store','my_rails_cookie_verification_secret','my_rails_s3','my_rails_environment']}
 
 prime_red5: {src: "red5_rc", file: "/etc/init.d/red5", mode: "0755"}
-netops_db_syscfg: {script: "netops_db_syscfg", file: "/tmp/br/netops_db_syscfg", my_host: "", mode: "0600", s3_key_id: "AKIAIXSVMO3QOE72AN5Q", s3_key: "COAwh/xparR7SR5HhKSbIWywW95YBDY1ZoafAAX7", gmail_user: "", gmail_password: "", recurly_user: "", recurly_password: ""}
+netops_db_syscfg: {script: "netops_db_syscfg", file: "/home/br/tmp/netops_db_syscfg", my_host: "", mode: "0600", s3_key_id: "AKIAIXSVMO3QOE72AN5Q", s3_key: "COAwh/xparR7SR5HhKSbIWywW95YBDY1ZoafAAX7", gmail_user: "", gmail_password: "", recurly_user: "", recurly_password: ""}
 prime_netops: {src: "netops_rc", file: "/etc/init.d/netops", mode: "0755", deps: ['netops_db_syscfg']}
 
 # startup -- in order
