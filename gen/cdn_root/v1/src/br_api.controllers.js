@@ -126,7 +126,7 @@
                     if (sk.length<1)    /* this is an error */
                         return;
                     var mechanism = sk[0];
-                    if (mechanism != 'webrtc-p2p')
+                    if (mechanism != 'p2p')
                         return;
                     var from_key = sk[1];
                     var to_key = sk[2];
@@ -137,9 +137,9 @@
                             webrtc_signal_in(o.connection_id, from_key, o.data); */
                         return;
                         }
-                    if (o.connection_id != n.connection_id) {                           /* not our own connection */
+                    if (o.connection_id!=n.connection_id && from_key.length) {          /* not our own connection */
                         //peer_webcam_onoff(o.connection_id, o.user_id, from_key, o.data);
-                        if (!from_key) _this.onAvailable(o.user_id);
+                        _this.onAvailable(o.user_id);
                         }
                     },'video');
                 n.subscribe(function(o){
@@ -158,7 +158,7 @@
             _onLoad: function() {
                 if (this._haveWebRTC) {
                     this._key = Math.random().toString(36).substring(2);
-                    this._api.commands.videoAction('webrtc-p2p-' + this._key, 'Supported'/*JSON.stringify(indicators.md)*/);
+                    this._api.commands.videoAction('p2p-' + this._key, 'Supported'/*JSON.stringify(indicators.md)*/);
                     }
                 },
             onAvailable: function(uid) {},
