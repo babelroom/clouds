@@ -911,6 +911,8 @@ console.log( $j('#tile',sel) );
                 if (sk.length<1)    /* this is an error */
                     return;
                 var mechanism = sk[0];
+                if (mechanism != 'webrtc' && mechanism != 'flash')
+                    return;
                 var from_key = sk[1];
                 var to_key = sk[2];
                 if (to_key) { /* targeted for a specific peer */

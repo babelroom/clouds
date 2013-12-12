@@ -118,6 +118,7 @@
             },
         privateConference: {
             _haveWebRTC: typeof(wrapRTC)==="undefined" ? false : !!wrapRTC.supported,        /* whether or not webRTC/wraprtc is included and supported */
+            _key: null,
             _subscribe: function() {
                 var n = this._api.notify, _this=this;
                 n.subscribe(function(o){
@@ -125,6 +126,8 @@
                     if (sk.length<1)    /* this is an error */
                         return;
                     var mechanism = sk[0];
+                    if (mechanism != 'webrtc-p2p')
+                        return;
                     var from_key = sk[1];
                     var to_key = sk[2];
                     if (to_key) { /* targeted for a specific peer */
@@ -142,13 +145,21 @@
                 n.subscribe(function(o){
                     if(o.updated.is_live && _this._api.context.is_live){ _this._onLoad(_this._api.context); }
                     },'room_context');
+                n.subscribe(function(o) {
+                    /* user has gone offline, delete any associated video */
+                    if (o.command==='del' && o.connection_id!=/*obviously this can't happen but include for completeness*/n.connection_id) {
+                        //peer_webcam_onoff(o.connection_id); -- peer has gone away 
+                        }
+                    },'online');
                 },
             _onInit: function() {
                 this._subscribe();
                 },
             _onLoad: function() {
-                if (this._haveWebRTC)
-                    this._api.commands.videoAction('webrtc' /* + '-' + webrtc_data.key*/, 'Supported'/*JSON.stringify(indicators.md)*/);
+                if (this._haveWebRTC) {
+                    this._key = Math.random().toString(36).substring(2);
+                    this._api.commands.videoAction('webrtc-p2p-' + this._key, 'Supported'/*JSON.stringify(indicators.md)*/);
+                    }
                 },
             onAvailable: function(uid) {},
             onLoad: function() {},
