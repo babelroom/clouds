@@ -4,6 +4,12 @@
 # Raise a CentOS6.3 bare install to the point where it can run BR setups
 # ---
 
+# ---
+# run it on a CentOS minimal install as follows:
+# $ curl -O https://raw.github.com/babelroom/clouds/master/clouds/from_minimal.sh
+# $ sh from_minimal.sh
+# ---
+
 cat <<'EOT' >/etc/yum.repos.d/from_minimal.repo
 [from_minimal]
 name=CentOS-6.3 - Base
