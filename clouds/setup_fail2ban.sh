@@ -86,6 +86,7 @@ bantime  = 86400
 EOT
 sudo cp -a /etc/fail2ban/jail.conf /etc/fail2ban/jail.conf-orig
 sudo install -o root -m 644 /home/br/tmp/jail.conf /etc/fail2ban/
+rm -f /home/br/tmp/jail.conf
 
 cat <<'EOT' >/home/br/tmp/fail2ban.conf
 # Fail2Ban configuration file
@@ -126,6 +127,7 @@ socket = /var/run/fail2ban/fail2ban.sock
 EOT
 sudo cp -a /etc/fail2ban/fail2ban.conf /etc/fail2ban/fail2ban.conf-orig
 sudo install -o root -m 644 /home/br/tmp/fail2ban.conf /etc/fail2ban/
+rm -f /home/br/tmp/fail2ban.conf
 
 cat <<'EOT' >/home/br/tmp/freeswitch.conf
 # Fail2Ban configuration file
@@ -153,6 +155,7 @@ ignoreregex =
 
 EOT
 sudo install -o root -m 644 /home/br/tmp/freeswitch.conf /etc/fail2ban/filter.d/
+rm -f /home/br/tmp/freeswitch.conf
 
 cat <<'EOT' >/home/br/tmp/freeswitch-dos.conf
 # Fail2Ban configuration file
@@ -178,6 +181,7 @@ ignoreregex =
 
 EOT
 sudo install -o root -m 644 /home/br/tmp/freeswitch-dos.conf /etc/fail2ban/filter.d/
+rm -f /home/br/tmp/freeswitch-dos.conf
 
 cat <<'EOT' >/home/br/tmp/fail2ban
 #!/bin/bash
@@ -274,6 +278,7 @@ esac
 exit $RETVAL
 EOT
 sudo install -o root -m 755 /home/br/tmp/fail2ban /etc/init.d/
+rm -f /home/br/tmp/fail2ban
 
 exit 0
 

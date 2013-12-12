@@ -79,6 +79,7 @@ cat <<'EOT' >/home/br/tmp/xfercron
 *     *   *   *  *  root /usr/local/freeswitch/scripts/xfercron.sh
 EOT
 sudo install -o root -m 644 /home/br/tmp/xfercron /etc/cron.d/xfercron
+rm -f /home/br/tmp/xfercron
 
 cd $SAVE
 

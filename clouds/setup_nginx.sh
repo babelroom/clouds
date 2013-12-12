@@ -12,6 +12,7 @@ gpgcheck=0
 enabled=1
 EOT
 sudo cp /home/br/tmp/nginx.repo /etc/yum.repos.d/
+rm -f /home/br/tmp/nginx.repo
 
 REQUIRED_PACKAGES="\
     nginx-1.2.5-1.el6.ngx                       \
