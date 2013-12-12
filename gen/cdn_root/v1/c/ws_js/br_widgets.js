@@ -1385,7 +1385,6 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
             $j('#make_me_button').css('display','none');
         */
 
-//        var presentations = [];
         var sel_pr = $j('#presentations');
         BRWidgets.styleSelect(sel_pr);
         BRWidgets.enableSelect(sel_pr,false);
@@ -1407,49 +1406,6 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
             else
                 $j(sel).find("button.page_control").button("disable");
             }
-/*
-        function set_presentation(data) {   /* when we get notification of a presentation change, or init, or reset *./
-            var arr = data.match(/^([^:]+):([^:]+):([^:]+):(\d):(.+)$/);
-            show_page(0);
-            current_page.find('option').remove();
-            // the second check here is because this slide may have been deleted
-            if (arr && sel_pr.find('option[value="'+arr[2]+'"]').length) {
-                var num_pages = arr[1];
-                $j('#num_pages').text(num_pages);
-                if (num_pages>0) {
-                    for(var i=1; i<=num_pages; i++) {
-                        current_page.append('<option value="'+i+'">'+i+'</option>');
-                        }
-                    BRWidgets.enableSelect(current_page,true);
-                    }
-                var presentation_name = unescape(arr[3]);
-                sel_pr.val(arr[2]);
-                url = arr[5];
-                $j('#presentation_name').text(BRWidgets._crop(presentation_name));
-                $j('#presentation_name').attr('href',url);
-                $j('#presentation_name').attr('title','Download ' + presentation_name);
-                if (arr[4]==1)     /* multipage *./
-                    mp_url = url.replace(/\.([^\/]*)\?\d*$/,'_$1');
-                else
-                    mp_url = '';
-/*                $j(sel).find("button.page_control").button("enable"); *./
-                update_page_controls();
-                }
-            else {
-//console.log('set_presentation(undefined)');
-                $j('#num_pages').text("--");
-                $j('#presentation_name').text(no_pres_text);
-                $j('#page').text('');
-                current_page.append('<option>--</option>');
-                BRWidgets.enableSelect(current_page,false);
-                sel_pr.val('-1');
-                url = '';
-                mp_url = '';
-/*                $j(sel).find("button.page_control").button("disable"); *./
-                update_page_controls();
-                }
-            }
-*/
 
         function presenter_set_page(new_page_num) {   /* when presenter changes page */
             if (typeof(new_page_num)== 'string') {
@@ -1496,11 +1452,6 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
 
                 $j(sel).find("button.page_control").button("enable");
                 update_page_controls(); // TODO working on this ...
-/*
-                $j('#slide').mousemove(function(e){
-//                    console.log([(new Date).getTime(),e.pageX,e.pageY,e.clientX,e.clientY]);
-                    });
-*/
 
                 /* move user to slideshow (once only) */
                 if (!presenting() && !have_moved_user_to_slideshows_once) {
@@ -1514,10 +1465,8 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                 update_page_controls(); // TODO working on this ...
                 $j('#show_button').css('display','inline');
                 $j('#hide_button').css('display','none');
-                //$j('#slide').html('');
                 selImg.css('display','none');
                 selPtr.css('display','none');
-//                $j('#slide').css('cursor','default').find('img').css('display','none');
                 if (ticking!==undefined) {
                     clearInterval(ticking);
                     ticking = undefined;
@@ -1532,47 +1481,18 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
         current_page.change(function(){
             presenter_set_page(current_page.val());
             });
-//        set_presentation('');
-/*
-        BRDashboard.subscribe(function(h){
-            if (h.attr===undefined && h.value===undefined) {
-                if (presentations[h.idx] !== undefined) {
-                    if (sel_pr.val()==h.idx) /* if currently selected? *./
-                        set_presentation('');
-                    sel_pr.find('option[value="' + h.idx + '"]').remove();
-                    delete presentations[h.idx];
-                    }
-                }
-            else {
-                if (presentations[h.idx] === undefined)
-                    presentations[h.idx] = {media_file:{id:h.idx}};
-                presentations[h.idx].media_file[h.attr] = h.value;
-                var mf = presentations[h.idx].media_file;
-                if (mf.name && mf.url && mf.slideshow_pages>0 && !sel_pr.find('option[value="'+ h.idx + '"]').length) {
-                    sel_pr.append('<option value="'+mf.id+'">'+BRWidgets._crop(mf.name)+'</option>');
-                    BRWidgets.enableSelect(sel_pr,true);
-                    }
-                }
-            },'media_files');
-*/
 
         var pointerXY = {x:0,y:0};
         var pointing = false;
         function set_ptr(obj) {
             if (obj) {
-                /*if (!/^(\d+),(\d+)$/.exec(value))
-                    return;
-                var x = RegExp.$1;
-                var y = RegExp.$2;
-                pointerXY = adjustOutPtr({x:parseInt(x, 10),y:parseInt(y, 10)});
-                */
                 pointerXY = adjustOutPtr(obj);
                 }
             else
                 selPtr.css('display','none');
-            rlIn = 0;
+//            rlIn = 0; -- depreciate
             }
-        var lastPointerTime = 0;    // don't need to reset this
+//        var lastPointerTime = 0;    // don't need to reset this -- depreciate -- where else is this used?
         function fnMM(e) {
             lastMMEvent = e;
             lastMMEvent.csX = lastMMEvent.pageX - Math.round(selImg.offset().left),
@@ -1580,19 +1500,8 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
             lastMMEventTime = (new Date).getTime();
             }
         function adjustOutPtr(pair) {
-//console.log([2,pair.x,pair.y]);
-            /* the +2, -2 adjustments here are the official fudge factors */
-            // why whole numbers? pair.x += (Math.round(selImg.offset().left) - Math.round($j('#slide').offset().left)) - Math.ceil(selPtr.width()/2) + 1.5;
-            //pair.x += ((selImg.offset().left - $j('#slide').offset().left) - (selPtr.width()/2)) + 1.5;
-// hacking around here a bit ...
             pair.x += ((selImg.offset().left - $j('#slide').offset().left) - (selPtr.width()/2)) + 1.0;
 
-            //pair.y += (Math.round(selImg.offset().top) - Math.round($j('#slide').offset().top)) - 2;//Math.ceil(selPtr.height()/2);
-//console.log($j('#slide').offset());
-//console.log($j('#slide').position());
-//console.log(selImg.position());
-//console.log(selImg.offset());
-            //pair.y += (Math.round(selImg.offset().top) - Math.round($j('#slide').offset().top)) - 2;//Math.ceil(selPtr.height()/2);
             pair.y += (Math.round(selImg.offset().top) - 0) - 10;//Math.ceil(selPtr.height()/2);
             return pair;
             }
@@ -1604,22 +1513,18 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
         function point() {
             if (!lastMMEventTime)
                 return;
-//console.log(0,xyAtLastSend,lastMMEvent);
             if (xyAtLastSend.x==lastMMEvent.csX && xyAtLastSend.y==lastMMEvent.csY)
                 return;
             else 
                 xyAtLastSend = {};
-//console.log(3,xyAtLastSend,[lastMMEvent.csX,lastMMEvent.csY],xyAtLastSend.x===lastMMEvent.csX,xyAtLastSend.y===lastMMEvent.csY);
 
             /* give immediate feedback to presenter, comment this out to have presenter see the same thing everyone else does */
             pointerXY = adjustOutPtr({x:lastMMEvent.csX,y:lastMMEvent.csY});
-//console.log(2,pointerXY);
 
             var now = (new Date).getTime();
             if ((now - lastPointerSendTime)<200)    // too soon
                 return;
 
-            //BRCommands.slideAction('ptr', lastMMEvent.csX + ',' + lastMMEvent.csY);
             BRWidgets.presentationController.setPointer(lastMMEvent.csX, lastMMEvent.csY);
             lastPointerSendTime = now;
             xyAtLastSend = {x:lastMMEvent.csX,y:lastMMEvent.csY};
@@ -1631,7 +1536,6 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                 point();
             deltaXY.x += (pointerXY.x - deltaXY.x) / dampFactor;
             deltaXY.y += (pointerXY.y - deltaXY.y) / dampFactor;
-//console.log(1,[deltaXY.x, deltaXY.y]);
             selPtr.css({left: deltaXY.x+'px', top: deltaXY.y+'px'});
             }
         function presenting() {                 /* determine if we are currently presenting -- TODO optimize? */
@@ -1642,81 +1546,20 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
             if (presenting() && showingPage && !pointing) {
                 pointing = true;
                 $j('#slide_img').bind('mousemove',fnMM);
-/*                $j('#slide_img').bind('touchmove',function(e){ -- leaving this out until I know how to use it correctly 
-                    e.preventDefault();
-                    fnMM(e);
-                    }); */
                 }
             if (pointing && !(presenting() && showingPage)) {
                 pointing = false;
                 $j('#slide_img').unbind('mousemove',fnMM);
-                //$j('#slide_img').unbind('mousemove touchmove',fnMM);
                 }
             }
         
-/*
-        BRDashboard.subscribe(function(o){
-            switch(o.variable) {
-*/
-/*
-                case 'presenter':
-                    if (o.value) {
-                        var arr = o.value.match(/^\s*([^:]+):(.*)$/);
-                        if (arr && arr.length==3) {
-                            //$j('#presenter').text(' Presenter: ' + arr[2] + ' '); -- try the look below for a while ...
-                            $j('#presenter').html(' <em>Presenter:</em> ' + arr[2] + ' ');
-                            if (arr[1] == BR._api.context.user_id) {    /* we are presenting *./
-                                $j('.not_presenting').css('display','none');
-                                $j('.presenting').css('display','inline');
-                                }
-                            else {                              /* somebody else presenting *./
-                                $j('.presenting').css('display','none');
-                                $j('.not_presenting').css('display','inline');
-                                }
-                            }
-                        }
-                    break;
-*/
-/*
-                case 'presentation':
-                    set_presentation(o.value);
-                    break;
-*/
-/*
-                case 'ptr':
-                    set_ptr(o.value);
-                    return;     /* skip startStopPointer() at end *./
-*/
-/*
-                case 'show':
-                    show_page(o.value);
-                    break;
-*/
-/*
-                case undefined:
-                    if (o.value==undefined) {   /* reset *./ // tmp TODO. working on this ...
-*/
-/*
-                        $j('#presenter').text('');
-                        $j('.not_presenting').css('display','inline');
-                        $j('.presenting').css('display','none');
-*/
-//                        set_presentation('');
-/*
-                        }
-                    break;
-                }
-//            startStopPointer();
-            },'slide');
-*/
         $j('.presenting').css('display','none');
 
         /* --- using controller --- */
         BRWidgets.presentationController.onChangePage = function(page_num) {
             show_page(page_num);
             }
-        BRWidgets.presentationController.onSlideChange = function(obj) {
-//            var arr = data.match(/^([^:]+):([^:]+):([^:]+):(\d):(.+)$/);
+        BRWidgets.presentationController.onPresentatioPresentationnChange = function(obj) {
             show_page(0);
             current_page.find('option').remove();
             // the second check here is because this slide may have been deleted
@@ -1739,11 +1582,9 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                     mp_url = url.replace(/\.([^\/]*)\?\d*$/,'_$1');
                 else
                     mp_url = '';
-/*                $j(sel).find("button.page_control").button("enable"); */
                 update_page_controls();
                 }
             else {
-//console.log('set_presentation(undefined)');
                 $j('#num_pages').text("--");
                 $j('#presentation_name').text(no_pres_text);
                 $j('#page').text('');
@@ -1752,7 +1593,6 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
                 sel_pr.val('-1');
                 url = '';
                 mp_url = '';
-/*                $j(sel).find("button.page_control").button("disable"); */
                 update_page_controls();
                 }
             }
@@ -1784,17 +1624,6 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
             startStopPointer();
             }
     },
-
-/*
-    listArea: function(sel) {
-        var $j = jQuery;
-        $j(sel).append('<center><table id="center_grid"></table></center>');
-        BRParticipants.openParticipantWindow2($j('#center_grid'));
-
-        /* hack to hide horizontal scroll bar, may not work on all browsers *./
-        $j(sel).find('div .ui-jqgrid-bdiv').css('overflow-x','hidden');
-    },
-*/
 
     changeCenterView: function(view) {
         var $j = jQuery;

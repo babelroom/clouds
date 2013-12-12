@@ -162,7 +162,7 @@ console.log(['call',uid]);
                 var arr = null;
                 if (value)
                     arr = value.match(/^([^:]+):([^:]+):([^:]+):(\d):(.+)$/);
-                this.onSlideChange(arr? {numPages:arr[1], presentationIndex:arr[2], presentationName:unescape(arr[3]), multipage:(arr[4]==1), url:arr[5]} : null);
+                this.onPresentationChange(arr? {numPages:arr[1], presentationIndex:arr[2], presentationName:unescape(arr[3]), multipage:(arr[4]==1), url:arr[5]} : null);
                 },
             _set_ptr: function(value) {
                 var obj = null;
@@ -175,7 +175,7 @@ console.log(['call',uid]);
                 },
             _onInit: function() {
                 var n = this._api.notify, _this=this;
-                this.onSlideChange(null);
+                this.onPresentationChange(null);
                 n.subscribe(function(h){
                     if (h.attr===undefined && h.value===undefined) {
                         if (_this.presentations[h.idx] !== undefined) {
@@ -248,7 +248,7 @@ console.log(['call',uid]);
                 },
 //            onUpdate(data) {},
             onChangePage: function(newPageNum) {},
-            onSlideChange: function(obj) {},
+            onPresentationChange: function(obj) {},
             onPresenterChange: function(name, me) {},
             onAddPresentation: function(idx, name) {},
             onRemovePresentation: function(idx) {},
@@ -266,10 +266,10 @@ console.log(['call',uid]);
                 this._api.commands.slideAction(undefined, undefined);
                 },
             makeMePresenter: function() {
-                BRCommands.slideAction('presenter', BR._api.context.user_id + ':' + BR._api.context.user_name);
+                this._api.commands.slideAction('presenter', this._api.context.user_id + ':' + this._api.context.user_name);
                 },
             setPointer: function(x, y) {
-                BRCommands.slideAction('ptr', x + ',' + y);
+                this._api.commands.slideAction('ptr', x + ',' + y);
                 }
             }
         }
