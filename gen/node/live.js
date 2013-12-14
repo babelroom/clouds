@@ -215,8 +215,8 @@ io.configure(function (){
                         fn(null);
                         }
                     if (!d.data) return fn(null);
-                    if (!d.data.user_id) return fn({error: 'unauthorized'});
-                    set(socket, 'access_'+d.data.conference_estream_id, d.data.is_host);
+                    if (d.data.user_id)
+                        set(socket, 'access_'+d.data.conference_estream_id, d.data.is_host);
                     fn(d);
                     });
                 });

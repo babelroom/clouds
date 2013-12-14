@@ -93,7 +93,11 @@
             count: 0,
             excludeSelf: false,
             _onInit: function() {
-                var n = this._api.notify, _this=this;
+                var n = this._api.notify
+                    , _this=this
+                    , ud=function(id){ if (n.user_map[id]) _this.onUpdate(id, n.user_map[id]); }
+                    ;
+                
                 n.subscribe(function(o){
                     if (_this.excludeSelf && o.id==_this._api.context.user_id)
                         return;
@@ -101,26 +105,117 @@
                         case 'show':
                             _this.count++;
                             _this.onCountChange(_this.count);
-                            _this.onAdd(o.idx, n.user_map[o.id]);
+                            ud(o.idx);
                             break;
                         case 'hide':
                             _this.count--;
-                            _this.onRemove(o.idx, n.user_map[o.id]);
+                            _this.onRemove(o.idx);
                             _this.onCountChange(_this.count);
                             break;
+                        /*case 'update':
+                            ud(o.idx);
+                            break; */
                         }
                     },'box');
+                n.subscribe(function(o){
+                    ud(o.idx);
+                    },'users');
                 this.onCountChange(0);
                 },
             onCountChange: function(newCount) {},
-            onAdd: function(id,user) {},
+            onUpdate: function(id,user) {},
             onRemove: function(id,user) {}
             },
         privateConference: {
             _haveWebRTC: typeof(wrapRTC)==="undefined" ? false : !!wrapRTC.supported,        /* whether or not webRTC/wraprtc is included and supported */
             _key: null,
-            _subscribe: function() {
+            _incoming: [],
+            _pc: null,
+            _state: null,
+            _indicators: null,
+            _setPC: function(pc) {
+                this._pc = pc;
+                for(var i=0; i<this._incoming.length; i++)
+                    this._signalIn(this._incoming[i]);
+                this._incoming = [];
+                },
+            _sendAction: function(msg, peer_key) {
+                this._api.commands.videoAction('p2p-' + this._key + (peer_key?'-'+peer_key:''), msg);
+                },
+            _uname: function(id) {
+                var n = this._api.notify, u=null;
+                if (n && n.user_map && id && n.user_map[id]) 
+                    u = n.user_map[id];
+                if (u)
+                    return (u.name||'') + ((u.name&&u.last_name)?' ':'') + (u.last_name||'');
+                },
+            _answer: function(peer_key, msg, obj) {
+                var _this = this;
+                if (_this.options.stereo)
+                    wrapRTC.addStereoToSDP(msg);
+                _this.onCallStatusUpdate('ringing', {awaiting_permission:true, name:_this._uname(obj.user_id)});
+                wrapRTC.openWebcam({
+//(function foo(obj) {return obj.setStream(null);})({
+                    element: _this.localVideo,
+                    onSupportFailure: function(msg) { console.log(1,msg); /*TODO*/ },
+                    onError: function(code) {
+                        switch(code) {
+                            case 1: /* camera / microphone access denied */
+                                _this.onCallStatusUpdate('permission_denied');
+                                _this.onCallStatusUpdate('done');
+                                break;
+                            default:
+                            }
+                        },
+                    setStream: function(stream) {
+                        _this.onCallStatusUpdate('ringing', {awaiting_permission:false, name:_this._uname(obj.user_id)});
+                        wrapRTC.answer(msg, stream, {
+                            //element: _this.localVideo,
+                            element: _this.remoteVideo,
+                            onError: function(error) { console.log("error from wrapRTC.answer()", error); },
+                            setPC: function(pc) { _this._setPC(pc);},
+                            signalOut: function(msg) { _this._sendAction(JSON.stringify(msg), peer_key); },
+                            //signalOut: function(msg) { console.log(['aso',msg]);if (!msg||msg.type!=='candidate')_this._sendAction(JSON.stringify(msg), peer_key); },
+//                            setStream: function(stream) { console.log(['answer','setStream']); },
+                            connected: function() { _this.onCallStatusUpdate('connected'); },
+                            disconnected: function() { _this.onCallStatusUpdate('done'); }
+                            });
+                        }
+                    });
+                },
+            _signalIn: function(msg) {
+                var _this = this;
+console.log(msg);
+                switch(msg.type) {
+/*
+ -- moved
+                    case 'offer':
+//console.log(this.localVideo);
+                        _this._answer(peer_key, msg);
+                        break;
+*/
+                    case 'answer':
+                        if (true/*webrtc_data.pcs[peer_key]*/) {
+                            if (_this.options.stereo)
+                                wrapRTC.addStereoToSDP(msg);
+                            wrapRTC.setRemoteDescription(_this._pc/*check pc...webrtc_data.pcs[peer_key]*/, msg);
+//                            indicators.peerCount++;
+//                            opts.updateBroadcasterIndicators(indicators);
+//                            peerKeys[peer_connection_id] = peer_key;
+                            }
+                        break;
+                    case 'candidate':
+                        if (true/*webrtc_data.pcs[peer_key]*/) {
+//                            webrtc_data.candidate_count = webrtc_data.candidate_count + 1;
+//                            openingVideo(webrtc_data.candidate_count);
+                            wrapRTC.candidate(_this._pc/*check pc...*/, msg);
+                            }
+                        break;
+                    }
+                },
+            _setupVideo: function() {
                 var n = this._api.notify, _this=this;
+                this._key = Math.random().toString(36).substring(2);
                 n.subscribe(function(o){
                     var sk = o.subkey.split(/-/, 3); // subkeys
                     if (sk.length<1)    /* this is an error */
@@ -131,40 +226,81 @@
                     var from_key = sk[1];
                     var to_key = sk[2];
                     if (to_key) { /* targeted for a specific peer */
-/*                        if (
-                                webrtc_data     &&
-                                to_key === webrtc_data.key)                             /* webcam for this box (user_id matches) *./
-                            webrtc_signal_in(o.connection_id, from_key, o.data); */
+                        if (_this._key && to_key==_this._key && typeof(o.data)!=='undefined') {
+                            try {
+                                var obj = JSON.parse(o.data);
+                                if (obj.type==='offer')
+                                    _this._answer(from_key, obj, o);
+                                else if (_this._pc)
+                                    _this._signalIn(obj);
+                                else
+                                    _this._incoming.push(obj);
+                                }
+                            catch(e) { }
+                            }
                         return;
                         }
                     if (o.connection_id!=n.connection_id && from_key.length) {          /* not our own connection */
                         //peer_webcam_onoff(o.connection_id, o.user_id, from_key, o.data);
-                        _this.onAvailable(o.user_id);
+                        _this.onUserStatusUpdate(o.user_id, from_key, 'available');
                         }
                     },'video');
-                n.subscribe(function(o){
-                    if(o.updated.is_live && _this._api.context.is_live){ _this._onLoad(_this._api.context); }
-                    },'room_context');
                 n.subscribe(function(o) {
                     /* user has gone offline, delete any associated video */
                     if (o.command==='del' && o.connection_id!=/*obviously this can't happen but include for completeness*/n.connection_id) {
                         //peer_webcam_onoff(o.connection_id); -- peer has gone away 
                         }
                     },'online');
+                n.subscribe(function(o){
+                    if(o.updated.is_live && _this._api.context.is_live) {
+                        _this._sendAction('Supported'); /* advertise our availability */
+                        }
+                    },'room_context');
                 },
             _onInit: function() {
-                this._subscribe();
-                },
-            _onLoad: function() {
                 if (this._haveWebRTC) {
-                    this._key = Math.random().toString(36).substring(2);
-                    this._api.commands.videoAction('p2p-' + this._key, 'Supported'/*JSON.stringify(indicators.md)*/);
+                    this._setupVideo();
                     }
                 },
-            onAvailable: function(uid) {},
-            onLoad: function() {},
-            call: function(uid) {
-console.log(['call',uid]);
+            localVideo: null,
+            remoteVideo: null,
+            onUserStatusUpdate: function(uid, key, state) {},
+            onCallStatusUpdate: function(state, flags) {},
+            // TODO: deal with errors ... (2)
+            call: function(uid,peer_key) {
+                var _this = this;
+                _this.onCallStatusUpdate('calling', {awaiting_permission:true, name:_this._uname(uid)});
+                wrapRTC.openWebcam({
+                    element: _this.localVideo,
+                    onSupportFailure: function(msg) { console.log(1,msg); /*TODO*/ },
+                    onError: function(code) {
+                        switch(code) {
+                            case 1: /* camera / microphone access denied */
+                                _this.onCallStatusUpdate('permission_denied');
+                                _this.onCallStatusUpdate('done');
+                                break;
+                            default:
+                            }
+                        },
+                    setStream: function(stream) {
+                        _this.onCallStatusUpdate('calling', {awaiting_permission:false, name:_this._uname(uid)});
+                        wrapRTC.callPeer(stream, {
+                            element: _this.remoteVideo,
+                            onError: function(error) { console.log("error from wrapRTC.callPeer()", error); },
+                            setPC: function(pc) { _this._setPC(pc);},
+                            connected: function() { _this.onCallStatusUpdate('connected'); },
+                            disconnected: function() { _this.onCallStatusUpdate('done'); },
+                            signalOut: function(msg) { _this._sendAction(JSON.stringify(msg), peer_key); }
+                            });
+                        }
+                    });
+                },
+            control: function(key, value) {
+                switch(key) {
+                    case 'hangup':
+                        this.onCallStatusUpdate('done');
+                        break;
+                    }
                 }
             },
         presentation: {

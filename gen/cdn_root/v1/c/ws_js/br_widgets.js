@@ -637,7 +637,7 @@ console.log( $j('#tile',sel) );
                     case 'offer':
                         if (opts.stereo)
                             wrapRTC.addStereoToSDP(msg);
-                        wrapRTC.answer(msg, {
+                        wrapRTC.answer(msg, null/*stream*/, {
                             key: webrtc_data.key,
                             peer_key: peer_key,
                             element: videoElement.get(0),
