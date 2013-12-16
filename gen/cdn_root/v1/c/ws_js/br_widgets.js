@@ -1484,6 +1484,7 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
             presenter_set_page(current_page.val());
             });
 
+        var scaleFactor = 800/10000;
         var pointerXY = {x:0,y:0};
         var pointing = false;
         function set_ptr(obj) {
@@ -1497,13 +1498,14 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
 //        var lastPointerTime = 0;    // don't need to reset this -- depreciate -- where else is this used?
         function fnMM(e) {
             lastMMEvent = e;
-            lastMMEvent.csX = lastMMEvent.pageX - Math.round(selImg.offset().left),
-            lastMMEvent.csY = lastMMEvent.pageY - Math.round(selImg.offset().top),
+            lastMMEvent._br_x = Math.round((lastMMEvent.pageX - selImg.offset().left) / scaleFactor),
+            lastMMEvent._br_y = Math.round((lastMMEvent.pageY - selImg.offset().top) / scaleFactor),
             lastMMEventTime = (new Date).getTime();
             }
         function adjustOutPtr(pair) {
+            pair.x *= scaleFactor;
+            pair.y *= scaleFactor;
             pair.x += ((selImg.offset().left - $j('#slide').offset().left) - (selPtr.width()/2)) + 1.0;
-
             pair.y += (Math.round(selImg.offset().top) - 0) - 10;//Math.ceil(selPtr.height()/2);
             return pair;
             }
@@ -1515,21 +1517,21 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
         function point() {
             if (!lastMMEventTime)
                 return;
-            if (xyAtLastSend.x==lastMMEvent.csX && xyAtLastSend.y==lastMMEvent.csY)
+            if (xyAtLastSend.x==lastMMEvent._br_x && xyAtLastSend.y==lastMMEvent._br_y)
                 return;
             else 
                 xyAtLastSend = {};
 
             /* give immediate feedback to presenter, comment this out to have presenter see the same thing everyone else does */
-            pointerXY = adjustOutPtr({x:lastMMEvent.csX,y:lastMMEvent.csY});
+            pointerXY = adjustOutPtr({x:lastMMEvent._br_x,y:lastMMEvent._br_y});
 
             var now = (new Date).getTime();
             if ((now - lastPointerSendTime)<200)    // too soon
                 return;
 
-            BRWidgets.presentationController.setPointer(lastMMEvent.csX, lastMMEvent.csY);
+            BRWidgets.presentationController.setPointer(lastMMEvent._br_x, lastMMEvent._br_y);
             lastPointerSendTime = now;
-            xyAtLastSend = {x:lastMMEvent.csX,y:lastMMEvent.csY};
+            xyAtLastSend = {x:lastMMEvent._br_x,y:lastMMEvent._br_y};
             }
         var deltaXY = {x:0,y:0};
         var dampFactor = 4;
@@ -1561,7 +1563,7 @@ need to change protocol to accomodate, perhaps just use gue or some such, might 
         BRWidgets.presentationController.onChangePage = function(page_num) {
             show_page(page_num);
             }
-        BRWidgets.presentationController.onPresentatioPresentationnChange = function(obj) {
+        BRWidgets.presentationController.onPresentationChange = function(obj) {
             show_page(0);
             current_page.find('option').remove();
             // the second check here is because this slide may have been deleted

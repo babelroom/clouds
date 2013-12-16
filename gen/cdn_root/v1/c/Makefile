@@ -2,9 +2,9 @@
 DEP_indexes=index_dev.html index_vm.html index.html
 2gen=css/gen_workspace.css ws_js/gen.min.js gen-other1.min.js gen-other2.min.js gen.min.js $(DEP_indexes)
 
-DEP_index=index.part.top index.part.css_prod index.part.style index.part.html index.part.js_prod index.part.init_prod index.part.logic index.part.bottom_prod
-DEP_index_vm=index.part.top index.part.css_prod index.part.style index.part.html index.part.js_prod index.part.init_vm index.part.logic index.part.bottom_prod
-DEP_index_dev=index.part.top index.part.css_dev index.part.style index.part.html index.part.js_dev index.part.init_vm index.part.logic index.part.bottom_vm
+DEP_index=index.part.top index.part.css_prod index.part.style index.part.html_prod index.part.js_prod index.part.init_prod index.part.logic index.part.bottom_prod
+DEP_index_vm=index.part.top index.part.css_prod index.part.style index.part.html_vm index.part.js_prod index.part.init_vm index.part.logic index.part.bottom_prod
+DEP_index_dev=index.part.top index.part.css_dev index.part.style index.part.html_vm index.part.js_dev index.part.init_vm index.part.logic index.part.bottom_vm
 
 #2gen=css/gen_lobby.css css/gen_lobby_old_ie.css css/gen_workspace.css ws_js/gen.min.js gen-other1.min.js gen-other2.min.js gen.min.js
 DEP_gen_lobby=lobby/customized.css lobby/br_override.css css/widget.css recurly-js/recurly-customized.css
