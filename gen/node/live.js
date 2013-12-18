@@ -20,7 +20,7 @@ var put_templates = {
     gue: {q: 'conference', fmt: function(d){return "Kgue-"+d.args.idx+d.args.attr+d.args.value;}, nonpriv: true},
 
     /* TODO tmp */
-    dialCmd: {q: 'fs_', fmt: function(d){return d.args;}, nonpriv: true},  /* scary */
+    dialCmd: {q: 'fs', fmt: function(d){return d.args;}, nonpriv: true},  /* scary */
 };
 
 var Live = function(config) {
