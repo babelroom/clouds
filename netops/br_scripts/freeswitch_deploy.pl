@@ -136,7 +136,7 @@ for(my $it=0; $it<$ENV{BR_ITERATIONS}; $it++)
 
     # ---
 #    sleep $ENV{BR_SLEEP_SHORT} if not $did_something;
-    ($udp->recv('no_conference:ready_to_deploy', $ENV{BR_SLEEP_SHORT}) or die) if not $did_something; 
+    ($udp->recv('no_conference:ready_to_deploy|no_conference:people_assigned', $ENV{BR_SLEEP_SHORT}) or die) if not $did_something; 
 }
 
 # ---
