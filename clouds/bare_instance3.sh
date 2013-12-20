@@ -22,7 +22,7 @@ mkdir tmp
 echo "Get BR sources .."
 mkdir gits
 cd gits
-git clone git://github.com/babelroom/clouds.git
+git clone -b 2.38 git://github.com/babelroom/clouds.git
 cd ./clouds/clouds
 
 # get basics right
