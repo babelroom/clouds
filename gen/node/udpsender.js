@@ -3,7 +3,12 @@ var dgram = require('dgram')
     , socket = dgram.createSocket('udp4')
 
 socket.bind();
-socket.setBroadcast(true);
+
+// http://stackoverflow.com/questions/9242957/node-js-dgram-setbroadcastflag-fails-due-to-ebadf
+//socket.setBroadcast(true);
+socket.on('listening', function(){
+    socket.setBroadcast(true);
+});
 
 var UDPSender = function(config) {
     /* currently unused */
