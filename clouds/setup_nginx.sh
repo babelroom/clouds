@@ -16,7 +16,7 @@ rm /home/br/tmp/nginx.repo
 
 # nginx-1.2.5-1.el6.ngx
 REQUIRED_PACKAGES="\
-    nginx-1.8.0-1.el6.ngx                       \
+    nginx-1.8.1-1.el6.ngx                       \
     "
 sudo yum install -y $REQUIRED_PACKAGES || exit -1
 
