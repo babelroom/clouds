@@ -6,7 +6,7 @@
 
 # ---
 # run it on a CentOS minimal install as follows:
-# $ curl -O https://raw.github.com/babelroom/clouds/master/clouds/from_minimal.sh
+# $ curl -O https://raw.githubusercontent.com/babelroom/clouds/master/clouds/from_minimal.sh
 # $ sh from_minimal.sh
 # ---
 
@@ -23,5 +23,6 @@ EOT
 yum --disablerepo=\* --enablerepo=from_minimal install -y sudo perl wget make
 rm -f /etc/yum.repos.d/from_minimal.repo
 
-wget --no-check-certificate https://sourceforge.net/projects/babelroom/files/git-1.7.1.bin/download -O /usr/bin/git && chmod +x /usr/bin/git && mkdir /tmp/gits.tmp && cd /tmp/gits.tmp && git clone -b 2.38 git://github.com/babelroom/clouds.git && cd ./clouds/clouds && ./bare_instance2.sh && ./sysconfig_as_ec2.sh
+#wget --no-check-certificate https://sourceforge.net/projects/babelroom/files/git-1.7.1.bin/download -O /usr/bin/git && chmod +x /usr/bin/git && mkdir /tmp/gits.tmp && cd /tmp/gits.tmp && git clone -b 2.38 git://github.com/babelroom/clouds.git && cd ./clouds/clouds && ./bare_instance2.sh && ./sysconfig_as_ec2.sh
+wget --no-check-certificate https://sourceforge.net/projects/babelroom/files/git-1.7.1.bin/download -O /usr/bin/git && chmod +x /usr/bin/git && mkdir /tmp/gits.tmp && cd /tmp/gits.tmp && git clone git://github.com/babelroom/clouds.git && cd ./clouds/clouds && ./bare_instance2.sh && ./sysconfig_as_ec2.sh
 
